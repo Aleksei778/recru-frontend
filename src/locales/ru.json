@@ -1,0 +1,32 @@
+{
+  "login": {
+    "header": "Вход",
+    "emailPlaceholder": "Введите Ваш email...",
+    "passwordPlaceholder": "Введите Ваш логин...",
+    "forgotPassword": "Забыли пароль",
+    "loginButton": "Войти",
+    "register": "Зарегистрироваться",
+    "loggingIn": "Подождите... Входим в систему"
+  },
+  "register": {
+    "header": "Регистрация",
+    "companyPlaceholder": "Введите имя Вашей компании...",
+    "subdomain": "Введите желаемый субдомен...",
+    "emailPlaceholder": "Введите email для Вашего админа...",
+    "passwordPlaceholder": "Введите пароль для Вашего админа...",
+    "registerButton": "Зарегистрироваться",
+    "login": "Вход",
+    "registeringIn": "Подождите... Регистрируем Вас в системе"
+  },
+  "sidebar": {
+    "vacancies": "Вакансии",
+    "candidates": "Кандидаты",
+    "messages": "Сообщения",
+    "events": "События",
+    "templates": "Шаблоны",
+    "statistics": "Статистика",
+    "profile": "Профиль",
+    "settings": "Настройки",
+    "logout": "Выход"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "login": {
+    "header": "Login",
+    "emailPlaceholder": "Input Your email...",
+    "passwordPlaceholder": "Input Your password...",
+    "forgotPassword": "Forgot password",
+    "loginButton": "Login",
+    "register": "Register",
+    "loggingIn": "Wait... Log in to the system"
+  },
+  "register": {
+    "header": "Register",
+    "companyPlaceholder": "Input Your company name...",
+    "subdomainPlaceholder": "Input Your subdomain...",
+    "emailPlaceholder": "Input Your admin's email...",
+    "passwordPlaceholder": "Input Your admin's password...",
+    "registerButton": "Register",
+    "login": "Login",
+    "registeringIn": "Wait... Register You in system"
+  },
+  "sidebar": {
+    "vacancies": "Vacancies",
+    "candidates": "Candidates",
+    "messages": "Messages",
+    "events": "Events",
+    "templates": "Templates",
+    "statistics": "Statistics",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout"
+  }
+}
