@@ -5,30 +5,35 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
-  Users,
-  MessageSquare,
-  CalendarDays,
-  FileText,
-  BarChart3,
-  User,
-  Settings,
-  LogOut,
+    LayoutDashboard,
+    Users,
+    MessageSquare,
+    CalendarDays,
+    FileText,
+    BarChart3,
+    User,
+    Settings,
+    LogOut,
+    Globe,
+    Moon,
+    Sun,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { useTranslation } from "@/hooks/useTranslation";
 import { nauryzRedKeds } from "@/lib/font";
+import { useTheme } from "@/contexts/theme-context";
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { language } = useLanguage();
+  const { language, toggleLanguage } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
 
   const menuItems = [
     {
       icon: LayoutDashboard,
       label: t("sidebar.vacancies"),
-      href: `/${language}/dashboard`,
+      href: `/${language}/vacancies`,
     },
     {
       icon: Users,
@@ -64,8 +69,8 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 h-screen bg-slate-950 text-white flex flex-col">
-      <div className="p-6 border-b border-gray-200">
+    <aside className="w-64 h-screen bg-white dark:bg-black flex flex-col border-r border-black dark:border-white">
+      <div className="p-6 border-b border-black dark:border-white">
         <h1
           className={`text-2xl md:text-3xl font-bold text-black dark:text-white ${nauryzRedKeds.className}`}
         >
@@ -85,8 +90,8 @@ export default function Sidebar() {
                   href={item.href}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                     isActive
-                      ? "bg-slate-800 text-white"
-                      : "text-slate-400 hover:bg-slate-900 hover:text-white"
+                      ? "bg-black text-white dark:bg-white dark:text-black"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 hover:text-black dark:hover:text-white"
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -98,8 +103,32 @@ export default function Sidebar() {
         </ul>
       </nav>
 
-      <div className="p-3 border-t border-slate-800">
-        <button className="flex items-center gap-3 px-4 py-3 w-full text-slate-400 hover:bg-slate-900 hover:text-white rounded-lg transition-all">
+      <div className="border-t border-black dark:border-white px-4 py-3 w-full">
+          <button
+              onClick={toggleTheme}
+              className="inline-flex items-center ml-2 gap-2 px-4 py-3 rounded-xl bg-white dark:bg-black hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors w-max"
+              aria-label="Toggle theme"
+          >
+              {theme === "light" ? (
+                  <Moon className="w-6 h-6 text-gray-700" />
+              ) : (
+                  <Sun className="w-6 h-6 text-gray-300" />
+              )}
+          </button>
+
+          <button
+              onClick={toggleLanguage}
+              className="inline-flex items-center ml-2 gap-2 px-4 py-3 rounded-xl bg-white dark:bg-black hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors w-max"
+          >
+              <Globe className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+              <span className="font-medium text-gray-700 dark:text-gray-300">
+                    {language === "ru" ? "EN" : "RU"}
+                  </span>
+          </button>
+      </div>
+
+      <div className="p-3">
+        <button className="flex items-center gap-3 px-4 py-3 w-full text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 hover:text-black dark:hover:text-white rounded-lg transition-all">
           <LogOut className="w-5 h-5" />
           <span className="text-sm font-medium">{t("sidebar.logout")}</span>
         </button>

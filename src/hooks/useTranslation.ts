@@ -24,8 +24,6 @@ export function useTranslation() {
   ) as Language;
 
   const t = (key: string, params?: Record<string, any>): string => {
-    console.log(`Translating key: "${key}" for language: "${currentLanguage}"`);
-
     const keys = key.split(".");
     let value: any = translations[currentLanguage];
 

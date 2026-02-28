@@ -1,5 +1,7 @@
 // contexts/language-context.tsx
-"use client";
+
+'use client';
+
 import React, { createContext, useContext, ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
 

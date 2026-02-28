@@ -5,14 +5,12 @@ import "../globals.css";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { LanguageProvider } from "@/contexts/language-context";
 import { montserrat } from "@/lib/font";
-import Sidebar from "@/components/Sidebar";
-import { notFound, usePathname } from "next/navigation";
+import { notFound } from "next/navigation";
 
 const languages = ["en", "ru"] as const;
 type Language = (typeof languages)[number];
 
 export async function generateMetadata({
-  // dynamic metadata
   params,
 }: {
   params: Promise<{ lang: string }>;
@@ -66,7 +64,6 @@ export async function generateMetadata({
   };
 }
 
-// Генерируем статические пути для языков
 export function generateStaticParams() {
   return languages.map((lang) => ({ lang }));
 }
@@ -82,30 +79,17 @@ export default async function RootLayout({
 }: RootLayoutProps) {
   const { lang } = await params;
 
-  // Checking validity of language
   if (!languages.includes(lang as Language)) {
     notFound();
   }
 
-  const pathname = usePathname();
-  const isLoginOrRegisterPage = pathname.includes('/login') || pathname.includes('/register');
-
-    return (
+  return (
     <html lang={lang} className={montserrat.variable} suppressHydrationWarning>
-      <body className={`${montserrat.className} flex flex-col min-h-screen`}>
+      <body className={`${montserrat.className} antialiased`}>
         <ThemeProvider>
-            <LanguageProvider initialLanguage={params.lang as "en" | "ru"}>
-                {isLoginOrRegisterPage ? (
-                    children
-                ) : (
-                    <div className="flex h-screen">
-                        <Sidebar />
-                        <main className="flex-1 overflow-y-auto bg-gray-50">
-                            {children}
-                        </main>
-                    </div>
-                )}
-            </LanguageProvider>
+          <LanguageProvider initialLanguage={lang as "en" | "ru"}>
+            {children}
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>
