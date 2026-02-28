@@ -1,22 +1,23 @@
 {
   "login": {
     "header": "Login",
-    "emailPlaceholder": "Input Your email...",
-    "passwordPlaceholder": "Input Your password...",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
     "forgotPassword": "Forgot password",
     "loginButton": "Login",
     "register": "Register",
-    "loggingIn": "Wait... Log in to the system"
+    "loggingIn": "Login into system..."
   },
   "register": {
-    "header": "Register",
-    "companyPlaceholder": "Input Your company name...",
-    "subdomainPlaceholder": "Input Your subdomain...",
-    "emailPlaceholder": "Input Your admin's email...",
-    "passwordPlaceholder": "Input Your admin's password...",
+    "header": "Registration",
+    "companyPlaceholder": "Company name",
+    "subdomainPlaceholder": "Subdomain",
+    "emailPlaceholder": "Email for Your admin",
+    "passwordPlaceholder": "Password for Your admin",
+    "passwordConfirmationPlaceholder": "Password confirmation",
     "registerButton": "Register",
     "login": "Login",
-    "registeringIn": "Wait... Register You in system"
+    "registeringIn": "Register into system..."
   },
   "sidebar": {
     "vacancies": "Vacancies",
