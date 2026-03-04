@@ -97,6 +97,20 @@ export interface Candidate {
     tenant?: Tenant
 }
 
+export interface CandidateForm {
+    first_name: string
+    last_name: string
+    middle_name: string | null
+    email: string
+    phone: string
+    resume_url: string
+    linkedin_url: string | null
+    github_url: string | null
+    source: CandidateSource
+    experience_years: number
+    education_level: CandidateEducationLevel
+}
+
 export interface Vacancy {
     id: number
     tenant_id: number
