@@ -32,10 +32,20 @@
   },
   "dashboard": {
     "vacancies": {
-      "hire"
+
     },
     "interviews": {
-
+      "status": {
+        "pending": "Ожидает",
+        "in_progress": "В процессе",
+        "completed": "Завершено",
+        "cancelled": "Отменено"
+      },
+      "rec": {
+        "hire": "Нанять",
+        "maybe": "Требуется детальное рассмотрение",
+        "reject": "Отказ"
+      }
     }
   }
 }
