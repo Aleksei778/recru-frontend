@@ -2,6 +2,7 @@ import type {
     User,
     Vacancy,
     Candidate,
+    CandidateForm,
     Paginated,
     Interview,
     Tenant,
@@ -119,7 +120,7 @@ export const interviews = {
     get: (id: number, token: string) =>
         request<Interview>(`/interviews/hr${id}`, {}, token),
 
-    create: (data: { vacancy_id: number; candidate_id: number; expires_days?: number }, token: string) =>
+    create: (data: { vacancy_id: number; candidate_id: number }, token: string) =>
         request<{ interview: Interview; access_token: string; link: string }>('/interviews/hr', {
             method: 'POST',
             body:   JSON.stringify(data),

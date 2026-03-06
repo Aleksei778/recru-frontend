@@ -30,7 +30,12 @@
     "settings": "Настройки",
     "logout": "Выход"
   },
-  "vacancies": {
+  "dashboard": {
+    "vacancies": {
+      "hire"
+    },
+    "interviews": {
 
+    }
   }
 }
