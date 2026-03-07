@@ -19,15 +19,33 @@
     "login": "Login",
     "registeringIn": "Register into system..."
   },
-  "sidebar": {
-    "vacancies": "Vacancies",
-    "candidates": "Candidates",
-    "messages": "Messages",
-    "events": "Events",
-    "templates": "Templates",
-    "statistics": "Statistics",
-    "profile": "Profile",
-    "settings": "Settings",
-    "logout": "Logout"
+  "dashboard": {
+    "sidebar": {
+      "vacancies": "Vacancies",
+      "candidates": "Candidates",
+      "messages": "Messages",
+      "events": "Events",
+      "templates": "Templates",
+      "statistics": "Statistics",
+      "profile": "Profile",
+      "settings": "Settings",
+      "logout": "Logout"
+    },
+    "vacancies": {},
+    "interviews": {
+      "heading": "Interviews",
+      "status": {
+        "pending": "Pending",
+        "in_progress": "Progress",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "rec": {
+        "hire": "Hire",
+        "maybe": "Detailed consideration is required",
+        "reject": "Reject"
+      },
+      "no_interview": "There is no interview. Create an interview on the candidates' page"
+    }
   }
 }

@@ -32,38 +32,38 @@ export default function Sidebar() {
   const menuItems = [
     {
       icon: LayoutDashboard,
-      label: t("sidebar.vacancies"),
+      label: t("dashboard.sidebar.vacancies"),
       href: `/${language}/vacancies`,
     },
     {
       icon: Users,
-      label: t("sidebar.candidates"),
+      label: t("dashboard.sidebar.candidates"),
       href: `/${language}/candidates`,
     },
     {
       icon: MessageSquare,
-      label: t("sidebar.messages"),
+      label: t("dashboard.sidebar.messages"),
       href: `/${language}/messages`,
     },
     {
       icon: CalendarDays,
-      label: t("sidebar.events"),
+      label: t("dashboard.sidebar.events"),
       href: `/${language}/events`,
     },
     {
       icon: FileText,
-      label: t("sidebar.templates"),
+      label: t("dashboard.sidebar.templates"),
       href: `/${language}/templates`,
     },
     {
       icon: BarChart3,
-      label: t("sidebar.statistics"),
+      label: t("dashboard.sidebar.statistics"),
       href: `/${language}/statistics`,
     },
-    { icon: User, label: t("sidebar.profile"), href: `/${language}/profile` },
+    { icon: User, label: t("dashboard.sidebar.profile"), href: `/${language}/profile` },
     {
       icon: Settings,
-      label: t("sidebar.settings"),
+      label: t("dashboard.sidebar.settings"),
       href: `/${language}/settings`,
     },
   ];
@@ -130,7 +130,7 @@ export default function Sidebar() {
       <div className="p-3">
         <button className="flex items-center gap-3 px-4 py-3 w-full text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 hover:text-black dark:hover:text-white rounded-lg transition-all">
           <LogOut className="w-5 h-5" />
-          <span className="text-sm font-medium">{t("sidebar.logout")}</span>
+          <span className="text-sm font-medium">{t("dashboard.sidebar.logout")}</span>
         </button>
       </div>
     </aside>

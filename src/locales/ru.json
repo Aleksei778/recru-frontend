@@ -19,22 +19,21 @@
     "login": "Вход",
     "registeringIn": "Регистрируем Вас в системе..."
   },
-  "sidebar": {
-    "vacancies": "Вакансии",
-    "candidates": "Кандидаты",
-    "messages": "Сообщения",
-    "events": "События",
-    "templates": "Шаблоны",
-    "statistics": "Статистика",
-    "profile": "Профиль",
-    "settings": "Настройки",
-    "logout": "Выход"
-  },
   "dashboard": {
-    "vacancies": {
-
+    "sidebar": {
+      "vacancies": "Вакансии",
+      "candidates": "Кандидаты",
+      "messages": "Сообщения",
+      "events": "События",
+      "templates": "Шаблоны",
+      "statistics": "Статистика",
+      "profile": "Профиль",
+      "settings": "Настройки",
+      "logout": "Выход"
     },
+    "vacancies": {},
     "interviews": {
+      "heading": "Интервью",
       "status": {
         "pending": "Ожидает",
         "in_progress": "В процессе",
@@ -45,7 +44,8 @@
         "hire": "Нанять",
         "maybe": "Требуется детальное рассмотрение",
         "reject": "Отказ"
-      }
+      },
+      "no_interviews": "Нет интервью. Создайте интервью на странице кандидатов."
     }
   }
 }

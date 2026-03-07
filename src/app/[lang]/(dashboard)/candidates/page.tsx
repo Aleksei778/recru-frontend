@@ -1,3 +1,5 @@
+// src/app/[lang]/(dashboard)/candidates/page.tsx
+
 'use client'
 
 import { useEffect, useState } from 'react'

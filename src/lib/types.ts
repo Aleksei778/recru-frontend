@@ -136,8 +136,9 @@ export interface Vacancy {
 
 export interface Interview {
     id: number
-    candidate_id: number
-    vacancy_id: number
+    candidate: Candidate
+    vacancy: Vacancy
+    ai_evaluation: number
     status: string
     created_at: string
     updated_at: string
