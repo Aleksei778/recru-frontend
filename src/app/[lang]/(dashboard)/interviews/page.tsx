@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
 import { useTranslation } from "@/hooks/useTranslation";
 import { interviews as api } from '@/lib/api'
-import { Interview, Vacancy } from '@/lib/types'
+import { Interview } from '@/lib/types'
 import { ClockIcon, CheckCircleIcon, XCircleIcon, PlayIcon } from 'lucide-react'
 
 const getStatusConfig = (t: (key: string) => string) => ({
@@ -79,17 +79,41 @@ export default function InterviewPage() {
                             >
                                 {/* Status badge */}
                                 <div className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg shrink-0 ${cfg.color}`}>
-                                    <StatusIcon className="w-3.5 h-3.5" />
+                                    <StatusIcon />
                                     { cfg.label }
                                 </div>
 
                                 {/* Candidate + Vacancy */}
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-medium text-black dark:text-white truncate">
-                                        {
-                                            
-                                        }
+                                        { `${item.candidate.last_name} ${item.candidate.first_name}` }
                                     </p>
+
+                                    <p>
+                                        { item.vacancy.title } · {item.vacancy?.tenant?.name ?? 'NDA Company'}
+                                    </p>
+                                </div>
+
+                                {/* Score */}
+                                {item.score !== null && (
+                                    <div className="text-right shrink-0">
+                                        <div className="text-xl font-bold text-gray-900 dark:text-white">
+                                            { item.score }
+                                        </div>
+                                        <div className="text-xs text-gray-400">из 100</div>
+                                    </div>
+                                )}
+
+                                {/* Recommendation */}
+                                {eval_?.recommendation && (
+                                    <div className={`text-xs font-semibold shrink-0 ${REC_CONFIG[eval_.recommendation].color}`}>
+                                        { REC_CONFIG[eval_.recommendation].label }
+                                    </div>
+                                )}
+
+                                {/* Date */}
+                                <div className="text-xs text-gray-400 shrink-0">
+                                    { new Date(item.created_at).toLocaleDateString('ru-RU') }
                                 </div>
                             </Link>
                         )
