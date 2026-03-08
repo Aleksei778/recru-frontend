@@ -138,7 +138,7 @@ export interface Interview {
     id: number
     candidate: Candidate
     vacancy: Vacancy
-    ai_evaluation: number
+    ai_evaluation: AiEvaluation
     status: string
     created_at: string
     updated_at: string
@@ -179,4 +179,16 @@ export interface AuthContext {
     register: (registerData: RegisterData) => Promise<void>
     logout: () => void
     loading: boolean
+}
+
+export type InterviewStatus = 'pending' | 'in_progress' | 'completed' | 'cancel'
+
+export type RecommendationType = 'hire' | 'maybe' | 'reject'
+
+export interface AiEvaluation {
+    recommendation: RecommendationType
+    score: number
+    summary: string
+    strengths: string[]
+    weaknesses: string[]
 }

@@ -1,11 +1,11 @@
 // app/[lang]/layout.tsx
 
-import type { Metadata } from "next";
-import "../globals.css";
-import { ThemeProvider } from "@/contexts/theme-context";
-import { LanguageProvider } from "@/contexts/language-context";
-import { montserrat } from "@/lib/font";
-import { notFound } from "next/navigation";
+import "../globals.css"
+import { ThemeProvider } from "@/contexts/theme-context"
+import { LanguageProvider } from "@/contexts/language-context"
+import { montserrat } from "@/lib/font"
+import { notFound } from "next/navigation"
+import React from "react"
 
 const languages = ["en", "ru"] as const;
 type Language = (typeof languages)[number];
@@ -14,7 +14,23 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ lang: string }>;
-}): Promise<Metadata> {
+}): Promise<{
+    title: string;
+    description: string;
+    keywords: string[];
+    authors: { name: string }[];
+    openGraph: {
+        type: string;
+        locale: string;
+        url: string;
+        siteName: string;
+        title: string;
+        description: string;
+        images: { url: string; width: number; height: number; alt: string }[]
+    };
+    twitter: { card: string; title: string; description: string; images: string[] };
+    alternates: { canonical: string; languages: { en: string; ru: string } }
+}> {
   const { lang } = await params;
 
   const titles = {

@@ -9,6 +9,7 @@ import {
     Users,
     MessageSquare,
     CalendarDays,
+    UserRoundCheck,
     FileText,
     BarChart3,
     User,
@@ -39,6 +40,11 @@ export default function Sidebar() {
       icon: Users,
       label: t("dashboard.sidebar.candidates"),
       href: `/${language}/candidates`,
+    },
+    {
+      icon: UserRoundCheck,
+      label: t("dashboard.sidebar.interviews"),
+      href: `/${language}/interviews`,
     },
     {
       icon: MessageSquare,
