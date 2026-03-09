@@ -9,6 +9,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/contexts/auth-context";
 import Link from "next/link";
+import React from "react";
 
 export default function Register() {
   const { t } = useTranslation();
@@ -36,8 +37,9 @@ export default function Register() {
           password: password,
           password_confirmation: passwordConfirmation
         })
-    } catch (err) {
-        setError(err instanceof ApiError ? err.message : 'Неверный логин или пароль')
+    } catch (error) {
+        console.error(error)
+        setError(error instanceof ApiError ? error.message : 'Неверный логин или пароль')
         setLoading(false)
     }
 };

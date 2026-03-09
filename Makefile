@@ -1,6 +1,6 @@
 SHELL = /bin/sh
 UID := $(shell id -u)
-COMPOSE = docker compose -f docker-compose.yaml
+COMPOSE = docker compose -p recru_frontend -f docker-compose.yaml
 
 .PHONY: docker-up docker-down docker-restart docker-stop \
         node

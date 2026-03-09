@@ -6,6 +6,7 @@ import { LanguageProvider } from "@/contexts/language-context"
 import { montserrat } from "@/lib/font"
 import { notFound } from "next/navigation"
 import React from "react"
+import { AuthProvider } from "@/contexts/auth-context";
 
 const languages = ["en", "ru"] as const;
 type Language = (typeof languages)[number];
@@ -89,25 +90,24 @@ interface RootLayoutProps {
   params: Promise<{ lang: string }>;
 }
 
-export default async function RootLayout({
-  children,
-  params,
-}: RootLayoutProps) {
-  const { lang } = await params;
+export default async function RootLayout({ children, params }: RootLayoutProps) {
+    const { lang } = await params;
 
-  if (!languages.includes(lang as Language)) {
-    notFound();
-  }
+    if (!languages.includes(lang as Language)) {
+        notFound();
+    }
 
-  return (
-    <html lang={lang} className={montserrat.variable} suppressHydrationWarning>
-      <body className={`${montserrat.className} antialiased`}>
-        <ThemeProvider>
-          <LanguageProvider initialLanguage={lang as "en" | "ru"}>
-            {children}
-          </LanguageProvider>
-        </ThemeProvider>
-      </body>
-    </html>
-  );
+    return (
+        <html lang={lang} className={montserrat.variable} suppressHydrationWarning>
+        <body className={`${montserrat.className} antialiased`}>
+            <ThemeProvider>
+                <LanguageProvider initialLanguage={lang as "en" | "ru"}>
+                    <AuthProvider>
+                        {children}
+                    </AuthProvider>
+                </LanguageProvider>
+            </ThemeProvider>
+        </body>
+        </html>
+    )
 }

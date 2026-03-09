@@ -8,9 +8,9 @@ import type {
     Tenant,
     LoginData,
     RegisterData,
-} from './types';
+} from '@/types';
 
-const API_BASE = process.env.API_BASE ?? 'http://localhost:80/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:80/api';
 
 async function request<T>(
     path: string,
@@ -27,7 +27,7 @@ async function request<T>(
         headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const res = await fetch(`${API_BASE}${path}`, {...options, headers});
+    const res = await fetch(`${API_BASE}${path}`, {...options, headers})
 
     if (!res.ok) {
         const err = await res.json().catch(() => ({}))

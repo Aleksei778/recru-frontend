@@ -2,6 +2,7 @@ services:
   node:
     image: node:25-alpine
     working_dir: /app
+    container_name: recru_node
     volumes:
       - .:/app
       - /app/node_modules
@@ -10,3 +11,12 @@ services:
     command: sh -c "npm install && npm run dev"
     environment:
       - NODE_ENV=development
+    networks:
+      default:
+        ipv4_address: 172.75.0.8
+
+networks:
+  default:
+    name: recru_network
+    external: true
+    driver: bridge

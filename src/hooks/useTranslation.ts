@@ -31,20 +31,11 @@ export function useTranslation() {
       if (value && typeof value === "object" && k in value) {
         value = value[k];
       } else {
-        console.warn(
-          `Translation not found for key: "${key}" at segment: "${k}" in language: "${currentLanguage}"`,
-        );
-        console.warn("Available keys at this level:", Object.keys(value || {}));
         return key;
       }
     }
 
     if (typeof value !== "string") {
-      console.warn(
-        `Translation value is not a string for key: "${key}", got:`,
-        typeof value,
-        value,
-      );
       return key;
     }
 
