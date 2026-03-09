@@ -13,7 +13,7 @@ import {
     CandidateStatus,
     Vacancy,
     VacancyStatus
-} from '@/lib/types'
+} from '@/types'
 import { PlusIcon, LinkIcon, CheckIcon, XIcon } from 'lucide-react'
 
 const EMPTY_FORM: CandidateForm = {

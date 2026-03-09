@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
 import { vacancies as api } from '@/lib/api'
-import type { Vacancy } from '@/lib/types'
+import type { Vacancy } from '@/types'
 import { PlusIcon, MapPinIcon, ChevronRightIcon } from 'lucide-react'
 
 const labels = {

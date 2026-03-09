@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
 import { useTranslation } from '@/hooks/useTranslation'
 import { interviews as api } from '@/lib/api'
-import { Interview, InterviewStatus, RecommendationType } from '@/lib/types'
+import type { Interview, InterviewStatus, RecommendationType } from '@/types'
 import { ClockIcon, CheckCircleIcon, XCircleIcon, PlayIcon } from 'lucide-react'
 import React from 'react'
 
