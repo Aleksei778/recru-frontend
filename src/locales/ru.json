@@ -32,6 +32,23 @@
       "settings": "Настройки",
       "logout": "Выход"
     },
+    "profile": {
+      "profile.error": "Ошибка при обновлении профиля",
+      "company.error": "Ошибка при обновлении компании",
+      "password": {
+        "mismatch": "Пароли не совпадают",
+        "short": "Слишком короткий пароль",
+        "error": "Ошибка при обновлении пароля"
+      },
+      "tab": {
+        "profile": "Профиль",
+        "company": "Компания",
+        "password": "Пароль"
+      },
+      "heading": "Профиль",
+      "name": "Имя",
+      "email": "Почта"
+    },
     "vacancies": {},
     "interviews": {
       "heading": "Интервью",

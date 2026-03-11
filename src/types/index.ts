@@ -56,6 +56,8 @@ export enum CandidateStatus {
 export interface Tenant {
     id: number
     name: string
+    website: string | null
+    industry: string | null
     created_at: string
     updated_at: string
 }
@@ -167,6 +169,24 @@ export interface RegisterData {
     subdomain: string,
     company: string,
     email: string,
+    password: string,
+    password_confirmation: string,
+}
+
+export interface UpdateProfileData {
+    name: string,
+    email: string,
+    avatar: string | null,
+}
+
+export interface UpdateTenantData {
+    name: string,
+    website: string,
+    industry: string,
+}
+
+export interface UpdatePasswordData {
+    current_password: string,
     password: string,
     password_confirmation: string,
 }

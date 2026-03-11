@@ -5,12 +5,15 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react"
 import { useRouter } from 'next/navigation'
 import type {User, Tenant, AuthContext, LoginData, RegisterData} from '@/types'
-import { auth } from '@/lib/api'
+import {auth, vacancies} from '@/lib/api'
+import { useLanguage } from "@/contexts/language-context"
 
 const ctx = createContext<AuthContext>({} as AuthContext)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const router = useRouter()
+
+    const { language } = useLanguage();
 
     const [user, setUser] = useState<User | null>(null)
     const [tenant, setTenant] = useState<Tenant | null>(null)
@@ -54,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(u)
         setTenant(te)
 
-        router.push('/vacancies')
+        router.push(`/${language}/vacancies`,)
     }
 
     const register = async (registerData: RegisterData) => {
@@ -66,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(u)
         setTenant(te)
 
-        router.push('/vacancies')
+        router.push(`${language}/vacancies`)
     }
 
     const logout = () => {
@@ -78,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null)
         setTenant(null)
 
-        router.push('/login')
+        router.push(`/${language}/login`)
     }
 
     return (

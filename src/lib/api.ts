@@ -8,6 +8,9 @@ import type {
     Tenant,
     LoginData,
     RegisterData,
+    UpdateProfileData,
+    UpdateTenantData,
+    UpdatePasswordData
 } from '@/types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:80/api';
@@ -64,7 +67,25 @@ export const auth = {
         request<{ message: string }>('/auth/logout', { method: 'POST' }, token),
 
     me: (token: string) =>
-        request<{ user: User, tenant: Tenant }>('/auth/me', {}, token)
+        request<{ user: User, tenant: Tenant }>('/auth/me', {}, token),
+
+    updateProfile: (updateProfileData: UpdateProfileData, token: string) =>
+        request<{ user: User, tenant: Tenant }>('/auth/me', {
+            method: 'PATCH',
+            body: JSON.stringify(updateProfileData),
+        }, token),
+
+    updateTenant: (updateTenantData: UpdateTenantData, token: string) =>
+        request<{ tenant: Tenant }>('/auth/tenant', {
+            method: 'PATCH',
+            body: JSON.stringify(updateTenantData)
+        }, token),
+
+    updatePassword: (updateProfileData: UpdatePasswordData, token: string) =>
+        request<{ user: User, tenant: Tenant }>('/auth/me/password', {
+            method: 'PATCH',
+            body: JSON.stringify(updateProfileData),
+        }, token),
 }
 
 export const vacancies = {
@@ -123,7 +144,7 @@ export const interviews = {
     create: (data: { vacancy_id: number; candidate_id: number }, token: string) =>
         request<{ interview: Interview; access_token: string; link: string }>('/interviews/hr', {
             method: 'POST',
-            body:   JSON.stringify(data),
+            body: JSON.stringify(data),
         }, token),
 
     regenerateToken: (id: number, token: string) =>

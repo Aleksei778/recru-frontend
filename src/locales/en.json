@@ -33,6 +33,23 @@
       "logout": "Logout"
     },
     "vacancies": {},
+    "profile": {
+      "profile.error": "Error while updating profile",
+      "company.error": "Error while updating company",
+      "password": {
+        "mismatch": "Passwords do not match",
+        "short": "Too short password. Min 8 characters",
+        "error": "Error while updating password"
+      },
+      "tab": {
+        "profile": "Profile",
+        "company": "Company",
+        "password": "Password"
+      },
+      "heading": "Profile",
+      "name": "Name",
+      "email": "Email"
+    },
     "interviews": {
       "heading": "Interviews",
       "status": {

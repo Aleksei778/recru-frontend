@@ -60,7 +60,6 @@ export function LanguageProvider({
 export function useLanguage() {
   const context = useContext(LanguageContext);
   if (context === undefined) {
-    // Возвращаем значения по умолчанию, если контекст недоступен
     return {
       language: "en" as Language,
       toggleLanguage: () => {},

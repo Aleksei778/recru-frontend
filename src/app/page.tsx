@@ -7,10 +7,9 @@ export default async function RootPage() {
   const headersList = await headers();
   const acceptLanguage = headersList.get("accept-language") || "";
 
-  // Определяем язык из браузера
   const preferredLang = acceptLanguage.toLowerCase().includes("ru")
     ? "ru"
     : "en";
 
-  redirect(`/${preferredLang}`);
+  redirect(`/${preferredLang}/vacancies`);
 }
