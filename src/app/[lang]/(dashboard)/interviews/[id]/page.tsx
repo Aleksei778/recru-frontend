@@ -23,4 +23,28 @@ export default function InterviewDetailPage() {
 
         api.get(parseInt(id), token).then(setData)
     }, [token, id]);
+
+    const copyLink = () => {
+        if (!token) return
+    }
+
+    const regenerate = async () => {
+        if (!token || !data) return
+
+        const result = await api.regenerateToken(data.id, token)
+        await navigator.clipboard.writeText(result.link)
+
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+    }
+
+    if (!data) return <div className="p-8 text-gray-400">Загрузка...</div>
+
+    const _eval = data.ai_evaluation
+
+    return (
+        <div>
+            
+        </div>
+    )
 }
