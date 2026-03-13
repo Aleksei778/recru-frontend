@@ -24,9 +24,8 @@
       "vacancies": "Vacancies",
       "candidates": "Candidates",
       "interviews": "Interviews",
-      "messages": "Messages",
       "events": "Events",
-      "templates": "Templates",
+      "resume": "Resume",
       "statistics": "Statistics",
       "profile": "Profile",
       "settings": "Settings",
@@ -34,21 +33,46 @@
     },
     "vacancies": {},
     "profile": {
-      "profile.error": "Error while updating profile",
-      "company.error": "Error while updating company",
-      "password": {
-        "mismatch": "Passwords do not match",
-        "short": "Too short password. Min 8 characters",
-        "error": "Error while updating password"
-      },
-      "tab": {
-        "profile": "Profile",
-        "company": "Company",
-        "password": "Password"
-      },
       "heading": "Profile",
-      "name": "Name",
-      "email": "Email"
+      "logout": "Logout",
+      "profile": {
+        "tab": "Profile",
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "save": "Save personal settings",
+        "saved": "Personal settings successfully saved",
+        "error": "Error updating profile",
+        "namePlaceholder": "Enter your name",
+        "emailPlaceholder": "Enter your email"
+      },
+      "company": {
+        "tab": "Company",
+        "name": "Company",
+        "website": "Website",
+        "industry": "Industry",
+        "domains": "Domains",
+        "save": "Save company settings",
+        "saved": "Company settings successfully saved",
+        "error": "Error updating company",
+        "namePlaceholder": "Enter your company name",
+        "websitePlaceholder": "Enter your company website",
+        "industryPlaceholder": "Enter your company industry"
+      },
+      "password": {
+        "tab": "Password",
+        "current": "Current password",
+        "new": "New password",
+        "confirm": "Confirm password",
+        "save": "Save password",
+        "saved": "Password successfully changed",
+        "mismatch": "Passwords do not match",
+        "short": "Too short password",
+        "error": "Error updating password",
+        "currentPlaceholder": "Enter your current password",
+        "newPlaceholder": "Enter your new password",
+        "confirmPlaceholder": "Confirm your new password"
+      }
     },
     "interviews": {
       "heading": "Interviews",

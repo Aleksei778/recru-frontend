@@ -47,26 +47,25 @@ export default function Sidebar() {
       href: `/${language}/interviews`,
     },
     {
-      icon: MessageSquare,
-      label: t("dashboard.sidebar.messages"),
-      href: `/${language}/messages`,
-    },
-    {
       icon: CalendarDays,
       label: t("dashboard.sidebar.events"),
       href: `/${language}/events`,
     },
     {
       icon: FileText,
-      label: t("dashboard.sidebar.templates"),
-      href: `/${language}/templates`,
+      label: t("dashboard.sidebar.resume"),
+      href: `/${language}/resume`,
     },
     {
       icon: BarChart3,
       label: t("dashboard.sidebar.statistics"),
       href: `/${language}/statistics`,
     },
-    { icon: User, label: t("dashboard.sidebar.profile"), href: `/${language}/profile` },
+    {
+        icon: User,
+        label: t("dashboard.sidebar.profile"),
+        href: `/${language}/profile`
+    },
     {
       icon: Settings,
       label: t("dashboard.sidebar.settings"),

@@ -58,6 +58,7 @@ export interface Tenant {
     name: string
     website: string | null
     industry: string | null
+    domains: string[]
     created_at: string
     updated_at: string
 }

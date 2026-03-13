@@ -8,7 +8,7 @@ import { useTranslation } from "@/hooks/useTranslation"
 import type { UpdateProfileData, UpdateTenantData } from "@/types"
 import React from 'react'
 import { auth as api, ApiError } from "@/lib/api"
-import { UserIcon, LockIcon, BuildingIcon, LogoutIcon, CheckIcon } from 'lucide-react'
+import { UserIcon, LockIcon, BuildingIcon, LogOutIcon, CheckIcon } from 'lucide-react'
 
 const inputClass = `
     w-full px-5 py-3.5 bg-white dark:bg-black
@@ -129,19 +129,23 @@ export default function ProfilePage() {
                 password: newPassword,
                 password_confirmation: confirmPassword,
             }, token)
+
+            setPasswordSuccess(true)
+            setCurrentPassword('')
+            setNewPassword('')
+            setConfirmPassword('')
+            setTimeout(() => setPasswordSuccess(false), 3000)
         } catch (err) {
-            setPasswordError(err instanceof ApiError
-                ? err.message
-                : t('dashboard.profile.password.error'))
+            setPasswordError(err instanceof ApiError ? err.message : t('profile.error'))
         } finally {
             setPasswordSaving(false)
         }
     }
 
     const tabs: { id: Tab, label: string, icon: React.ElementType }[] = [
-        {id: 'profile', label: t('dashboard.profile.tab.profile'), icon: UserIcon},
-        {id: 'company', label: t('dashboard.profile.tab.company'), icon: BuildingIcon},
-        {id: 'password', label: t('dashboard.profile.tab.password'), icon: LockIcon},
+        {id: 'profile', label: t('dashboard.profile.profile.tab'), icon: UserIcon},
+        {id: 'company', label: t('dashboard.profile.company.tab'), icon: BuildingIcon},
+        {id: 'password', label: t('dashboard.profile.password.tab'), icon: LockIcon},
     ]
 
     const SubmitButton = ({saving, success, label, successLabel}: {
@@ -244,22 +248,24 @@ export default function ProfilePage() {
                         <form onSubmit={saveProfile} className="space-y-4">
                             <div>
                                 <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 ml-1">
-                                    {t('dashboard.profile.name')}
+                                    {t('dashboard.profile.profile.name')}
                                 </label>
                                 <input
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     required={true}
+                                    placeholder={t('dashboard.profile.profile.namePlaceholder')}
                                     className={inputClass}
                                 />
                             </div>
 
                             <div>
                                 <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 ml-1">
-                                    {t('dashboard.profile.email')}
+                                    {t('dashboard.profile.profile.email')}
                                 </label>
                                 <input
                                     value={email}
+                                    placeholder={t('dashboard.profile.profile.emailPlaceholder')}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required={true}
                                     className={inputClass}
@@ -267,11 +273,182 @@ export default function ProfilePage() {
                             </div>
 
                             <div>
-                                <label></label>
+                                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
+                                    {t('dashboard.profile.profile.role')}
+                                </label>
+                                <div className={readonlyClass}>{user?.role}</div>
+                            </div>
+
+                            {profileError &&  (
+                                <p className="text-red-500 text-xs text-center">
+                                    {profileError}
+                                </p>
+                            )}
+
+                            <div className="mt-4">
+                                <SubmitButton
+                                    saving={profileSaving}
+                                    success={profileSuccess}
+                                    label={t('dashboard.profile.profile.save')}
+                                    successLabel={t('dashboard.profile.profile.saved')}
+                                />
                             </div>
                         </form>
                     </div>
                 )}
+
+                {/* Tab: Company */}
+                {tab === 'company' && (
+                    <div className="rounded-3xl border border-black dark:border-white p-8">
+                        <form onSubmit={saveCompany} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 ml-1">
+                                    {t('dashboard.profile.company.name')}
+                                </label>
+                                <input
+                                    placeholder={t('dashboard.profile.company.namePlaceholder')}
+                                    value={companyName}
+                                    onChange={(e) => setCompanyName(e.target.value)}
+                                    required={true}
+                                    className={inputClass}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 ml-1">
+                                    {t('dashboard.profile.company.website')}
+                                </label>
+                                <input
+                                    value={website}
+                                    onChange={(e) => setWebsite(e.target.value)}
+                                    placeholder={t('dashboard.profile.company.websitePlaceholder') + ' (https://company.com)'}
+                                    required={true}
+                                    className={inputClass}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 ml-1">
+                                    {t('dashboard.profile.company.industry')}
+                                </label>
+                                <input
+                                    value={industry}
+                                    onChange={(e) => setIndustry(e.target.value)}
+                                    placeholder={t('dashboard.profile.company.industryPlaceholder') + ' (IT, FinTech, HealthTech)'}
+                                    required={true}
+                                    className={inputClass}
+                                />
+                            </div>
+
+                            {/* Tabs: Domains */}
+                            {tenant?.domains && tenant.domains.length > 0 && (
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 ml-1">
+                                        {t('dashboard.profile.company.domains')}
+                                    </label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {tenant.domains.map((domain: string) => (
+                                            <span
+                                                key={domain}
+                                                className="text-xs border border-gray-300 dark:border-gray-700
+                                                           text-gray-500 dark:text-gray-400
+                                                           px-3 py-1 rounded-full"
+                                            >
+                                                {domain}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {companyError && (
+                                <p className="text-red-500 text-xs text-center">{companyError}</p>
+                            )}
+
+                            <div className="mt-4">
+                                <SubmitButton
+                                    saving={companySaving}
+                                    success={companySuccess}
+                                    label={t('dashboard.profile.company.save')}
+                                    successLabel={t('dashboard.profile.company.saved')}
+                                />
+                            </div>
+                        </form>
+                    </div>
+                )}
+
+                {/* Tab: Password */}
+                {tab === 'password' && (
+                    <div className="rounded-3xl border border-black dark:border-white p-8">
+                        <form onSubmit={savePassword} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 ml-1">
+                                    {t('dashboard.profile.password.current')}
+                                </label>
+                                <input
+                                    type="password"
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    required={true}
+                                    placeholder={t('dashboard.profile.password.currentPlaceholder')}
+                                    className={inputClass}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 ml-1">
+                                    {t('dashboard.profile.password.new')}
+                                </label>
+                                <input
+                                    type="password"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    required={true}
+                                    placeholder={t('dashboard.profile.password.newPlaceholder')}
+                                    className={inputClass}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-medium text-gray-500
+                                              dark:text-gray-400 mb-1.5 ml-1">
+                                    {t('dashboard.profile.password.confirm')}
+                                </label>
+                                <input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={e => setConfirmPassword(e.target.value)}
+                                    placeholder={t('dashboard.profile.password.confirmPlaceholder')}
+                                    required
+                                    className={inputClass}
+                                />
+                            </div>
+
+                            {passwordError && (
+                                <p className="text-red-500 text-xs text-center">{passwordError}</p>
+                            )}
+
+                            <div>
+                                <SubmitButton
+                                    saving={passwordSaving}
+                                    success={passwordSuccess}
+                                    label={t('dashboard.profile.password.save')}
+                                    successLabel={t('dashboard.profile.password.saved')}
+                                />
+                            </div>
+                        </form>
+                    </div>
+                )}
+
+                {/* Logout */}
+                <button
+                    onClick={logout}
+                    className="flex items-center gap-2 t-8 text-l text-gray-400 mt-5
+                               hover:text-black dark:hover:text-white transition-colors duration-200"
+                >
+                    <LogOutIcon className="w-6 h-6" />
+                    {t('dashboard.profile.logout')}
+                </button>
             </div>
         </div>
     )
