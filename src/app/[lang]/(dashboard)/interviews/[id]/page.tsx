@@ -1,4 +1,4 @@
-// src/app/[lang]/(dashboard)/interviews/page.tsx
+// src/app/[lang]/(dashboard)/interviews/[id]/page.tsx
 
 'use client'
 
@@ -8,10 +8,12 @@ import { useAuth } from '@/contexts/auth-context'
 import type { Interview } from "@/types"
 import { ArrowLeftIcon, LinkIcon, CheckIcon } from 'lucide-react'
 import { interviews as api } from "@/lib/api";
+import {useTranslation} from "@/hooks/useTranslation";
 
 export default function InterviewDetailPage() {
     const { id } = useParams<{ id: string }>()
     const { token } = useAuth()
+    const { t } = useTranslation()
 
     const router = useRouter()
 
@@ -43,8 +45,24 @@ export default function InterviewDetailPage() {
     const _eval = data.ai_evaluation
 
     return (
-        <div>
-            
+        <div className="max-w-3xl mx-auto p-8">
+            <button onClick={() => router.back()} className="flex items-center gap-2 mb-6 text-gray-500 hover:text-gray-700 mb-6">
+                <ArrowLeftIcon className="w-4 h-4" />
+                {t('dashboard.interview.id.back')}
+            </button>
+        </div>
+
+        {/* Header */}
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 mb-5">
+            <div className="flex items-start justify-between mb-4">
+                <div>
+                    <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                        {data?.candidate.last_name} {data?.candidate.first_name}
+                    </h1>
+
+                    
+                </div>
+            </div>
         </div>
     )
 }

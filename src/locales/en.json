@@ -87,6 +87,9 @@
         "maybe": "Detailed consideration is required",
         "reject": "Reject"
       },
+      "id": {
+        "back": "Back"
+      },
       "no_interview": "There is no interview. Create an interview on the candidates' page"
     }
   }
