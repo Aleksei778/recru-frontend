@@ -50,19 +50,35 @@ export default function InterviewDetailPage() {
                 <ArrowLeftIcon className="w-4 h-4" />
                 {t('dashboard.interview.id.back')}
             </button>
-        </div>
 
-        {/* Header */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 mb-5">
-            <div className="flex items-start justify-between mb-4">
-                <div>
-                    <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                        {data?.candidate.last_name} {data?.candidate.first_name}
-                    </h1>
+            {/* Header */}
+            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 mb-5">
+                <div className="flex items-start justify-between mb-4">
+                    <div>
+                        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                            {data?.candidate.last_name} {data?.candidate.first_name}
+                        </h1>
 
-                    
+                        <p className="text-sm text-gray-500">
+                            {data.vacancy?.title} · {data.vacancy?.company}
+                        </p>
+                    </div>
+
+                    {data.score !== null && (
+                        <div className=""></div>
+                    )}
                 </div>
             </div>
+
+            {/* Regenerate link button */}
+            <button
+                onClick={regenerate}
+                className="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 dark:bg-blue-900/20
+                               px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors"
+            >
+                {copied ? <CheckIcon className="w-3.5 h-3.5" /> : <LinkIcon className="w-3.5 h-3.5" />}
+                {copied ? t('dashboard.interview.id.copied') : t('dashboard.interview.id.regenerate')}
+            </button>
         </div>
     )
 }

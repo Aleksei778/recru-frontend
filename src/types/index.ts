@@ -44,6 +44,7 @@ export enum CandidateSource {
     Social = 'Social',
     Email = 'email',
     Bulk_import = 'bulk_import',
+    Resume_parsing = 'resume_parsing',
 }
 
 export enum CandidateStatus {
@@ -76,31 +77,7 @@ export interface User {
     tenant?: Tenant
 }
 
-export interface Candidate {
-    id: number
-    tenant_id: number
-    first_name: string
-    last_name: string
-    middle_name: string | null
-    email: string | null
-    phone: string | null
-    resume_url: string | null
-    linkedin_url: string | null
-    github_url: string | null
-    source: string | null
-    status: CandidateStatus
-    experience_years: number | null
-    grade: string | null
-    education_level: CandidateEducationLevel | null
-    added_by_id: number | null
-    created_at: string
-    updated_at: string
-    interviews?: Interview[]
-    added_by?: User
-    tenant?: Tenant
-}
-
-export interface CandidateForm {
+export interface CandidateData {
     first_name: string
     last_name: string
     middle_name: string | null
@@ -111,7 +88,27 @@ export interface CandidateForm {
     github_url: string | null
     source: CandidateSource
     experience_years: number
+    grade: CandidateGrade
     education_level: CandidateEducationLevel
+    skills: string[]
+}
+
+export interface Candidate {
+    id: number
+    tenant_id: number
+    candidateData: CandidateData
+    status: CandidateStatus
+    added_by_id: number | null
+    created_at: string
+    updated_at: string
+    interviews?: Interview[]
+    added_by?: User
+    tenant?: Tenant
+}
+
+export interface ParsedCandidate {
+    candidateData: CandidateData
+    summary: string
 }
 
 export interface Vacancy {
@@ -220,3 +217,6 @@ export interface Message {
     role: 'user' | 'assistant';
     content: string;
 }
+
+export type ResumeParsingStage = 'upload' | 'parsing' | 'review' | 'saving' | 'done'
+

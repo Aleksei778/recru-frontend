@@ -74,6 +74,37 @@
         "confirmPlaceholder": "Confirm your new password"
       }
     },
+    "resume": {
+      "heading": "Resume parsing",
+      "subheading": "Transform resumes into structured data",
+      "parsing": {
+        "error": "Error processing resume! Please try again later"
+      },
+      "saving": {
+        "error": "Error saving user from parsed resume! Please try again later"
+      },
+      "steps": {
+        "upload": "Upload",
+        "review": "Review",
+        "done": "Done"
+      },
+      "upload": {
+        "pdf": "PDF",
+        "text": "Text",
+        "remove": "Remove file",
+        "drop": "Drop file here",
+        "size": "not more than 20 MB",
+        "parse": "Parse",
+        "paste": "Paste your resume text here"
+      },
+      "parse": {
+        "parsing": "Analyzing the resume",
+        "hint": "Creating your personal summary... Hang on, we're almost there..."
+      },
+      "review": {
+        "summary": "Conclusion about the candidate"
+      }
+    },
     "interviews": {
       "heading": "Interviews",
       "status": {
@@ -88,7 +119,9 @@
         "reject": "Reject"
       },
       "id": {
-        "back": "Back"
+        "back": "Back",
+        "copied": "Link copied to clipboard",
+        "regenerate": "Regenerate link and copy"
       },
       "no_interview": "There is no interview. Create an interview on the candidates' page"
     }

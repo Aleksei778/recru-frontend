@@ -2,7 +2,7 @@ import type {
     User,
     Vacancy,
     Candidate,
-    CandidateForm,
+    CandidateData,
     Paginated,
     Interview,
     Tenant,
@@ -10,7 +10,7 @@ import type {
     RegisterData,
     UpdateProfileData,
     UpdateTenantData,
-    UpdatePasswordData
+    UpdatePasswordData, ParsedCandidate
 } from '@/types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:80/api';
@@ -118,13 +118,13 @@ export const candidates = {
     get: (id: number, token: string) =>
         request<Candidate>(`/candidates/${id}`, {}, token),
 
-    create: (data: CandidateForm, token: string) =>
+    create: (data: CandidateData, token: string) =>
         request<Candidate>('/candidates', {
             method: 'POST',
             body: JSON.stringify(data),
         }, token),
 
-    update: (id: number, data: Partial<CandidateForm>, token: string) =>
+    update: (id: number, data: Partial<CandidateData>, token: string) =>
         request<Vacancy>('/candidates', {
             method: 'PATCH' ,
             body: JSON.stringify(data),
@@ -132,6 +132,20 @@ export const candidates = {
 
     delete: (id: number, token: string) =>
         request<Vacancy>(`/candidates/${id}`, { method: 'DELETE' }, token),
+}
+
+export const resume = {
+    pdf: (FormData: FormData, token: string) =>
+        request<{ parsedCandidate: ParsedCandidate }>('/resume/pdf', {
+            method: 'POST',
+            body: FormData,
+        }, token),
+
+    text: (text: string, token: string) =>
+        request<{ parsedCandidate: ParsedCandidate }>('/resume/text', {
+            method: 'POST',
+            body: JSON.stringify({ resume_text: text }),
+        }, token),
 }
 
 export const interviews = {
