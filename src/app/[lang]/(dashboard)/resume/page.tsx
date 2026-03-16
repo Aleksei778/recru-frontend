@@ -328,12 +328,25 @@ export default function ResumePage() {
 
                 {/* Stage: Review */}
                 {stage === 'review' && parsed && (
-                    <div className="rounded-3xl border border-black dark:border-white p-6">
-                        <div className="flex items-center gap-2 mb-3">
-                            <SparklesIcon className="w-4 h-4 text-black dark:text-white" />
-                            <span className="text-xs font-semibold text-black dark:text-white uppercase tracking-widest">
-                                {t('dashboard.resume.review.summary')}
-                            </span>
+                    <div className="space-y-6">
+                        {/* AI Summary */}
+                        <div className="rounded-3xl border border-black dark:border-white p-6">
+                            <div className="flex items-center gap-2 mb-3">
+                                <SparklesIcon className="w-4 h-4 text-black dark:text-white" />
+                                <span className="text-xs font-semibold text-black dark:text-white uppercase tracking-widest">
+                                    {t('dashboard.resume.review.summary')}
+                                </span>
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                                {parsed.summary}
+                            </p>
+                        </div>
+
+                        {/* Editable Fields */}
+                        <div className="rounded-3xl border border-black dark:border-white p-8 space-y-6">
+                            <p className="text-xs font-semibold text-black dark:text-white uppercase tracking-widest mb-6">
+                                {t('dashboard.resume.review.fields')}
+                            </p>
                         </div>
                     </div>
                 )}
