@@ -125,7 +125,7 @@ export default function ResumePage() {
         }
     }
 
-    const setField = <K extends keyof ParsedCandidate>(key: K, value: ParsedCandidate[K]) => {
+    const setField = <K extends keyof ParsedCandidate>(key: string, value: ParsedCandidate[K]) => {
         setParsed(p => p ? {...p, [key]: value} : p)
     }
 
@@ -348,6 +348,51 @@ export default function ResumePage() {
                                 {t('dashboard.resume.review.fields')}
                             </p>
                         </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <Field label={t('candidate.lastName')}>
+                                <input
+                                    value={parsed.candidateData.last_name}
+                                    onChange={e => setField('candidateData.last_name', e.target.value)}
+                                    className={inputClass}
+                                />
+                            </Field>
+
+                            <Field label={t('candidate.firstName')}>
+                                <input
+                                    value={parsed.candidateData.first_name}
+                                    onChange={e => setField('first_name', e.target.value)}
+                                    className={inputClass}
+                                />
+                            </Field>
+
+                            <Field label={t('candidate.middleName')}>
+                                <input
+                                    value={parsed.candidateData.middle_name ?? ''}
+                                    onChange={e => setField('candidateData.middle_name', e.target.value)}
+                                    className={inputClass}
+                                />
+                            </Field>
+                        </div>
+
+                        <div className="border-t border-gray-100 dark:border-gray-900" />
+
+                        <Field label={t('candidate.email')}>
+                            <input
+                                type="email"
+                                value={parsed.candidateData.email ?? ''}
+                                onChange={e => setField('email', e.target.value)}
+                                className={inputClass}
+                            />
+                        </Field>
+
+                        <Field label={t('candidate.phone')}>
+                            <input
+                                value={parsed.phone ?? ''}
+                                onChange={e => setField('phone', e.target.value || null)}
+                                className={inputClass}
+                            />
+                        </Field>
                     </div>
                 )}
             </div>

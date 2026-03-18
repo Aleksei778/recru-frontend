@@ -20,6 +20,11 @@
     "registeringIn": "Регистрируем Вас в системе..."
   },
   "dashboard": {
+    "candidates": {
+      "last_name": "Фамилия",
+      "first_name": "Имя",
+      "middle_name": "Отчество"
+    },
     "sidebar": {
       "vacancies": "Вакансии",
       "candidates": "Кандидаты",
