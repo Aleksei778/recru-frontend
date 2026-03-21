@@ -137,7 +137,14 @@
         "wait": "A technical interview awaits you. Position: ",
         "honest": "Write in detail and honestly — this will help us better understand your experience.",
         "connecting": "Connecting...",
-        "start": "Start interview"
+        "start": "Start interview",
+        "analyze": "Analyzing your answers...",
+        "finish_interview": "Interview finished",
+        "send_recruiter": "Results will be sent to the recruiter",
+        "grade": "out of 100",
+        "strength": "Strengths",
+        "weaknesses": "Weaknesses",
+        "type_message": "Your answer..."
       }
     }
   }

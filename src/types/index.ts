@@ -141,7 +141,6 @@ export interface Interview {
     ai_evaluation: AiEvaluation
     status: InterviewStatus
     conversation: Message[]
-    score: number | null
     created_at: string
     updated_at: string
 }
@@ -149,7 +148,6 @@ export interface Interview {
 export interface InterviewSession {
     id: number
     status: InterviewStatus
-    score: number | null
     turn: number
     can_finish: boolean
     conversation: Message[]
@@ -225,6 +223,7 @@ export interface AiEvaluation {
     strengths: string[]
     weaknesses: string[]
     skills_assessment: string[]
+    score: number
 }
 
 export interface Message {
