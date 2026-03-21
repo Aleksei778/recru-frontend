@@ -121,7 +121,16 @@
       "id": {
         "back": "Back",
         "copied": "Link copied to clipboard",
-        "regenerate": "Regenerate link and copy"
+        "regenerate": "Regenerate link and copy",
+        "grade": "out of 100",
+        "aiEvaluation": "AI evaluation",
+        "strength": "Strengths",
+        "skills": "Skills"
+      },
+      "token":  {
+        "invalid_link": "Invalid link",
+        "finish": "Finish",
+        "hello": "Hello, "
       },
       "no_interview": "There is no interview. Create an interview on the candidates' page"
     }

@@ -139,9 +139,23 @@ export interface Interview {
     candidate: Candidate
     vacancy: Vacancy
     ai_evaluation: AiEvaluation
-    status: string
+    status: InterviewStatus
+    conversation: Message[]
+    score: number | null
     created_at: string
     updated_at: string
+}
+
+export interface InterviewSession {
+    id: number
+    status: InterviewStatus
+    score: number | null
+    turn: number
+    can_finish: boolean
+    conversation: Message[]
+    ai_evaluation: AiEvaluation | null
+    vacancy: Vacancy
+    candidate: Candidate
 }
 
 export interface Paginated<T> {
@@ -207,10 +221,10 @@ export type Phase = 'loading' | 'ready' | 'active' | 'finishing' | 'done' | 'err
 
 export interface AiEvaluation {
     recommendation: RecommendationType
-    score: number
     summary: string
     strengths: string[]
     weaknesses: string[]
+    skills_assessment: string[]
 }
 
 export interface Message {

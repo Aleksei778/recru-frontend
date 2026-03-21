@@ -10,7 +10,10 @@ import type {
     RegisterData,
     UpdateProfileData,
     UpdateTenantData,
-    UpdatePasswordData, ParsedCandidate
+    UpdatePasswordData,
+    ParsedCandidate,
+    AiEvaluation,
+    InterviewSession
 } from '@/types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:80/api';
@@ -183,5 +186,5 @@ export const session = {
         }),
 
     finish: (token: string) =>
-        request<Evaluation>(`/interviews/candidate${token}/finish`, { method: 'POST' }),
+        request<AiEvaluation>(`/interviews/candidate${token}/finish`, { method: 'POST' }),
 }

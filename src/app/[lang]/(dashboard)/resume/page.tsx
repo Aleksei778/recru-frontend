@@ -388,7 +388,7 @@ export default function ResumePage() {
 
                         <Field label={t('candidate.phone')}>
                             <input
-                                value={parsed.phone ?? ''}
+                                value={parsed.candidateData.phone ?? ''}
                                 onChange={e => setField('phone', e.target.value || null)}
                                 className={inputClass}
                             />

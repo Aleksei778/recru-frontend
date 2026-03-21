@@ -81,9 +81,9 @@ export default function InterviewPage() {
             ) : (
                 <div className="space-y-3">
                     {items.map(item => {
-                        const cfg        = STATUS_CONFIG[item.status as InterviewStatus]
+                        const cfg = STATUS_CONFIG[item.status as InterviewStatus]
                         const StatusIcon = cfg.icon
-                        const eval_      = item.ai_evaluation
+                        const eval_ = item.ai_evaluation
 
                         return (
                             <Link
@@ -102,7 +102,7 @@ export default function InterviewPage() {
                                 {/* Candidate + Vacancy */}
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-semibold text-black dark:text-white truncate">
-                                        {item.candidate.last_name} {item.candidate.first_name}
+                                        {item.candidate.candidateData.last_name} {item.candidate.candidateData.first_name}
                                     </p>
                                     <p className="text-xs text-gray-400 truncate mt-0.5">
                                         {item.vacancy.title}
@@ -114,7 +114,7 @@ export default function InterviewPage() {
                                 {/* Score */}
                                 <div className="text-right shrink-0">
                                     <div className="text-xl font-bold text-black dark:text-white">
-                                        {eval_.score}
+                                        {item.score}
                                     </div>
                                     <div className="text-xs text-gray-400">из 100</div>
                                 </div>
