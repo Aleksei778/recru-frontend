@@ -42,6 +42,11 @@ export default function Sidebar() {
       href: `/${language}/candidates`,
     },
     {
+      icon: MessageSquare,
+      label: t("dashboard.sidebar.emails"),
+      href: `/${language}/emails`,
+    },
+    {
       icon: UserRoundCheck,
       label: t("dashboard.sidebar.interviews"),
       href: `/${language}/interviews`,

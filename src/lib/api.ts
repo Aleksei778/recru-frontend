@@ -13,7 +13,7 @@ import type {
     UpdatePasswordData,
     ParsedCandidate,
     AiEvaluation,
-    InterviewSession
+    InterviewSession, Email
 } from '@/types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:80/api';
@@ -88,6 +88,20 @@ export const auth = {
         request<{ user: User, tenant: Tenant }>('/auth/me/password', {
             method: 'PATCH',
             body: JSON.stringify(updateProfileData),
+        }, token),
+}
+
+export const emails = {
+    list: (token: string, page: number = 1) =>
+        request<Paginated<Email>>(`/emails?page=${page}`, {}, token),
+
+    get: (id: number, token: string) =>
+        request<Email>(`/emails/${id}`, {}, token),
+
+    send: (token: string, data: Email) =>
+        request<Email>('/email', {
+            method: 'POST',
+            body: JSON.stringify(data),
         }, token),
 }
 

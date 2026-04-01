@@ -24,6 +24,7 @@
       "vacancies": "Vacancies",
       "candidates": "Candidates",
       "interviews": "Interviews",
+      "emails": "Emails",
       "events": "Events",
       "resume": "Resume",
       "statistics": "Statistics",
@@ -45,6 +46,11 @@
         "error": "Error updating profile",
         "namePlaceholder": "Enter your name",
         "emailPlaceholder": "Enter your email"
+      },
+      "emails": {
+        "heading": "Chat with candidates",
+        "total": "Total",
+        "search": "Search"
       },
       "company": {
         "tab": "Company",

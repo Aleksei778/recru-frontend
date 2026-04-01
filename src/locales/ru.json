@@ -25,10 +25,16 @@
       "first_name": "Имя",
       "middle_name": "Отчество"
     },
+    "emails": {
+      "heading": "Переписка с кандидатами",
+      "total": "Всего писем",
+      "search": "Поиск"
+    },
     "sidebar": {
       "vacancies": "Вакансии",
       "candidates": "Кандидаты",
       "interviews": "Интервью",
+      "emails": "Почта",
       "events": "События",
       "resume": "Резюме",
       "statistics": "Статистика",

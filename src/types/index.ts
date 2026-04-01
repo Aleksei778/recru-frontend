@@ -233,3 +233,10 @@ export interface Message {
 
 export type ResumeParsingStage = 'upload' | 'parsing' | 'review' | 'saving' | 'done'
 
+export interface Email {
+    to: string;
+    subject: string;
+    body: string;
+}
+
+export type EmailStatus = 'sent' | 'draft' | 'failed'
