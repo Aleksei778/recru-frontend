@@ -16,10 +16,10 @@ const getStatusConfig = (t: (key: string) => string): Record<InterviewStatus, {
     icon:  React.ElementType
     color: string
 }> => ({
-    pending: { label: t('interviews.status.pending'), icon: ClockIcon, color: 'border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400' },
-    in_progress: { label: t('interviews.status.in_progress'), icon: PlayIcon, color: 'border-black dark:border-white text-black dark:text-white' },
-    completed: { label: t('interviews.status.completed'), icon: CheckCircleIcon, color: 'border-black dark:border-white text-black dark:text-white' },
-    cancel: { label: t('interviews.status.cancel'), icon: XCircleIcon, color: 'border-gray-300 dark:border-gray-700 text-gray-400' },
+    pending: { label: t('dashboard.interviews.status.pending'), icon: ClockIcon, color: 'border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400' },
+    in_progress: { label: t('dashboard.interviews.status.in_progress'), icon: PlayIcon, color: 'border-black dark:border-white text-black dark:text-white' },
+    completed: { label: t('dashboard.interviews.status.completed'), icon: CheckCircleIcon, color: 'border-black dark:border-white text-black dark:text-white' },
+    cancel: { label: t('dashboard.interviews.status.cancel'), icon: XCircleIcon, color: 'border-gray-300 dark:border-gray-700 text-gray-400' },
 })
 
 const getRecConfig = (t: (key: string) => string): Record<RecommendationType, {

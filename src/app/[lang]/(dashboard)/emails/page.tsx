@@ -1,13 +1,25 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
 import { emails as api } from '@/lib/api'
 import type { Email, EmailStatus } from '@/types'
 import { MailIcon, SearchIcon, PlusIcon } from 'lucide-react'
 import React from 'react'
-import {useTranslation} from "@/hooks/useTranslation";
+import { useTranslation } from "@/hooks/useTranslation"
+import { ClockIcon, CheckIcon, XCircleIcon } from 'lucide-react'
+
+const getStatusConfig = (t: (key: string) => string): Record<EmailStatus, {
+    label: string
+    icon:  React.ElementType
+    color: string
+}> => ({
+    sent: { label: t('dashboard.emails.status.sent'), icon: CheckIcon, color: 'border-black dark:border-white text-black dark:text-white' },
+    draft: { label: t('dashboard.emails.status.draft'), icon: ClockIcon, color: 'border-gray-300 dark:border-gray-700 text-gray-400 dark:text-gray-500' },
+    failed: { label: t('interviews.status.error'), icon: XCircleIcon, color: 'border-red-300 dark:border-red-800 text-red-500 dark:text-red-400' },
+})
+
+
 
 export default function EmailsPage() {
     const { token } = useAuth()
@@ -18,6 +30,8 @@ export default function EmailsPage() {
     const [search, setSearch] = useState<string>('')
     const [selected, setSelected] = useState<Email | null>(null)
     const [statusFilter, setStatusFilter] = useState<EmailStatus | 'all'>('all')
+
+    const STATUS_CONFIG = getStatusConfig(t)
 
     useEffect(() => {
         if (!token) return
@@ -120,7 +134,46 @@ export default function EmailsPage() {
                                     <MailIcon className="w-8 h-8 text-gray-200 dark:text-gray-800 mx-auto mb-3" />
                                 <p className="text-sm text-gray-400">{t('dashboard.emails.empty')}</p>
                                 </div>
-                            ) : ()}
+                            ) : filtered.length === 0 ? (
+                                <div className="text-center py-16">
+                                    <MailIcon className="w-8 h-8 text-gray-200 dark:text-gray-800 mx-auto mb-3" />
+                                    <p className="text-sm text-gray-400">{t('dashboard')}</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-px px-2 pb-4">
+                                    {filtered.map(email => {
+                                        const cfg = STATUS_CONFIG[email.status]
+                                        const StatusIcon = cfg.icon
+                                        const isSelected = selected?.id === email.id
+
+                                        return (
+                                            <button
+                                                key={email.id}
+                                                onClick={() => setSelected(email)}
+                                                className={`w-full text-left px-4 py-3.5 rounded-2xl transition-all duration-150
+                                                ${isSelected
+                                                    ? 'bg-black dark:bg-white'
+                                                    : 'hover:bg-gray-50 dark:hover:bg-gray-950'
+                                                }`}
+                                            >
+                                                {/* Candidate + status */}
+                                                <div className="flex items-center gap-2 mb-1 justify-between">
+                                                    <p className=text-sm font-medium truncate
+                                                       ${isSelected ? 'text-white dark:text-black' : 'text-black dark:text-white'}>
+                                                        {email.candidate
+                                                            ? `${email.candidate.last_name} ${email.candidate.first_name}`
+                                                            : '—'
+                                                        }
+                                                    </p>
+                                                    <div className={`flex items-center gap-1 text-xs shrink-0 ${isSelected ? 'text-gray-300 dark:text-gray-600' : cfg.color.split(' ')[2] + ' ' + cfg.color.split(' ')[3]}`}>
+                                                        <StatusIcon className="w-3 h-3" />
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -9,16 +9,16 @@ import { Send } from 'lucide-react'
 
 export default function CandidateInterviewPage() {
     const { token } = useParams<{ token: string }>()
-    const { t }     = useTranslation()
+    const { t } = useTranslation()
 
-    const [info,      setInfo]      = useState<InterviewSession | null>(null)
-    const [input,     setInput]     = useState('')
-    const [phase,     setPhase]     = useState<Phase>('loading')
+    const [info, setInfo] = useState<InterviewSession | null>(null)
+    const [input, setInput] = useState('')
+    const [phase, setPhase] = useState<Phase>('loading')
     const [canFinish, setCanFinish] = useState(false)
-    const [messages,  setMessages]  = useState<Message[]>([])
-    const [eval_,     setEval_]     = useState<AiEvaluation | null>(null)
-    const [sending,   setSending]   = useState(false)
-    const [error,     setError]     = useState<string | null>(null)
+    const [messages, setMessages]  = useState<Message[]>([])
+    const [eval_, setEval_] = useState<AiEvaluation | null>(null)
+    const [sending, setSending] = useState(false)
+    const [error, setError]     = useState<string | null>(null)
 
     const bottomRef = useRef<HTMLDivElement | null>(null)
 
