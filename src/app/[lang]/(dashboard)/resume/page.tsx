@@ -1,14 +1,16 @@
+// src/app/[lang]/(dashboard)/resume/page.tsx
+
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useTranslation } from '@/hooks/useTranslation'
-import {candidates as cApi, resume, resume as rApi} from '@/lib/api'
+import {candidates as cApi, resume as rApi} from '@/lib/api'
 import { ApiError} from '@/lib/api'
 import {
     UploadIcon, FileTextIcon, SparklesIcon,
-    CheckIcon, ChevronRightIcon, XIcon, RefreshCwIcon,
+    CheckIcon, ChevronRightIcon, XIcon,
 } from 'lucide-react'
 import React from 'react'
 import type {
@@ -119,9 +121,9 @@ export default function ResumePage() {
             await cApi.create(parsed.candidateData, token)
             setStage('done')
         } catch (err) {
-            let message = err instanceof ApiError
+            err instanceof ApiError
                 ? err.message
-                : t('dashboard.resume.saving.error')
+                : t('dashboard.resume.saving.error');
         }
     }
 

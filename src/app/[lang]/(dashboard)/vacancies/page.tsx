@@ -106,7 +106,7 @@ export default function VacanciesPage() {
                                 <MapPinIcon className="w-3.5 h-3.5 flex-shrink-0" />
                                 {v.location}
                             </div>
-
+x
                             {/* Salary */}
                             {(v.salary_min || v.salary_max) && (
                                 <p className="text-sm font-semibold text-black dark:text-white mb-4">

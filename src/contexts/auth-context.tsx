@@ -4,8 +4,14 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react"
 import { useRouter } from 'next/navigation'
-import type {User, Tenant, AuthContext, LoginData, RegisterData} from '@/types'
-import {auth, vacancies} from '@/lib/api'
+import type {
+    User,
+    Tenant,
+    AuthContext,
+    LoginData,
+    RegisterData
+} from '@/types'
+import { auth } from '@/lib/api'
 import { useLanguage } from "@/contexts/language-context"
 
 const ctx = createContext<AuthContext>({} as AuthContext)

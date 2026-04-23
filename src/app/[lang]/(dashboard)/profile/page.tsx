@@ -192,6 +192,7 @@ export default function ProfilePage() {
                     <div className="w-14 h-14 rounded-full border-2 border-black dark:border-white
                                     flex items-center justify-center bg-gray-50 dark:bg-gray-950 shrink-0">
                         {user?.avatar ?  (
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full"/>
                         ) : (
                             <span className="text-lg font-bold text-black dark:text-white">

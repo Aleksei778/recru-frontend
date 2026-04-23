@@ -83,27 +83,43 @@ export interface CandidateData {
     middle_name: string | null
     email: string
     phone: string
-    resume_url: string
-    linkedin_url: string | null
-    github_url: string | null
     source: CandidateSource
     experience_years: number
-    grade: CandidateGrade
     education_level: CandidateEducationLevel
-    skills: string[]
+    skills: Skill[]
+    workplaces: Workplace[]
+    socials: Social[]
+}
+
+export interface Workplace {
+    company_name: string
+    position: string
+    description: string
+    started_at: string
+    ended_at: string | null
+}
+
+export interface Social {
+    name: string
+    url: string
 }
 
 export interface Candidate {
     id: number
-    tenant_id: number
     candidateData: CandidateData
-    status: CandidateStatus
-    added_by_id: number | null
-    created_at: string
-    updated_at: string
     interviews?: Interview[]
-    added_by?: User
-    tenant?: Tenant
+    created_at: string
+}
+
+export type WorkPlaceForm = {
+    company_name: string,
+    position: string,
+    description: string
+}
+
+export type SocialForm = {
+    type: string
+    url: string
 }
 
 export interface ParsedCandidate {
@@ -138,7 +154,9 @@ export interface Interview {
     id: number
     candidate: Candidate
     vacancy: Vacancy
-    ai_evaluation: AiEvaluation
+    questions: Question[]
+    grade: number
+    text_grade: string
     status: InterviewStatus
     conversation: Message[]
     created_at: string
@@ -211,7 +229,9 @@ export interface AuthContext {
     loading: boolean
 }
 
-export type InterviewStatus = 'pending' | 'in_progress' | 'completed' | 'cancel'
+export type InterviewStatus = 'pending' | 'generating_questions' | 'questions_review' |
+    'synthesizing' | 'ready' | 'in_progress' | 'processing' |
+    'evaluating' | 'evaluated' | 'closed'
 
 export type RecommendationType = 'hire' | 'maybe' | 'reject'
 
@@ -231,12 +251,70 @@ export interface Message {
     content: string;
 }
 
-export type ResumeParsingStage = 'upload' | 'parsing' | 'review' | 'saving' | 'done'
+export type EmailRecipient =
+    | { recipient_type: 'candidate'; recipient: Candidate }
+    | { recipient_type: 'user'; recipient: User }
 
-export interface Email {
-    to: string;
-    subject: string;
-    body: string;
+export type Email = EmailRecipient & {
+    id: number
+    interview?: Interview
+    sender?: User
+    type: EmailType
+    status: EmailStatus
+    locale: Locale
+    subject: string
+    sent_at: string | null
 }
 
-export type EmailStatus = 'sent' | 'draft' | 'failed'
+export type EmailStatus = 'pending' | 'sent' | 'failed'
+
+export type EmailType = 'interview_invite' | 'questions_ready' | 'results' | 'decision';
+
+export type Locale = 'ru' | 'en'
+
+export type InterviewDecision = 'approve'|'reject';
+
+export interface Question {
+    id: number,
+    interview: Interview,
+    number: number,
+    text: string,
+    answer: Answer|null,
+}
+
+export interface Answer {
+    question: Question,
+    text: string
+}
+
+export interface VoiceLog {
+    subject: Answer|Question,
+    audio_path: string,
+}
+
+export type Skill = {
+    id: number
+    name: string
+    slug: string
+    category: SkillCategory
+}
+
+export type SkillCategory =
+    | 'frontend'
+    | 'backend'
+    | 'fullstack'
+    | 'mobile'
+    | 'devops'
+    | 'database'
+    | 'cloud'
+    | 'testing'
+    | 'architecture'
+    | 'security'
+    | 'ai_ml'
+    | 'data'
+    | 'analytics'
+    | 'design'
+    | 'product'
+    | 'management'
+    | 'soft'
+    | 'other'

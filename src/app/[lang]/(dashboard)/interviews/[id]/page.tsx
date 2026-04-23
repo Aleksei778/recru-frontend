@@ -1,179 +1,182 @@
-// src/app/[lang]/(dashboard)/interviews/[id]/page.tsx
+// app/[lang]/(dashboard)/interviews/[id]/page.tsx
 
 'use client'
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
-import type { Interview } from "@/types"
-import { ArrowLeftIcon, LinkIcon, CheckIcon } from 'lucide-react'
-import { interviews as api } from "@/lib/api";
-import {useTranslation} from "@/hooks/useTranslation";
+import { interviews as api } from '@/lib/api'
+import type { Interview } from '@/types'
+import { CheckCircleIcon, ClockIcon, ChevronRightIcon } from 'lucide-react'
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function InterviewDetailPage() {
     const { id } = useParams<{ id: string }>()
     const { token } = useAuth()
     const { t } = useTranslation()
 
+    const interviewId = Number(id)
     const router = useRouter()
 
-    const [data, setData] = useState<Interview | null>(null)
-    const [copied, setCopied] = useState(false)
+    const [interview, setInterview] = useState<Interview | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [closing, setClosing] = useState(false)
 
     useEffect(() => {
         if (!token) return
+        api.get(interviewId, token).then(interview => {
+            setInterview(interview)
+            setLoading(false)
+        })
+    }, [interviewId, token])
 
-        api.get(parseInt(id), token).then(setData)
-    }, [token, id]);
-
-    const copyLink = () => {
+    const close = async (decision: 'approve' | 'reject') => {
         if (!token) return
+        setClosing(true)
+        await api.close(decision, interviewId, token)
+        setInterview(prev => prev ? { ...prev, status: 'closed' } : prev)
+        setClosing(false)
     }
 
-    const regenerate = async () => {
-        if (!token || !data) return
-
-        const result = await api.regenerateToken(data.id, token)
-        await navigator.clipboard.writeText(result.link)
-
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
+    if (loading || !interview) {
+        return (
+            <div className="min-h-screen bg-white dark:bg-black p-8">
+                <div className="max-w-3xl mx-auto space-y-4">
+                    {[...Array(4)].map((_, i) => (
+                        <div key={i} className="h-24 rounded-2xl border border-gray-100 dark:border-gray-900 animate-pulse" />
+                    ))}
+                </div>
+            </div>
+        )
     }
-
-    if (!data) return <div className="p-8 text-gray-400">Загрузка...</div>
-
-    const _eval = data.ai_evaluation
 
     return (
-        <div className="max-w-3xl mx-auto p-8">
-            <button onClick={() => router.back()} className="flex items-center gap-2 mb-6 text-gray-500 hover:text-gray-700 mb-6">
-                <ArrowLeftIcon className="w-4 h-4" />
-                {t('dashboard.interview.id.back')}
-            </button>
+        <div className="min-h-screen bg-white dark:bg-black p-8">
+            <div className="max-w-3xl mx-auto">
 
-            {/* Header */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 mb-5">
-                <div className="flex items-start justify-between mb-4">
+                <div className="mb-8 flex items-start justify-between">
                     <div>
-                        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                            {data?.candidate.candidateData.last_name} {data?.candidate.candidateData.first_name}
+                        <h1 className="text-2xl font-bold text-black dark:text-white">
+                            {interview.candidate.candidateData.last_name} {interview.candidate.candidateData.first_name}
                         </h1>
+                        <p className="text-sm text-gray-400 mt-1">{interview.vacancy.title}</p>
+                    </div>
+                    <span className="text-xs border border-gray-300 dark:border-gray-700
+                        text-gray-500 px-3 py-1.5 rounded-full">
+                        {interview.status}
+                    </span>
+                </div>
 
-                        <p className="text-sm text-gray-500">
-                            {data.vacancy?.title} · {data.vacancy?.tenant?.name ?? 'NDA Company'}
+                {interview.status === 'questions_review' && (
+                    <div className="rounded-3xl border border-black dark:border-white p-6 mb-6">
+                        <p className="text-sm text-black dark:text-white font-medium mb-1">
+                            Вопросы готовы к проверке
                         </p>
+                        <p className="text-xs text-gray-400 mb-4">
+                            Проверьте и при необходимости отредактируйте вопросы
+                        </p>
+                        <button
+                            onClick={() => router.push(`/interviews/${id}/questions`)}
+                            className="flex items-center gap-2 px-5 py-2.5 bg-black dark:bg-white
+                                text-white dark:text-black rounded-full text-sm font-medium"
+                        >
+                            Проверить вопросы
+                            <ChevronRightIcon className="w-4 h-4" />
+                        </button>
                     </div>
+                )}
 
-                    {data.score && (
-                        <div className="text-center">
-                            <div className="text-center">
-                                <div className="text-4xl font-bold text-blue-600">
-                                    {data.score}
-                                </div>
-                                <div className="text-xs text-gray-400">
-                                    {t('dashboard.interviews.id.grade')}
-                                </div>
+                {['pending', 'generating_questions', 'synthesizing'].includes(interview.status) && (
+                    <div className="rounded-3xl border border-gray-200 dark:border-gray-800 p-6 mb-6
+                        flex items-center gap-4">
+                        <div className="w-8 h-8 rounded-full border-2 border-gray-200 dark:border-gray-800
+                            border-t-black dark:border-t-white animate-spin shrink-0" />
+                        <div>
+                            <p className="text-sm font-medium text-black dark:text-white">
+                                {{
+                                    pending: t('dashboard.'),
+                                    "generating_questions": "Generating questions",
+                                    "questions_review": "Questions review",
+                                    "synthesizing": "Synthesizing",
+                                    "ready": "Ready",
+                                    "in_progress": "In progress",
+                                    "processing": "Processing",
+                                    "evaluating": "Evaluating",
+                                    "evaluated": "Evaluated",
+                                    "closed": "Closed"
+                                }[interview.status]}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-0.5">Это займёт несколько секунд</p>
+                        </div>
+                    </div>
+                )}
+
+                {interview.status === 'evaluated' && (
+                    <div className="rounded-3xl border border-black dark:border-white p-6 mb-6">
+                        <div className="flex items-center gap-3 mb-4">
+                            <CheckCircleIcon className="w-5 h-5 text-black dark:text-white" />
+                            <span className="font-semibold text-black dark:text-white">Результаты оценки</span>
+                        </div>
+                        <div className="flex items-center gap-6 mb-4">
+                            <div>
+                                <p className="text-4xl font-bold text-black dark:text-white">
+                                    {interview.grade}
+                                </p>
+                                <p className="text-xs text-gray-400">из 100</p>
                             </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Regenerate link button */}
-                <button
-                    onClick={regenerate}
-                    className="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors"
-                >
-                    {copied ? <CheckIcon className="w-3.5 h-3.5" /> : <LinkIcon className="w-3.5 h-3.5" />}
-                    {copied ? t('dashboard.interviews.id.copied') : t('dashboard.interviews.id.regenerate')}
-                </button>
-            </div>
-
-            {/* AI evaluation */}
-            {_eval && (
-                <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 mb-5">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                        {t('dashboard.interviews.id.aiEvaluation')}
-                    </h2>
-
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-5">
-                        {_eval.summary}
-                    </p>
-
-                    <div className="grid grid-cols-2 gap-5 mb-5">
-                        <div>
-                            <p className="text-xs font-medium text-green-600 uppercase tracking-wide mb-2">
-                                {t('dashboard.interviews.id.strengths')}
+                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed flex-1">
+                                {interview.text_grade}
                             </p>
-
-                            <ul className="space-y-1">
-                                {_eval.strengths?.map((s, i) => (
-                                    <li key={i} className="text-sm text-gray-600 dark:text-gray-300 flex gap-2">
-                                        <span className="text-green-500">✓</span>
-                                        { s }
-                                    </li>
-                                ))}
-                            </ul>
                         </div>
-                        <div>
-                            <p className="text-xs font-medium text-red-600 uppercase tracking-wide mb-2">
-                                {t('dashboard.interviews.id.weaknesses')}
-                            </p>
-
-                            <ul className="space-y-1">
-                                {_eval.weaknesses?.map((s, i) => (
-                                    <li className="text-sm text-gray-600 dark:text-gray-300 flex gap-2">
-                                        <span className="text-red-400">✗</span>
-                                        { s }
-                                    </li>
-                                ))}
-                            </ul>
+                        <div className="flex gap-3 pt-4 border-t border-gray-100 dark:border-gray-900">
+                            <button
+                                onClick={() => close('approve')}
+                                disabled={closing}
+                                className="flex-1 py-3 bg-black dark:bg-white text-white dark:text-black
+                                    rounded-full text-sm font-medium disabled:opacity-40 transition-all"
+                            >
+                                Отправить аппрув
+                            </button>
+                            <button
+                                onClick={() => close('reject')}
+                                disabled={closing}
+                                className="flex-1 py-3 border border-gray-300 dark:border-gray-700
+                                    text-gray-500 rounded-full text-sm hover:border-black hover:text-black
+                                    dark:hover:border-white dark:hover:text-white disabled:opacity-40 transition-all"
+                            >
+                                Отправить отказ
+                            </button>
                         </div>
                     </div>
+                )}
 
-                    {/* Skills */}
-                    {_eval.skills_assessment && (
-                        <div>
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">{t('dashboard.interviews.id.skills')}</p>
-                            <div className="space-y-2">
-                                {Object.entries(_eval.skills_assessment).map(([skill, score]) => (
-                                    <div key={skill} className="flex items-center gap-3">
-                                        <span className="text-sm text-gray-600 dark:text-gray-300 w-32 truncate">{skill}</span>
-                                        <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
-                                            <div
-                                                className="bg-blue-500 h-1.5 rounded-full transition-all"
-                                                style={{ width: `${(score / 5) * 100}%` }}
-                                            />
-                                        </div>
-                                        <span className="text-xs text-gray-400">{score}/5</span>
+                {interview.questions?.length > 0 && (
+                    <div className="space-y-4">
+                        <h2 className="text-sm font-semibold text-black dark:text-white uppercase tracking-widest">
+                            Ответы кандидата
+                        </h2>
+                        {interview.questions.map(q => (
+                            <div key={q.id} className="rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
+                                <p className="text-xs text-gray-400 mb-2">Вопрос {q.number}</p>
+                                <p className="text-sm font-medium text-black dark:text-white mb-3">{q.text}</p>
+                                {q.answer?.text ? (
+                                    <div className="bg-gray-50 dark:bg-gray-950 rounded-xl p-4">
+                                        <p className="text-xs text-gray-400 mb-1">Ответ</p>
+                                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                            {q.answer.text}
+                                        </p>
                                     </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* Conversation */}
-            {data.conversation && data.conversation.length > 0 && (
-                <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
-                    <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
-                        Диалог <span className="text-gray-400 font-normal text-sm">({data.conversation.length} сообщений)</span>
-                    </h2>
-                    <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-                        {data.conversation.map((msg, i) => (
-                            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-lg text-sm px-4 py-2.5 rounded-2xl leading-relaxed ${
-                                    msg.role === 'user'
-                                        ? 'bg-blue-600 text-white rounded-br-sm'
-                                        : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-bl-sm'
-                                }`}>
-                                    {msg.content}
-                                </div>
+                                ) : (
+                                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                                        <ClockIcon className="w-3.5 h-3.5" />
+                                        Обрабатывается...
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     )
 }

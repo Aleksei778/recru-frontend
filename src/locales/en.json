@@ -115,10 +115,18 @@
       "heading": "Interviews",
       "status": {
         "pending": "Pending",
-        "in_progress": "Progress",
-        "completed": "Completed",
-        "cancelled": "Cancelled"
+        "generating_questions": "Generating questions",
+        "questions_review": "Questions review",
+        "synthesizing": "Synthesizing",
+        "ready": "Ready",
+        "in_progress": "In progress",
+        "processing": "Processing",
+        "evaluating": "Evaluating",
+        "evaluated": "Evaluated",
+        "closed": "Closed"
       },
+      "check": "Check",
+      "grade": "out of 100",
       "rec": {
         "hire": "Hire",
         "maybe": "Detailed consideration is required",
@@ -131,7 +139,13 @@
         "grade": "out of 100",
         "aiEvaluation": "AI evaluation",
         "strength": "Strengths",
-        "skills": "Skills"
+        "skills": "Skills",
+        "questions": {
+          "heading": "Checking questions",
+          "can_edit": "Edit and confirm the order of the questions before sending them to the candidate. We strongly recommend that you hire a technical specialist from your company for 5 minutes!",
+          "saving": "Saving...",
+          "confirm": "Confirm and launch synthesis"
+        }
       },
       "no_interview": "There is no interview. Create an interview on the candidates' page"
     },

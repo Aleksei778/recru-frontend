@@ -13,7 +13,11 @@ import type {
     UpdatePasswordData,
     ParsedCandidate,
     AiEvaluation,
-    InterviewSession, Email
+    InterviewSession,
+    Email,
+    Question,
+    InterviewDecision,
+    Skill,
 } from '@/types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:80/api';
@@ -135,10 +139,10 @@ export const candidates = {
     get: (id: number, token: string) =>
         request<Candidate>(`/candidates/${id}`, {}, token),
 
-    create: (data: CandidateData, token: string) =>
+    create: (form: CandidateData, token: string) =>
         request<Candidate>('/candidates', {
             method: 'POST',
-            body: JSON.stringify(data),
+            body: JSON.stringify(form),
         }, token),
 
     update: (id: number, data: Partial<CandidateData>, token: string) =>
@@ -149,6 +153,11 @@ export const candidates = {
 
     delete: (id: number, token: string) =>
         request<Vacancy>(`/candidates/${id}`, { method: 'DELETE' }, token),
+}
+
+export const skills = {
+    search: (q: string, token: string) =>
+        request<Skill[]>(`skills?q=${encodeURIComponent(q)}`, {}, token),
 }
 
 export const resume = {
@@ -170,7 +179,7 @@ export const interviews = {
         request<Paginated<Interview>>(`/interviews/hr?page=${page}`, {}, token),
 
     get: (id: number, token: string) =>
-        request<Interview>(`/interviews/hr${id}`, {}, token),
+        request<Interview>(`/interviews/hr/${id}`, {}, token),
 
     create: (data: { vacancy_id: number; candidate_id: number }, token: string) =>
         request<{ interview: Interview; access_token: string; link: string }>('/interviews/hr', {
@@ -180,10 +189,22 @@ export const interviews = {
 
     regenerateToken: (id: number, token: string) =>
         request<{ access_token: string; link: string }>(
-            `/interviews/hr/${id}/regenerate-token`,
+            `/interviews/hr/${id}/regenerate`,
             { method: 'POST' },
             token,
         ),
+
+    approveQuestions: (data: { questions: Question[] }, id: number, token: string) =>
+        request<{ interview: Interview }>(`/interviews/hr/${id}/approve`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }, token),
+
+    close: (decision: InterviewDecision, id: number, token: string) =>
+        request<{message: string}>(`/interviews/hr/${id}/close`, {
+            method: 'POST',
+            body: JSON.stringify({decision: decision})
+        }, token),
 }
 
 export const session = {
