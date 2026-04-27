@@ -1,4 +1,4 @@
-// src/
+// src/components/skills/SkillsInput.tsx
 
 'use client'
 
@@ -135,7 +135,7 @@ export default function SkillsInput({ value = [], onChange }: Props) {
                                 >
                                     <span className="text-black dark:text-white">{skill.name}</span>
                                     {skill.category && (
-                                        <span className="text-xs text-gray-400">{skill.category}</span>
+                                        <span className="text-xs text-gray-400">{skill.category.name}</span>
                                     )}
                                 </div>
                             ))

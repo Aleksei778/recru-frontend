@@ -17,19 +17,36 @@ import type {
     Email,
     Question,
     InterviewDecision,
-    Skill,
+    Skill, UploadResumeResult,
 } from '@/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:80/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://recru.local:80/api';
+
+function getApiBase(): string {
+    if (typeof window === 'undefined') return API_BASE
+
+    const host = window.location.hostname
+    const centralDomain = process.env.NEXT_PUBLIC_CENTRAL_DOMAIN ?? 'recru.local'
+    const apiPort = process.env.NEXT_PUBLIC_API_PORT ?? '80'
+    const port = apiPort !== '80' ? `:${apiPort}` : ''
+
+    if (host !== centralDomain && host !== 'localhost') {
+        return `${window.location.protocol}//${host}${port}/api`
+    }
+
+    return API_BASE
+}
 
 async function request<T>(
     path: string,
     options: RequestInit = {},
     token?: string,
 ): Promise<T> {
+    const isFormData = options.body instanceof FormData;
+
     const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
         'Accept': 'application/json',
+        ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
         ...(options.headers as Record<string, string>),
     }
 
@@ -37,14 +54,14 @@ async function request<T>(
         headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const res = await fetch(`${API_BASE}${path}`, {...options, headers})
+    const res = await fetch(`${getApiBase()}${path}`, { ...options, headers })
 
     if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new ApiError(res.status, err?.error ?? err?.message ?? 'Server Error', err);
+        throw new ApiError(res.status, err?.error ?? err?.message ?? 'Server Error', err)
     }
 
-    return res.json();
+    return res.json()
 }
 
 export class ApiError extends Error {
@@ -157,21 +174,26 @@ export const candidates = {
 
 export const skills = {
     search: (q: string, token: string) =>
-        request<Skill[]>(`skills?q=${encodeURIComponent(q)}`, {}, token),
+        request<Skill[]>(`/skills?q=${encodeURIComponent(q)}`, {}, token),
 }
 
 export const resume = {
-    pdf: (FormData: FormData, token: string) =>
-        request<{ parsedCandidate: ParsedCandidate }>('/resume/pdf', {
+    file: (FormData: FormData, token: string) =>
+        request<UploadResumeResult>('/resume/file', {
             method: 'POST',
             body: FormData,
         }, token),
 
     text: (text: string, token: string) =>
-        request<{ parsedCandidate: ParsedCandidate }>('/resume/text', {
+        request<UploadResumeResult>('/resume/text', {
             method: 'POST',
-            body: JSON.stringify({ resume_text: text }),
-        }, token),
+            body: JSON.stringify({ resume: text }),
+        }, token)
+}
+
+export const operations = {
+    status: (id: number, token: string) =>
+        request<{ id: number, status: string, result: any }>(`/operations/${id}/status`, {}, token),
 }
 
 export const interviews = {
@@ -205,21 +227,4 @@ export const interviews = {
             method: 'POST',
             body: JSON.stringify({decision: decision})
         }, token),
-}
-
-export const session = {
-    get: (token: string) =>
-        request<InterviewSession>(`/interviews/candidate/${token}`),
-
-    start: (token: string) =>
-        request<{ message: string }>(`/interviews/candidate/${token}/start`, { method: 'POST' }),
-
-    answer: (token: string, answer: string) =>
-        request<{ message: string; turn: number; can_finish: boolean }>(`/interviews/candidate/${token}/answer`, {
-            method: 'POST',
-            body:   JSON.stringify({ answer }),
-        }),
-
-    finish: (token: string) =>
-        request<AiEvaluation>(`/interviews/candidate${token}/finish`, { method: 'POST' }),
 }

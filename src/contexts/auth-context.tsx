@@ -3,7 +3,6 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react"
-import { useRouter } from 'next/navigation'
 import type {
     User,
     Tenant,
@@ -17,8 +16,6 @@ import { useLanguage } from "@/contexts/language-context"
 const ctx = createContext<AuthContext>({} as AuthContext)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const router = useRouter()
-
     const { language } = useLanguage();
 
     const [user, setUser] = useState<User | null>(null)
@@ -54,6 +51,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         initAuth()
     }, [])
 
+    const CENTRAL_DOMAIN = process.env.NEXT_PUBLIC_CENTRAL_DOMAIN ?? 'recru.local'
+    const PORT = process.env.NEXT_PUBLIC_FRONTEND_PORT ? `:${process.env.NEXT_PUBLIC_FRONTEND_PORT}` : '3000'
+
     const login = async (loginData: LoginData): Promise<void> => {
         const { token: t, user: u, tenant: te } = await auth.login(loginData)
 
@@ -63,7 +63,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(u)
         setTenant(te)
 
-        router.push(`/${language}/vacancies`,)
+        const subdomain = te.subdomain
+        window.location.href = `${window.location.protocol}//${subdomain}.${CENTRAL_DOMAIN}${PORT}/${language}/callback?token=${t}`
     }
 
     const register = async (registerData: RegisterData) => {
@@ -75,11 +76,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(u)
         setTenant(te)
 
-        router.push(`${language}/vacancies`)
+        const subdomain = te.subdomain
+        window.location.href = `${window.location.protocol}//${subdomain}.${CENTRAL_DOMAIN}${PORT}/${language}/callback?token=${t}`
     }
 
-    const logout = () => {
-        if (token) auth.logout(token).catch(() => {})
+    const logout = async () => {
+        if (token) await auth.logout(token)
 
         localStorage.removeItem('recru-token')
 
@@ -87,11 +89,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null)
         setTenant(null)
 
-        router.push(`/${language}/login`)
+        window.location.href = `${window.location.protocol}//${CENTRAL_DOMAIN}${PORT}/${language}/login`
+    }
+
+    const setTokenAndUser = (t: string, u: User, te: Tenant) => {
+        setToken(t)
+        setUser(u)
+        setTenant(te)
     }
 
     return (
-        <ctx.Provider value={{ user, token, tenant, login, register, logout, loading }}>
+        <ctx.Provider value={{ user, token, tenant, login, register, logout, loading, setTokenAndUser }}>
             { children }
         </ctx.Provider>
     )

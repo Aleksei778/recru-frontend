@@ -1,42 +1,46 @@
-export enum UserRole {
-    Admin = 'admin',
-    HR = 'hr',
+export type UserRole = 'admin' | 'hr'
+
+export interface User {
+    id: number
+    name: string
+    email: string
+    role: UserRole
+    settings: Record<string, unknown> | null
+    email_verified_at: string | null
+    created_at: string
+    updated_at: string
+    tenant?: Tenant
 }
 
-export enum VacancyEmploymentType {
-    Full_time = 'full_time',
-    Part_time = 'part_time',
-    Contract = 'contract',
-    Internship = 'internship',
-}
+export type VacancyEmploymentType =
+    'full_time' |
+    'part_time' |
+    'contract' |
+    'internship'
 
-export enum VacancyStatus {
-    Draft = 'draft',
-    Published = 'published',
-    Closed = 'closed',
-}
+export type VacancyStatus =
+    'draft' |
+    'published' |
+    'closed'
 
-export enum VacancyWorkMode {
-    Office = 'office',
-    Remote = 'remote',
-    Hybrid = 'hybrid',
-}
+export type VacancyWorkMode =
+    'office' |
+    'remote' |
+    'hybrid'
 
-export enum CandidateEducationLevel {
-    Secondary = 'secondary',
-    Incomplete_higher = 'incomplete_higher',
-    Bachelor = 'bachelor',
-    Master = 'master',
-    Specialist = 'specialist',
-    Doctor = 'doctor',
-}
+export type CandidateEducationLevel =
+    'secondary' |
+    'incomplete_higher' |
+    'bachelor' |
+    'master' |
+    'specialist' |
+    'doctor'
 
-export enum CandidateGrade {
-    Junior = 'junior',
-    Middle = 'middle',
-    Senior = 'senior',
-    Lead = 'lead',
-}
+export type CandidateGrade =
+    'junior' |
+    'middle' |
+    'senior' |
+    'lead'
 
 export enum CandidateSource {
     HH = 'hh',
@@ -59,7 +63,7 @@ export interface Tenant {
     name: string
     website: string | null
     industry: string | null
-    domains: string[]
+    subdomain: string[]
     created_at: string
     updated_at: string
 }
@@ -110,21 +114,16 @@ export interface Candidate {
     interviews?: Interview[]
     created_at: string
 }
-
-export type WorkPlaceForm = {
-    company_name: string,
-    position: string,
-    description: string
-}
-
-export type SocialForm = {
-    type: string
-    url: string
-}
-
 export interface ParsedCandidate {
     candidateData: CandidateData
-    summary: string
+    text_grade: string
+    grade: number
+}
+
+export interface UploadResumeResult {
+    resume_id: number
+    parse_operation_id: number
+    evaluate_operation_id: number
 }
 
 export interface Vacancy {
@@ -184,13 +183,10 @@ export interface Paginated<T> {
     to: number | null
 }
 
-export interface ResourceResponse<T> {
-    data: T
-}
-
 export interface LoginData {
     email: string,
     password: string,
+    password_confirmation: string,
 }
 
 export interface RegisterData {
@@ -227,6 +223,7 @@ export interface AuthContext {
     register: (registerData: RegisterData) => Promise<void>
     logout: () => void
     loading: boolean
+    setTokenAndUser: (token: string, user: User, tenant: Tenant) => void
 }
 
 export type InterviewStatus = 'pending' | 'generating_questions' | 'questions_review' |
@@ -296,25 +293,12 @@ export type Skill = {
     id: number
     name: string
     slug: string
+    aliases: string[]
     category: SkillCategory
 }
 
-export type SkillCategory =
-    | 'frontend'
-    | 'backend'
-    | 'fullstack'
-    | 'mobile'
-    | 'devops'
-    | 'database'
-    | 'cloud'
-    | 'testing'
-    | 'architecture'
-    | 'security'
-    | 'ai_ml'
-    | 'data'
-    | 'analytics'
-    | 'design'
-    | 'product'
-    | 'management'
-    | 'soft'
-    | 'other'
+export type SkillCategory = {
+    id: number
+    name: string
+    slug: string
+}

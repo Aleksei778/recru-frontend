@@ -26,7 +26,7 @@ export default function Login() {
       setError("")
 
       try {
-          await login({ email, password })
+          await login({ email: email, password: password, password_confirmation: password })
       } catch (err) {
           setError(err instanceof ApiError ? err.message : 'Неверный логин или пароль')
           setLoading(false)
