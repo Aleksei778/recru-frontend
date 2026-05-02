@@ -114,8 +114,8 @@ export default function InterviewsPage() {
 
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-semibold text-black dark:text-white truncate">
-                                        {item.candidate.candidateData.last_name}{' '}
-                                        {item.candidate.candidateData.first_name}
+                                        {item.candidate.last_name}{' '}
+                                        {item.candidate.first_name}
                                     </p>
                                     <p className="text-xs text-gray-400 truncate mt-0.5">
                                         {item.vacancy.title}

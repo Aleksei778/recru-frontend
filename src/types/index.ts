@@ -42,21 +42,19 @@ export type CandidateGrade =
     'senior' |
     'lead'
 
-export enum CandidateSource {
-    HH = 'hh',
-    Habr = 'habr',
-    Social = 'Social',
-    Email = 'email',
-    Bulk_import = 'bulk_import',
-    Resume_parsing = 'resume_parsing',
-}
+export type CandidateSource =
+    'hh' |
+    'habr' |
+    'social' |
+    'email' |
+    'resume_parsing' |
+    'bulk_import'
 
-export enum CandidateStatus {
-    New = 'new',
-    Screened = 'screened',
-    Approved = 'approved',
-    Rejected = 'rejected',
-}
+export type CandidateStatus =
+    'new' |
+    'screened' |
+    'approved' |
+    'rejected'
 
 export interface Tenant {
     id: number
@@ -81,20 +79,6 @@ export interface User {
     tenant?: Tenant
 }
 
-export interface CandidateData {
-    first_name: string
-    last_name: string
-    middle_name: string | null
-    email: string
-    phone: string
-    source: CandidateSource
-    experience_years: number
-    education_level: CandidateEducationLevel
-    skills: Skill[]
-    workplaces: Workplace[]
-    socials: Social[]
-}
-
 export interface Workplace {
     company_name: string
     position: string
@@ -110,10 +94,41 @@ export interface Social {
 
 export interface Candidate {
     id: number
-    candidateData: CandidateData
+    tenant_id: number
+    first_name: string
+    last_name: string
+    middle_name: string | null
+    email: string | null
+    phone: string | null
+    source: CandidateSource | null
+    grade: CandidateGrade | null
+    status: string | null
+    experience_years: number
+    education_level: CandidateEducationLevel | null
     interviews?: Interview[]
-    created_at: string
+    workplaces?: Workplace[]
+    socials?: Social[]
+    skills?: Skill[]
 }
+
+export interface CandidateData {
+    first_name: string
+    last_name: string
+    middle_name: string | null
+    email: string
+    phone: string | null
+    source: CandidateSource
+    experience_years: number
+    education_level: CandidateEducationLevel
+    workplaces: Workplace[]
+    socials: Social[]
+    skills: Skill[]
+}
+
+export type NextQuestionResponse = { is_completed: boolean; question: Question | null; audio_url: string | null }
+
+export type InterviewStage = 'loading' | 'question' | 'recording' | 'submitting' | 'completed' | 'error'
+
 export interface ParsedCandidate {
     candidateData: CandidateData
     text_grade: string
@@ -126,11 +141,25 @@ export interface UploadResumeResult {
     evaluate_operation_id: number
 }
 
+export interface VacancyForm {
+    title: string
+    description: string | null
+    employment_type: VacancyEmploymentType
+    work_mode: VacancyWorkMode
+    salary_min: number | null
+    salary_max: number | null
+    salary_currency: string | null
+    experience_years: number | null
+    status: VacancyStatus
+    location: string | null
+    skills: Skill[]
+}
+
 export interface Vacancy {
     id: number
     tenant_id: number
     title: string
-    required_skills: string[]
+    skills: Skill[]
     description: string | null
     employment_type: VacancyEmploymentType
     work_mode: VacancyWorkMode
@@ -272,11 +301,10 @@ export type Locale = 'ru' | 'en'
 export type InterviewDecision = 'approve'|'reject';
 
 export interface Question {
-    id: number,
-    interview: Interview,
+    id: number
     number: number,
     text: string,
-    answer: Answer|null,
+    answer: Answer | null
 }
 
 export interface Answer {

@@ -57,7 +57,7 @@ export default function InterviewDetailPage() {
                 <div className="mb-8 flex items-start justify-between">
                     <div>
                         <h1 className="text-2xl font-bold text-black dark:text-white">
-                            {interview.candidate.candidateData.last_name} {interview.candidate.candidateData.first_name}
+                            {interview.candidate.last_name} {interview.candidate.first_name}
                         </h1>
                         <p className="text-sm text-gray-400 mt-1">{interview.vacancy.title}</p>
                     </div>

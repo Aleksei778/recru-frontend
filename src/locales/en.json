@@ -32,7 +32,57 @@
       "settings": "Settings",
       "logout": "Logout"
     },
-    "vacancies": {},
+    "vacancies": {
+      "heading": "Vacancies",
+      "total": "{{count}} vacancies",
+      "create": "Create vacancy",
+      "createFirst": "Create first vacancy →",
+      "empty": "No vacancies",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteConfirm": "Delete vacancy?",
+      "deleteText": "This action is irreversible.",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "experience": "Experience: {{years}}+ yrs",
+      "modal": {
+        "createTitle": "New vacancy",
+        "editTitle": "Edit vacancy",
+        "title": "Title *",
+        "titlePlaceholder": "e.g. Senior Frontend Developer",
+        "description": "Description",
+        "descriptionPlaceholder": "Vacancy description...",
+        "location": "Location",
+        "locationPlaceholder": "e.g. Moscow",
+        "salaryMin": "Salary from",
+        "salaryMax": "Salary to",
+        "salaryCurrency": "Currency",
+        "experienceYears": "Experience (years)",
+        "employmentType": "Employment type",
+        "workMode": "Work mode",
+        "status": "Status",
+        "skillsLabel": "Required skills",
+        "skillPlaceholder": "Add skill and press Enter",
+        "add": "Create",
+        "update": "Save changes"
+      },
+      "status": {
+        "draft": "Draft",
+        "published": "Published",
+        "closed": "Closed"
+      },
+      "employment": {
+        "full_time": "Full time",
+        "part_time": "Part time",
+        "contract": "Contract",
+        "internship": "Internship"
+      },
+      "workMode": {
+        "office": "Office",
+        "remote": "Remote",
+        "hybrid": "Hybrid"
+      }
+    },
     "profile": {
       "heading": "Profile",
       "logout": "Logout",
@@ -126,7 +176,7 @@
         "closed": "Closed"
       },
       "check": "Check",
-      "grade": "out of 100",
+      "grade": "out of 10",
       "rec": {
         "hire": "Hire",
         "maybe": "Detailed consideration is required",
@@ -136,7 +186,7 @@
         "back": "Back",
         "copied": "Link copied to clipboard",
         "regenerate": "Regenerate link and copy",
-        "grade": "out of 100",
+        "grade": "out of 10",
         "aiEvaluation": "AI evaluation",
         "strength": "Strengths",
         "skills": "Skills",
@@ -161,7 +211,7 @@
         "analyze": "Analyzing your answers...",
         "finish_interview": "Interview finished",
         "send_recruiter": "Results will be sent to the recruiter",
-        "grade": "out of 100",
+        "grade": "out of 10",
         "strength": "Strengths",
         "weaknesses": "Weaknesses",
         "type_message": "Your answer..."

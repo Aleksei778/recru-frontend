@@ -26,8 +26,9 @@ export default function QuestionsReviewPage() {
 
     useEffect(() => {
         if (!token) return
-        api.get(interviewId, token).then(res => {
-            setQuestions(res.questions)
+        api.get(interviewId, token).then((res: any) => {
+            const interview = res.data ?? res
+            setQuestions(interview.questions ?? [])
             setLoading(false)
         })
     }, [interviewId, token])

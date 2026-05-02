@@ -2,41 +2,56 @@
 
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { interviews as api } from '@/lib/api'
 import { MicIcon, StopCircleIcon, ChevronRightIcon, CheckCircleIcon } from 'lucide-react'
-
-type Stage = 'loading' | 'question' | 'recording' | 'submitting' | 'completed' | 'error'
+import { type Question, InterviewStage } from "@/types";
 
 export default function InterviewPage() {
     const { token } = useParams<{ token: string }>()
 
-    const [stage, setStage] = useState<Stage>('loading')
-    const [question, setQuestion] = useState<{ id: number; number: number; text: string; audio_url: string | null } | null>(null)
+    const [stage, setStage] = useState<InterviewStage>('loading')
+    const [question, setQuestion] = useState<Question | null>(null)
     const [error, setError] = useState<string | null>(null)
     const [blob, setBlob] = useState<Blob | null>(null)
     const [duration, setDuration] = useState(0)
 
-    const mediaRef = useRef<MediaRecorder | null>(null)
-    const chunksRef= useRef<Blob[]>([])
-    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-    const audioRef = useRef<HTMLAudioElement | null>(null)
+    const mediaRef  = useRef<MediaRecorder | null>(null)
+    const chunksRef = useRef<Blob[]>([])
+    const timerRef  = useRef<ReturnType<typeof setInterval> | null>(null)
+    const audioRef  = useRef<HTMLAudioElement | null>(null)
 
-    const fetchNextQuestion = async () => {
+    const fetchNextQuestion = useCallback(async () => {
         setStage('loading')
         setBlob(null)
         setDuration(0)
 
+        if (audioRef.current) {
+            audioRef.current.pause()
+            audioRef.current = null
+        }
+
         try {
             const data = await api.nextQuestion(token)
 
-            if (data.status === 'completed') {
+            if (data.is_completed) {
                 setStage('completed')
                 return
             }
 
-            setQuestion(data.question)
+            if (!data.question) {
+                setError('Не удалось загрузить вопрос')
+                setStage('error')
+                return
+            }
+
+            setQuestion({
+                id: data.question.id,
+                number: data.question.number,
+                text: data.question.text,
+                answer: null
+            })
             setStage('question')
 
             if (data.audio_url) {
@@ -47,36 +62,55 @@ export default function InterviewPage() {
             setError('Не удалось загрузить вопрос')
             setStage('error')
         }
-    }
+    }, [token])
 
     useEffect(() => {
         fetchNextQuestion()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    // очистка таймера при размонтировании
+    useEffect(() => {
+        return () => {
+            if (timerRef.current) clearInterval(timerRef.current)
+        }
     }, [])
 
     const startRecording = async () => {
         chunksRef.current = []
         setDuration(0)
 
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-        const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
+        try {
+            const stream   = await navigator.mediaDevices.getUserMedia({ audio: true })
+            const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
 
-        recorder.ondataavailable = e => chunksRef.current.push(e.data)
-        recorder.onstop = () => {
-            const b = new Blob(chunksRef.current, { type: 'audio/webm' })
-            setBlob(b)
-            stream.getTracks().forEach(t => t.stop())
+            recorder.ondataavailable = e => {
+                if (e.data.size > 0) chunksRef.current.push(e.data)
+            }
+
+            recorder.onstop = () => {
+                const b = new Blob(chunksRef.current, { type: 'audio/webm' })
+                setBlob(b)
+                stream.getTracks().forEach(t => t.stop())
+            }
+
+            recorder.start()
+            mediaRef.current = recorder
+            setStage('recording')
+
+            timerRef.current = setInterval(() => setDuration(d => d + 1), 1000)
+        } catch {
+            setError('Нет доступа к микрофону')
+            setStage('error')
         }
-
-        recorder.start()
-        mediaRef.current = recorder
-        setStage('recording')
-
-        timerRef.current = setInterval(() => setDuration(d => d + 1), 1000)
     }
 
     const stopRecording = () => {
         mediaRef.current?.stop()
-        if (timerRef.current) clearInterval(timerRef.current)
+        if (timerRef.current) {
+            clearInterval(timerRef.current)
+            timerRef.current = null
+        }
         setStage('question')
     }
 
@@ -86,12 +120,12 @@ export default function InterviewPage() {
 
         try {
             const formData = new FormData()
-            formData.append('audio', blob, 'answer.webm')
+            formData.append('audio',    blob, 'answer.webm')
             formData.append('duration', String(duration))
 
             await api.submitAnswer(token, question.id, formData)
 
-            fetchNextQuestion()
+            await fetchNextQuestion()
         } catch {
             setError('Не удалось отправить ответ')
             setStage('error')
@@ -118,7 +152,7 @@ export default function InterviewPage() {
                     <h1 className="text-2xl font-bold text-black dark:text-white mb-3">
                         Интервью завершено
                     </h1>
-                    <p className="text-gray-400 text-sm">
+                    <p className="text-gray-400 text-sm leading-relaxed">
                         Ваши ответы приняты. Мы свяжемся с вами после рассмотрения.
                     </p>
                 </div>
@@ -130,10 +164,11 @@ export default function InterviewPage() {
         return (
             <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center p-8">
                 <div className="text-center">
-                    <p className="text-red-500 mb-4">{error}</p>
+                    <p className="text-red-500 mb-4 text-sm">{error}</p>
                     <button
                         onClick={fetchNextQuestion}
-                        className="px-6 py-2.5 bg-black dark:bg-white text-white dark:text-black rounded-full text-sm"
+                        className="px-6 py-2.5 bg-black dark:bg-white text-white dark:text-black
+                            rounded-full text-sm font-medium"
                     >
                         Попробовать снова
                     </button>
@@ -146,7 +181,6 @@ export default function InterviewPage() {
         <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center p-8">
             <div className="w-full max-w-lg">
 
-                {/* Вопрос */}
                 <div className="mb-2">
                     <span className="text-xs text-gray-400 uppercase tracking-widest">
                         Вопрос {question?.number}
@@ -159,7 +193,6 @@ export default function InterviewPage() {
                     </p>
                 </div>
 
-                {/* Запись */}
                 {stage === 'recording' ? (
                     <div className="flex flex-col items-center gap-6">
                         <div className="flex items-center gap-3">
@@ -202,8 +235,15 @@ export default function InterviewPage() {
                                             bg-black dark:bg-white text-white dark:text-black rounded-full
                                             text-sm font-medium disabled:opacity-40 transition-all"
                                     >
-                                        Следующий вопрос
-                                        <ChevronRightIcon className="w-4 h-4" />
+                                        {stage === 'submitting' ? (
+                                            <div className="w-4 h-4 rounded-full border-2 border-white/30
+                                                dark:border-black/30 border-t-white dark:border-t-black animate-spin" />
+                                        ) : (
+                                            <>
+                                                Следующий вопрос
+                                                <ChevronRightIcon className="w-4 h-4" />
+                                            </>
+                                        )}
                                     </button>
                                 </div>
                             </>

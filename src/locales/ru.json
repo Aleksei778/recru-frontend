@@ -89,7 +89,57 @@
         "confirmPlaceholder": "Подтвердите новый пароль"
       }
     },
-    "vacancies": {},
+    "vacancies": {
+      "heading": "Вакансии",
+      "total": "{{count}} вакансий",
+      "create": "Создать вакансию",
+      "createFirst": "Создать первую вакансию →",
+      "empty": "Нет вакансий",
+      "edit": "Редактировать",
+      "delete": "Удалить",
+      "deleteConfirm": "Удалить вакансию?",
+      "deleteText": "Это действие необратимо.",
+      "cancel": "Отмена",
+      "saving": "Сохранение...",
+      "experience": "Опыт: {{years}}+ лет",
+      "modal": {
+        "createTitle": "Новая вакансия",
+        "editTitle": "Редактировать вакансию",
+        "title": "Название *",
+        "titlePlaceholder": "Например: Senior Frontend Developer",
+        "description": "Описание",
+        "descriptionPlaceholder": "Описание вакансии...",
+        "location": "Местоположение",
+        "locationPlaceholder": "Например: Москва",
+        "salaryMin": "Зарплата от",
+        "salaryMax": "Зарплата до",
+        "salaryCurrency": "Валюта",
+        "experienceYears": "Опыт (лет)",
+        "employmentType": "Тип занятости",
+        "workMode": "Формат работы",
+        "status": "Статус",
+        "skillsLabel": "Требуемые навыки",
+        "skillPlaceholder": "Введите навык и нажмите Enter",
+        "add": "Создать",
+        "update": "Сохранить изменения"
+      },
+      "status": {
+        "draft": "Черновик",
+        "published": "Опубликована",
+        "closed": "Закрыта"
+      },
+      "employment": {
+        "full_time": "Полная занятость",
+        "part_time": "Частичная занятость",
+        "contract": "Контракт",
+        "internship": "Стажировка"
+      },
+      "workMode": {
+        "office": "Офис",
+        "remote": "Удалённо",
+        "hybrid": "Гибрид"
+      }
+    },
     "resume": {
       "heading": "Парсинг резюме",
       "subheading": "Превращаем резюме в структурированные данные",
@@ -135,7 +185,7 @@
         "evaluated": "Оценено",
         "closed": "Закрыто"
       },
-      "grade": "из 100",
+      "grade": "из 10",
       "check": "Проверить",
       "rec": {
         "hire": "Нанять",
@@ -146,7 +196,7 @@
         "back": "Назад",
         "copied": "Ссылка скопирована",
         "regenerate": "Перевыпустить ссылку и скопировать",
-        "grade": "из 100",
+        "grade": "из 10",
         "aiEvaluation": "Оценка ИИ",
         "strength": "Сильные стороны",
         "skills": "Навыки",
@@ -171,7 +221,7 @@
         "analyze": "Анализируем Ваши ответы...",
         "finish_interview": "Интервью завершено",
         "send_recruiter": "Результаты будут переданы рекрутеру",
-        "grade": "из 100",
+        "grade": "из 10",
         "strength": "Сильные стороны",
         "weaknesses": "Зоны роста",
         "type_message": "Ваш ответ..."

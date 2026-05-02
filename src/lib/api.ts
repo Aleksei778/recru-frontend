@@ -1,6 +1,7 @@
 import type {
     User,
     Vacancy,
+    VacancyForm,
     Candidate,
     CandidateData,
     Paginated,
@@ -17,7 +18,7 @@ import type {
     Email,
     Question,
     InterviewDecision,
-    Skill, UploadResumeResult,
+    Skill, UploadResumeResult, NextQuestionResponse,
 } from '@/types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://recru.local:80/api';
@@ -140,8 +141,8 @@ export const vacancies = {
         }, token),
 
     update: (id: number, data: Partial<VacancyForm>, token: string) =>
-        request<Vacancy>('/vacancies', {
-            method: 'PATCH' ,
+        request<Vacancy>(`/vacancies/${id}`, {
+            method: 'PATCH',
             body: JSON.stringify(data),
         }, token),
 
@@ -170,24 +171,37 @@ export const candidates = {
 
     delete: (id: number, token: string) =>
         request<Vacancy>(`/candidates/${id}`, { method: 'DELETE' }, token),
+
+    search: (q: string, token: string) =>
+        request<Candidate[]>(`/candidates/search?q=${encodeURIComponent(q)}`, {}, token),
 }
 
 export const skills = {
     search: (q: string, token: string) =>
-        request<Skill[]>(`/skills?q=${encodeURIComponent(q)}`, {}, token),
+        request<Skill[]>(`/skills/search?q=${encodeURIComponent(q)}`, {}, token),
 }
 
 export const resume = {
     file: (FormData: FormData, token: string) =>
-        request<UploadResumeResult>('/resume/file', {
+        request<UploadResumeResult>('/resume/parse/file', {
             method: 'POST',
             body: FormData,
         }, token),
 
     text: (text: string, token: string) =>
-        request<UploadResumeResult>('/resume/text', {
+        request<UploadResumeResult>('/resume/parse/string', {
             method: 'POST',
             body: JSON.stringify({ resume: text }),
+        }, token),
+
+    save: (resumeId: number, candidateId: number|undefined, mode: 'new'|'existing', token: string) =>
+        request<Candidate>(`/resume/${resumeId}/save`, {
+            method: 'POST',
+            body: JSON.stringify({
+                resume_id: resumeId,
+                candidate_id: candidateId,
+                mode: mode,
+            }),
         }, token)
 }
 
@@ -198,33 +212,42 @@ export const operations = {
 
 export const interviews = {
     list: (token: string, page = 1) =>
-        request<Paginated<Interview>>(`/interviews/hr?page=${page}`, {}, token),
+        request<Paginated<Interview>>(`/hr/interviews?page=${page}`, {}, token),
 
     get: (id: number, token: string) =>
-        request<Interview>(`/interviews/hr/${id}`, {}, token),
+        request<Interview>(`/hr/interviews/${id}`, {}, token),
 
     create: (data: { vacancy_id: number; candidate_id: number }, token: string) =>
-        request<{ interview: Interview; access_token: string; link: string }>('/interviews/hr', {
+        request<{ interview: Interview; access_token: string; link: string }>('/hr/interviews', {
             method: 'POST',
             body: JSON.stringify(data),
         }, token),
 
     regenerateToken: (id: number, token: string) =>
         request<{ access_token: string; link: string }>(
-            `/interviews/hr/${id}/regenerate`,
+            `/hr/interviews/${id}/regenerate`,
             { method: 'POST' },
             token,
         ),
 
     approveQuestions: (data: { questions: Question[] }, id: number, token: string) =>
-        request<{ interview: Interview }>(`/interviews/hr/${id}/approve`, {
+        request<{ interview: Interview }>(`/hr/interviews/${id}/questions/approve`, {
             method: 'POST',
             body: JSON.stringify(data),
         }, token),
 
     close: (decision: InterviewDecision, id: number, token: string) =>
-        request<{message: string}>(`/interviews/hr/${id}/close`, {
+        request<{message: string}>(`/hr/interviews/${id}/close`, {
             method: 'POST',
             body: JSON.stringify({decision: decision})
         }, token),
+
+    nextQuestion: (token: string) =>
+        request<NextQuestionResponse>(`/candidate/interviews/${token}/questions/next`, {}),
+
+    submitAnswer: (token: string, questionId: number, formData: FormData) =>
+        request<{ status: string }>(`/candidate/interviews/${token}/questions/${questionId}/answer`, {
+            method: 'POST',
+            body:   formData,
+        }),
 }
