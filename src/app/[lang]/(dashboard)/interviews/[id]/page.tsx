@@ -9,10 +9,12 @@ import { interviews as api } from '@/lib/api'
 import type { Interview } from '@/types'
 import { CheckCircleIcon, ClockIcon, ChevronRightIcon } from 'lucide-react'
 import { useTranslation } from "@/hooks/useTranslation";
+import {useLanguage} from "@/contexts/language-context";
 
 export default function InterviewDetailPage() {
     const { id } = useParams<{ id: string }>()
     const { token } = useAuth()
+    const { language } = useLanguage()
     const { t } = useTranslation()
 
     const interviewId = Number(id)
@@ -76,7 +78,7 @@ export default function InterviewDetailPage() {
                             Проверьте и при необходимости отредактируйте вопросы
                         </p>
                         <button
-                            onClick={() => router.push(`/interviews/${id}/questions`)}
+                            onClick={() => router.push(`/${language}/interviews/${id}/questions`)}
                             className="flex items-center gap-2 px-5 py-2.5 bg-black dark:bg-white
                                 text-white dark:text-black rounded-full text-sm font-medium"
                         >

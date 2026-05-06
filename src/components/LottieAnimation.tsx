@@ -2,7 +2,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useTheme } from "@/contexts/theme-context";
 
 const Player = dynamic(
   () => import("@lottiefiles/react-lottie-player").then((mod) => mod.Player),
@@ -26,20 +25,16 @@ const Player = dynamic(
 );
 
 export default function ClientLottieAnimation() {
-  const { theme } = useTheme();
-
   return (
-    <div className={theme === "dark" ? "dark" : ""}>
-      <Player
-        autoplay
-        loop
-        src="/animations/404 blue.json"
-        style={{
-          height: "500px",
-          width: "500px",
-          maxWidth: "100%",
-        }}
-      />
-    </div>
+    <Player
+      autoplay
+      loop
+      src="/notfound.json"
+      style={{
+        height: "500px",
+        width: "500px",
+        maxWidth: "100%",
+      }}
+    />
   );
 }

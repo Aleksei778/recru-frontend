@@ -68,7 +68,8 @@ export interface Tenant {
 
 export interface User {
     id: number
-    name: string
+    first_name: string
+    last_name: string
     email: string
     role: UserRole
     avatar: string | null
@@ -261,8 +262,6 @@ export type InterviewStatus = 'pending' | 'generating_questions' | 'questions_re
 
 export type RecommendationType = 'hire' | 'maybe' | 'reject'
 
-export type Phase = 'loading' | 'ready' | 'active' | 'finishing' | 'done' | 'error'
-
 export interface AiEvaluation {
     recommendation: RecommendationType
     summary: string
@@ -310,11 +309,6 @@ export interface Question {
 export interface Answer {
     question: Question,
     text: string
-}
-
-export interface VoiceLog {
-    subject: Answer|Question,
-    audio_path: string,
 }
 
 export type Skill = {

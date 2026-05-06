@@ -56,7 +56,7 @@ const SubmitButton = ({ saving, success, label, successLabel }: {
     </button>
 )
 
-type Tab = 'profile' | 'company' | 'password'
+type Tab = 'profile' | 'company' | 'password' | 'settings'
 
 export default function ProfilePage() {
     const { t } = useTranslation()

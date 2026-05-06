@@ -195,7 +195,7 @@ export const resume = {
         }, token),
 
     save: (resumeId: number, candidateId: number|undefined, mode: 'new'|'existing', token: string) =>
-        request<Candidate>(`/resume/${resumeId}/save`, {
+        request<Candidate>(`/resume/save`, {
             method: 'POST',
             body: JSON.stringify({
                 resume_id: resumeId,

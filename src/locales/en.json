@@ -25,7 +25,6 @@
       "candidates": "Candidates",
       "interviews": "Interviews",
       "emails": "Emails",
-      "events": "Events",
       "resume": "Resume",
       "statistics": "Statistics",
       "profile": "Profile",
@@ -198,6 +197,23 @@
         }
       },
       "no_interview": "There is no interview. Create an interview on the candidates' page"
+    },
+    "statistics": {
+      "heading": "Statistics",
+      "subheading": "Overview of your recruitment pipeline",
+      "cards": {
+        "vacancies": "Vacancies",
+        "candidates": "Candidates",
+        "interviews": "Interviews",
+        "avgGrade": "Avg. grade"
+      },
+      "charts": {
+        "vacanciesByStatus": "Vacancies by status",
+        "candidatesByGrade": "Candidates by grade",
+        "candidatesBySource": "Candidates by source",
+        "interviewsByStatus": "Interviews by status",
+        "gradeDistribution": "Grade distribution"
+      }
     },
     "interview": {
       "token": {

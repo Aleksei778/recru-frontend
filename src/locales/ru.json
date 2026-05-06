@@ -40,7 +40,6 @@
       "candidates": "Кандидаты",
       "interviews": "Интервью",
       "emails": "Почта",
-      "events": "События",
       "resume": "Резюме",
       "statistics": "Статистика",
       "profile": "Профиль",
@@ -208,6 +207,23 @@
         }
       },
       "no_interviews": "Нет интервью. Создайте интервью на странице кандидатов."
+    },
+    "statistics": {
+      "heading": "Статистика",
+      "subheading": "Обзор вашего рекрутингового пайплайна",
+      "cards": {
+        "vacancies": "Вакансии",
+        "candidates": "Кандидаты",
+        "interviews": "Интервью",
+        "avgGrade": "Средняя оценка"
+      },
+      "charts": {
+        "vacanciesByStatus": "Вакансии по статусу",
+        "candidatesByGrade": "Кандидаты по грейду",
+        "candidatesBySource": "Кандидаты по источнику",
+        "interviewsByStatus": "Интервью по статусу",
+        "gradeDistribution": "Распределение оценок"
+      }
     },
     "interview": {
       "token": {

@@ -13,6 +13,7 @@ import {
     SparklesIcon, MicIcon, SearchIcon, CheckIcon,
 } from 'lucide-react'
 import React from 'react'
+import { useLanguage } from "@/contexts/language-context";
 
 const getStatusConfig = (t: (key: string) => string): Record<InterviewStatus, {
     label: string
@@ -40,6 +41,7 @@ const PROCESSING_STATUSES: InterviewStatus[] = [
 
 export default function InterviewsPage() {
     const { t } = useTranslation()
+    const { language } = useLanguage()
     const { token } = useAuth()
 
     const [items, setItems] = useState<Interview[]>([])
@@ -94,8 +96,8 @@ export default function InterviewsPage() {
                             <Link
                                 key={item.id}
                                 href={status === 'questions_review'
-                                    ? `/interviews/${item.id}/questions`
-                                    : `/interviews/${item.id}`
+                                    ? `/${language}/interviews/${item.id}/questions`
+                                    : `/${language}/interviews/${item.id}`
                                 }
                                 className="flex items-center gap-5 rounded-2xl border border-black
                                     dark:border-white px-6 py-4 hover:shadow-xl

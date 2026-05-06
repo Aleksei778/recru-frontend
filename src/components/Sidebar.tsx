@@ -52,11 +52,6 @@ export default function Sidebar() {
       href: `/${language}/interviews`,
     },
     {
-      icon: CalendarDays,
-      label: t("dashboard.sidebar.events"),
-      href: `/${language}/events`,
-    },
-    {
       icon: FileText,
       label: t("dashboard.sidebar.resume"),
       href: `/${language}/resume`,
@@ -70,11 +65,6 @@ export default function Sidebar() {
         icon: User,
         label: t("dashboard.sidebar.profile"),
         href: `/${language}/profile`
-    },
-    {
-      icon: Settings,
-      label: t("dashboard.sidebar.settings"),
-      href: `/${language}/settings`,
     },
   ];
 

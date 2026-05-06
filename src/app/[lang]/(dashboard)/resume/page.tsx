@@ -61,6 +61,7 @@ export default function ResumePage() {
 
     useEffect(() => {
         if (!parseOpId || !evalOpId || !token) return
+        if (stage !== 'parsing') return
 
         pollRef.current = setInterval(async () => {
             try {
@@ -71,28 +72,37 @@ export default function ResumePage() {
 
                 if (parseOp.status === 'completed' && evalOp.status === 'completed') {
                     clearInterval(pollRef.current!)
+                    pollRef.current = null
+
                     setParsed({
                         candidateData: parseOp.result,
-                        text_grade: evalOp.result?.feedback ?? '',
-                        grade: evalOp.result?.score ?? 0,
+                        text_grade:    evalOp.result?.feedback ?? '',
+                        grade:         evalOp.result?.score ?? 0,
                     })
                     setStage('review')
                 }
 
                 if (parseOp.status === 'failed' || evalOp.status === 'failed') {
                     clearInterval(pollRef.current!)
+                    pollRef.current = null
                     setError(t('dashboard.resume.parsing.error'))
                     setStage('upload')
                 }
             } catch {
                 clearInterval(pollRef.current!)
+                pollRef.current = null
                 setError(t('dashboard.resume.parsing.error'))
                 setStage('upload')
             }
         }, 3000)
 
-        return () => clearInterval(pollRef.current!)
-    }, [parseOpId, evalOpId, token, t])
+        return () => {
+            if (pollRef.current) {
+                clearInterval(pollRef.current)
+                pollRef.current = null
+            }
+        }
+    }, [parseOpId, evalOpId, token, t, stage])
 
     useEffect(() => {
         if (candidateMode !== 'existing' || !candidateSearch.trim() || !token) return

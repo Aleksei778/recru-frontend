@@ -9,12 +9,14 @@ import { interviews as api} from '@/lib/api'
 import type { Question } from '@/types'
 import { CheckIcon, PencilIcon } from 'lucide-react'
 import {useTranslation} from "@/hooks/useTranslation";
+import {useLanguage} from "@/contexts/language-context";
 
 export default function QuestionsReviewPage() {
     const { id } = useParams<{ id: string }>()
     const interviewId = Number(id)
 
     const { token } = useAuth()
+    const { language } = useLanguage()
     const { t } = useTranslation()
 
     const router = useRouter()
@@ -63,7 +65,7 @@ export default function QuestionsReviewPage() {
 
         try {
             await api.approveQuestions({ questions: questions }, interviewId, token)
-            router.push(`/interviews/${interviewId}`)
+            router.push(`/${language}/interviews/${interviewId}`)
         } finally {
             setSaving(false)
         }
