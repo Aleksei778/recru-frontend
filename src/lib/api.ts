@@ -1,5 +1,6 @@
 import type {
     User,
+    UserRole,
     Vacancy,
     VacancyForm,
     Candidate,
@@ -12,13 +13,12 @@ import type {
     UpdateProfileData,
     UpdateTenantData,
     UpdatePasswordData,
-    ParsedCandidate,
-    AiEvaluation,
-    InterviewSession,
     Email,
     Question,
     InterviewDecision,
-    Skill, UploadResumeResult, NextQuestionResponse,
+    Skill,
+    UploadResumeResult,
+    NextQuestionResponse,
 } from '@/types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://recru.local:80/api';
@@ -114,17 +114,14 @@ export const auth = {
 }
 
 export const emails = {
-    list: (token: string, page: number = 1) =>
-        request<Paginated<Email>>(`/emails?page=${page}`, {}, token),
+    inbox: (token: string, page: number = 1) =>
+        request<Paginated<Email>>(`/emails/inbox?page=${page}`, {}, token),
+
+    sent: (token: string, page: number = 1) =>
+        request<Paginated<Email>>(`/emails/sent?page=${page}`, {}, token),
 
     get: (id: number, token: string) =>
         request<Email>(`/emails/${id}`, {}, token),
-
-    send: (token: string, data: Email) =>
-        request<Email>('/email', {
-            method: 'POST',
-            body: JSON.stringify(data),
-        }, token),
 }
 
 export const vacancies = {
@@ -134,16 +131,16 @@ export const vacancies = {
     get: (id: number, token: string) =>
         request<Vacancy>(`/vacancies/${id}`, {}, token),
 
-    create: (data: VacancyForm, token: string) =>
+    create: (data: VacancyForm, skill_ids: number[], token: string) =>
         request<Vacancy>('/vacancies', {
             method: 'POST',
-            body: JSON.stringify(data),
+            body: JSON.stringify({...data, skill_ids: skill_ids}),
         }, token),
 
-    update: (id: number, data: Partial<VacancyForm>, token: string) =>
+    update: (id: number, data: Partial<VacancyForm>, skill_ids: number[], token: string) =>
         request<Vacancy>(`/vacancies/${id}`, {
             method: 'PATCH',
-            body: JSON.stringify(data),
+            body: JSON.stringify({...data, skill_ids: skill_ids}),
         }, token),
 
     delete: (id: number, token: string) =>
@@ -157,20 +154,20 @@ export const candidates = {
     get: (id: number, token: string) =>
         request<Candidate>(`/candidates/${id}`, {}, token),
 
-    create: (form: CandidateData, token: string) =>
+    create: (form: CandidateData, skill_ids: number[], token: string) =>
         request<Candidate>('/candidates', {
             method: 'POST',
-            body: JSON.stringify(form),
+            body: JSON.stringify({...form, skill_ids: skill_ids}),
         }, token),
 
-    update: (id: number, data: Partial<CandidateData>, token: string) =>
-        request<Vacancy>('/candidates', {
-            method: 'PATCH' ,
-            body: JSON.stringify(data),
+    update: (id: number, data: Partial<CandidateData>, skill_ids: number[], token: string) =>
+        request<Candidate>(`/candidates/${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({...data, skill_ids: skill_ids}),
         }, token),
 
     delete: (id: number, token: string) =>
-        request<Vacancy>(`/candidates/${id}`, { method: 'DELETE' }, token),
+        request<Candidate>(`/candidates/${id}`, { method: 'DELETE' }, token),
 
     search: (q: string, token: string) =>
         request<Candidate[]>(`/candidates/search?q=${encodeURIComponent(q)}`, {}, token),
@@ -210,14 +207,35 @@ export const operations = {
         request<{ id: number, status: string, result: any }>(`/operations/${id}/status`, {}, token),
 }
 
+export const team = {
+    list: (token: string) =>
+        request<User[]>('/team', {}, token),
+
+    invite: (data: { email: string; role: UserRole }, token: string) =>
+        request<User>('/team/invite', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }, token),
+
+    updateRole: (id: number, role: UserRole, token: string) =>
+        request<User>(`/team/${id}/role`, {
+            method: 'PATCH',
+            body: JSON.stringify({ role }),
+        }, token),
+
+    remove: (id: number, token: string) =>
+        request<{ message: string }>(`/team/${id}`, { method: 'DELETE' }, token),
+}
+
 export const interviews = {
     list: (token: string, page = 1) =>
         request<Paginated<Interview>>(`/hr/interviews?page=${page}`, {}, token),
 
     get: (id: number, token: string) =>
-        request<Interview>(`/hr/interviews/${id}`, {}, token),
+        request<{ interview: Interview } | Interview>(`/hr/interviews/${id}`, {}, token)
+            .then(r => ('interview' in r ? r.interview : r)),
 
-    create: (data: { vacancy_id: number; candidate_id: number }, token: string) =>
+    create: (data: { vacancy_id: number; candidate_id: number, questions_number: number }, token: string) =>
         request<{ interview: Interview; access_token: string; link: string }>('/hr/interviews', {
             method: 'POST',
             body: JSON.stringify(data),
@@ -240,6 +258,12 @@ export const interviews = {
         request<{message: string}>(`/hr/interviews/${id}/close`, {
             method: 'POST',
             body: JSON.stringify({decision: decision})
+        }, token),
+
+    sendInvite: (id: number, token: string) =>
+        request<{ message: string }>(`/emails/send/invitation`, {
+            method: 'POST',
+            body: JSON.stringify({interview_id: id})
         }, token),
 
     nextQuestion: (token: string) =>

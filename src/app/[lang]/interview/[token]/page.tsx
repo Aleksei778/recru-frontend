@@ -5,14 +5,18 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { interviews as api } from '@/lib/api'
-import { MicIcon, StopCircleIcon, ChevronRightIcon, CheckCircleIcon } from 'lucide-react'
+import { MicIcon, StopCircleIcon, ChevronRightIcon, CheckCircleIcon, Volume2Icon, ClipboardCheckIcon } from 'lucide-react'
 import { type Question, InterviewStage } from "@/types";
+import { nauryzRedKeds } from '@/lib/font'
+import { useTranslation } from '@/hooks/useTranslation'
 
 export default function InterviewPage() {
     const { token } = useParams<{ token: string }>()
+    const { t } = useTranslation()
 
-    const [stage, setStage] = useState<InterviewStage>('loading')
+    const [stage, setStage] = useState<InterviewStage>('intro')
     const [question, setQuestion] = useState<Question | null>(null)
+    const [total, setTotal] = useState<number | null>(null)
     const [error, setError] = useState<string | null>(null)
     const [blob, setBlob] = useState<Blob | null>(null)
     const [duration, setDuration] = useState(0)
@@ -41,11 +45,12 @@ export default function InterviewPage() {
             }
 
             if (!data.question) {
-                setError('Не удалось загрузить вопрос')
+                setError(t('interview.error.loadQuestion'))
                 setStage('error')
                 return
             }
 
+            if (data.total_questions) setTotal(data.total_questions)
             setQuestion({
                 id: data.question.id,
                 number: data.question.number,
@@ -59,17 +64,11 @@ export default function InterviewPage() {
                 audioRef.current.play().catch(() => {})
             }
         } catch {
-            setError('Не удалось загрузить вопрос')
+            setError(t('interview.error.loadQuestion'))
             setStage('error')
         }
-    }, [token])
+    }, [token, t])
 
-    useEffect(() => {
-        fetchNextQuestion()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    // очистка таймера при размонтировании
     useEffect(() => {
         return () => {
             if (timerRef.current) clearInterval(timerRef.current)
@@ -100,7 +99,7 @@ export default function InterviewPage() {
 
             timerRef.current = setInterval(() => setDuration(d => d + 1), 1000)
         } catch {
-            setError('Нет доступа к микрофону')
+            setError(t('interview.error.noMic'))
             setStage('error')
         }
     }
@@ -127,13 +126,83 @@ export default function InterviewPage() {
 
             await fetchNextQuestion()
         } catch {
-            setError('Не удалось отправить ответ')
+            setError(t('interview.error.submitAnswer'))
             setStage('error')
         }
     }
 
     const formatTime = (s: number) =>
         `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
+
+    if (stage === 'intro') {
+        return (
+            <div className="min-h-screen bg-white dark:bg-black flex flex-col items-center justify-center p-8">
+                <div className="w-full max-w-md flex flex-col items-center text-center">
+
+                    <h1 className={`text-4xl font-bold text-black dark:text-white mb-2 ${nauryzRedKeds.className}`}>
+                        RECRU
+                    </h1>
+                    <p className="text-xs text-gray-400 uppercase tracking-widest mb-12">
+                        {t('interview.intro.aiInterview')}
+                    </p>
+
+                    <div className="w-full rounded-3xl border border-black dark:border-white p-8 mb-8 text-left space-y-5">
+                        <p className="text-sm font-semibold text-black dark:text-white uppercase tracking-widest mb-6">
+                            {t('interview.intro.howItWorks')}
+                        </p>
+
+                        <div className="flex items-start gap-4">
+                            <div className="w-8 h-8 rounded-full bg-black dark:bg-white flex items-center justify-center shrink-0">
+                                <Volume2Icon className="w-4 h-4 text-white dark:text-black" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-black dark:text-white">{t('interview.intro.questionStep')}</p>
+                                <p className="text-xs text-gray-400 leading-relaxed mt-0.5">
+                                    {t('interview.intro.questionStepDesc')}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start gap-4">
+                            <div className="w-8 h-8 rounded-full bg-black dark:bg-white flex items-center justify-center shrink-0">
+                                <MicIcon className="w-4 h-4 text-white dark:text-black" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-black dark:text-white">{t('interview.intro.answerStep')}</p>
+                                <p className="text-xs text-gray-400 leading-relaxed mt-0.5">
+                                    {t('interview.intro.answerStepDesc')}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start gap-4">
+                            <div className="w-8 h-8 rounded-full bg-black dark:bg-white flex items-center justify-center shrink-0">
+                                <ClipboardCheckIcon className="w-4 h-4 text-white dark:text-black" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-black dark:text-white">{t('interview.intro.evaluationStep')}</p>
+                                <p className="text-xs text-gray-400 leading-relaxed mt-0.5">
+                                    {t('interview.intro.evaluationStepDesc')}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p className="text-xs text-gray-400 mb-6">
+                        {t('interview.intro.micHint')}
+                    </p>
+
+                    <button
+                        onClick={fetchNextQuestion}
+                        className="w-full py-4 bg-black dark:bg-white text-white dark:text-black
+                            rounded-full font-medium text-sm transition-all hover:opacity-80"
+                    >
+                        {t('interview.intro.start')}
+                    </button>
+                </div>
+            </div>
+        )
+    }
 
     if (stage === 'loading') {
         return (
@@ -150,10 +219,10 @@ export default function InterviewPage() {
                 <div className="text-center max-w-md">
                     <CheckCircleIcon className="w-16 h-16 text-black dark:text-white mx-auto mb-6" />
                     <h1 className="text-2xl font-bold text-black dark:text-white mb-3">
-                        Интервью завершено
+                        {t('interview.completed.title')}
                     </h1>
                     <p className="text-gray-400 text-sm leading-relaxed">
-                        Ваши ответы приняты. Мы свяжемся с вами после рассмотрения.
+                        {t('interview.completed.text')}
                     </p>
                 </div>
             </div>
@@ -170,7 +239,7 @@ export default function InterviewPage() {
                         className="px-6 py-2.5 bg-black dark:bg-white text-white dark:text-black
                             rounded-full text-sm font-medium"
                     >
-                        Попробовать снова
+                        {t('interview.error.retry')}
                     </button>
                 </div>
             </div>
@@ -181,10 +250,33 @@ export default function InterviewPage() {
         <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center p-8">
             <div className="w-full max-w-lg">
 
-                <div className="mb-2">
-                    <span className="text-xs text-gray-400 uppercase tracking-widest">
-                        Вопрос {question?.number}
-                    </span>
+                <div className="mb-6">
+                    <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs text-gray-400 uppercase tracking-widest">
+                            {t('interview.question', { number: question?.number })}
+                        </span>
+                        {total && question && (
+                            <span className="text-sm font-bold text-black dark:text-white tabular-nums">
+                                {question.number} <span className="text-gray-400 font-normal">/ {total}</span>
+                            </span>
+                        )}
+                    </div>
+                    {total && question ? (
+                        <div className="flex gap-1.5">
+                            {Array.from({ length: total }, (_, i) => (
+                                <div
+                                    key={i}
+                                    className={`h-1 flex-1 rounded-full transition-all duration-300
+                                        ${i < question.number
+                                            ? 'bg-black dark:bg-white'
+                                            : 'bg-gray-200 dark:bg-gray-800'
+                                        }`}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="h-1 w-full rounded-full bg-gray-100 dark:bg-gray-900" />
+                    )}
                 </div>
 
                 <div className="rounded-3xl border border-black dark:border-white p-8 mb-8">
@@ -207,7 +299,7 @@ export default function InterviewPage() {
                                 text-white dark:text-black rounded-full font-medium transition-all hover:opacity-80"
                         >
                             <StopCircleIcon className="w-5 h-5" />
-                            Остановить
+                            {t('interview.stop')}
                         </button>
                     </div>
                 ) : (
@@ -226,7 +318,7 @@ export default function InterviewPage() {
                                             text-gray-500 rounded-full text-sm hover:border-black hover:text-black
                                             dark:hover:border-white dark:hover:text-white transition-all"
                                     >
-                                        Перезаписать
+                                        {t('interview.reRecord')}
                                     </button>
                                     <button
                                         onClick={submitAnswer}
@@ -240,7 +332,7 @@ export default function InterviewPage() {
                                                 dark:border-black/30 border-t-white dark:border-t-black animate-spin" />
                                         ) : (
                                             <>
-                                                Следующий вопрос
+                                                {t('interview.nextQuestion')}
                                                 <ChevronRightIcon className="w-4 h-4" />
                                             </>
                                         )}
@@ -255,7 +347,7 @@ export default function InterviewPage() {
                                     font-medium text-sm transition-all hover:opacity-80"
                             >
                                 <MicIcon className="w-5 h-5" />
-                                Начать запись
+                                {t('interview.intro.start')}
                             </button>
                         )}
                     </div>

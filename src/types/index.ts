@@ -119,6 +119,7 @@ export interface CandidateData {
     email: string
     phone: string | null
     source: CandidateSource
+    grade: CandidateGrade | null
     experience_years: number
     education_level: CandidateEducationLevel
     workplaces: Workplace[]
@@ -126,9 +127,9 @@ export interface CandidateData {
     skills: Skill[]
 }
 
-export type NextQuestionResponse = { is_completed: boolean; question: Question | null; audio_url: string | null }
+export type NextQuestionResponse = { is_completed: boolean; question: Question | null; audio_url: string | null; total_questions?: number }
 
-export type InterviewStage = 'loading' | 'question' | 'recording' | 'submitting' | 'completed' | 'error'
+export type InterviewStage = 'intro' | 'loading' | 'question' | 'recording' | 'submitting' | 'completed' | 'error'
 
 export interface ParsedCandidate {
     candidateData: CandidateData
@@ -153,6 +154,8 @@ export interface VacancyForm {
     experience_years: number | null
     status: VacancyStatus
     location: string | null
+    grade: CandidateGrade | null
+    education_level: CandidateEducationLevel | null
     skills: Skill[]
 }
 
@@ -170,6 +173,8 @@ export interface Vacancy {
     experience_years: number | null
     status: VacancyStatus
     location: string | null
+    grade: CandidateGrade | null
+    education_level: CandidateEducationLevel | null
     published_at: string | null
     closed_at: string | null
     created_by_id: number

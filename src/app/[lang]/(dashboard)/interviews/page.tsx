@@ -58,9 +58,9 @@ export default function InterviewsPage() {
     }, [token])
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black p-8">
+        <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
 
-            <div className="mb-10 flex items-center justify-between">
+            <div className="mb-6 sm:mb-10 flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-black dark:text-white">
                         {t('dashboard.interviews.heading')}
@@ -144,7 +144,7 @@ export default function InterviewsPage() {
                                 )}
 
                                 <div className="text-xs text-gray-400 shrink-0">
-                                    {new Date(item.created_at).toLocaleDateString('ru-RU')}
+                                    {new Date(item.created_at).toLocaleDateString(language)}
                                 </div>
                             </Link>
                         )

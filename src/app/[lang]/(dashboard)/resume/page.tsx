@@ -5,13 +5,15 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { useTranslation } from '@/hooks/useTranslation'
+import { useLanguage } from '@/contexts/language-context'
 import { candidates as cApi, resume as rApi, operations as opApi } from '@/lib/api'
 import { ApiError } from '@/lib/api'
 import {
     UploadIcon, FileTextIcon, SparklesIcon, SearchIcon,
     CheckIcon, ChevronRightIcon, XIcon,
+    BriefcaseIcon, GlobeIcon, PlusIcon, Trash2Icon, LinkIcon, CalendarIcon,
 } from 'lucide-react'
-import type { Candidate, CandidateEducationLevel, ParsedCandidate } from '@/types'
+import type { Candidate, CandidateEducationLevel, ParsedCandidate, Workplace, Social } from '@/types'
 
 type Stage = 'upload' | 'parsing' | 'review' | 'candidate' | 'saving' | 'done'
 type CandidateMode = 'new' | 'existing'
@@ -35,6 +37,7 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
 
 export default function ResumePage() {
     const { t } = useTranslation()
+    const { language } = useLanguage()
     const { token } = useAuth()
 
     const [stage, setStage] = useState<Stage>('upload')
@@ -57,6 +60,7 @@ export default function ResumePage() {
     const [existingCandidate, setExistingCandidate] = useState<Candidate | null>(null)
     const searchRef  = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+    const [reviewMounted, setReviewMounted] = useState(false)
     const fileInputRef = useRef<HTMLInputElement | null>(null)
 
     useEffect(() => {
@@ -119,6 +123,14 @@ export default function ResumePage() {
             }
         }, 300)
     }, [candidateSearch, candidateMode, token])
+
+    useEffect(() => {
+        if (stage === 'review') {
+            const t = setTimeout(() => setReviewMounted(true), 30)
+            return () => clearTimeout(t)
+        }
+        setReviewMounted(false)
+    }, [stage])
 
     const onDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault()
@@ -200,12 +212,72 @@ export default function ResumePage() {
         setCandidates([])
     }
 
+    const setWorkplace = (idx: number, field: keyof Workplace, value: unknown) => {
+        setParsed(p => {
+            if (!p) return p
+            const workplaces = [...p.candidateData.workplaces]
+            workplaces[idx] = { ...workplaces[idx], [field]: value }
+            return { ...p, candidateData: { ...p.candidateData, workplaces } }
+        })
+    }
+
+    const addWorkplace = () => {
+        setParsed(p => {
+            if (!p) return p
+            const blank: Workplace = { company_name: '', position: '', description: '', started_at: '', ended_at: null }
+            return { ...p, candidateData: { ...p.candidateData, workplaces: [...p.candidateData.workplaces, blank] } }
+        })
+    }
+
+    const removeWorkplace = (idx: number) => {
+        setParsed(p => {
+            if (!p) return p
+            return { ...p, candidateData: { ...p.candidateData, workplaces: p.candidateData.workplaces.filter((_, i) => i !== idx) } }
+        })
+    }
+
+    const setSocial = (idx: number, field: keyof Social, value: string) => {
+        setParsed(p => {
+            if (!p) return p
+            const socials = [...p.candidateData.socials]
+            socials[idx] = { ...socials[idx], [field]: value }
+            return { ...p, candidateData: { ...p.candidateData, socials } }
+        })
+    }
+
+    const addSocial = () => {
+        setParsed(p => {
+            if (!p) return p
+            return { ...p, candidateData: { ...p.candidateData, socials: [...p.candidateData.socials, { name: '', url: '' }] } }
+        })
+    }
+
+    const removeSocial = (idx: number) => {
+        setParsed(p => {
+            if (!p) return p
+            return { ...p, candidateData: { ...p.candidateData, socials: p.candidateData.socials.filter((_, i) => i !== idx) } }
+        })
+    }
+
+    const formatPeriod = (start: string, end: string | null) => {
+        const fmt = (s: string) => {
+            if (!s) return ''
+            try { return new Date(s).toLocaleDateString(language, { month: 'short', year: 'numeric' }) }
+            catch { return s }
+        }
+        const s = fmt(start)
+        const e = end ? fmt(end) : t('dashboard.resume.workplace.present')
+        if (!s && !end) return ''
+        if (!s) return e
+        return `${s} — ${e}`
+    }
+
     const stageOrder: Record<Stage, number> = {
         upload: 0, parsing: 0, review: 1, saving: 2, candidate: 2, done: 3
     }
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black p-8">
+        <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
             <div className="max-w-2xl mx-auto">
 
                 <div className="mb-10">
@@ -218,7 +290,7 @@ export default function ResumePage() {
                     <p className="text-sm text-gray-400 ml-8">{t('dashboard.resume.subheading')}</p>
                 </div>
 
-                <div className="flex items-center gap-3 mb-10">
+                <div className="flex items-center gap-2 sm:gap-3 mb-6 sm:mb-10 flex-wrap">
                     {(['upload', 'review', 'candidate', 'done'] as const).map((s, i) => {
                         const current = stageOrder[stage]
                         const step    = stageOrder[s]
@@ -354,31 +426,64 @@ export default function ResumePage() {
                 )}
 
                 {stage === 'review' && parsed && (
-                    <div className="space-y-6">
+                    <div
+                        className="space-y-6"
+                        style={{
+                            opacity: reviewMounted ? 1 : 0,
+                            transform: reviewMounted ? 'none' : 'translateY(10px)',
+                            transition: 'opacity 0.45s ease, transform 0.45s ease',
+                        }}
+                    >
+                        {/* AI Summary + circular score */}
                         <div className="rounded-3xl border border-black dark:border-white p-6">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                    <SparklesIcon className="w-4 h-4 text-black dark:text-white" />
-                                    <span className="text-xs font-semibold text-black dark:text-white uppercase tracking-widest">
-                                        {t('dashboard.resume.review.summary')}
-                                    </span>
-                                </div>
-                                {parsed.grade != null && (
-                                    <div className="text-right">
-                                        <span className="text-2xl font-bold text-black dark:text-white">{parsed.grade}</span>
-                                        <span className="text-xs text-gray-400 ml-1">/ 10</span>
+                            <div className="flex items-start gap-5">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <SparklesIcon className="w-4 h-4 text-black dark:text-white" />
+                                        <span className="text-xs font-semibold text-black dark:text-white uppercase tracking-widest">
+                                            {t('dashboard.resume.review.summary')}
+                                        </span>
                                     </div>
-                                )}
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{parsed.text_grade}</p>
+                                </div>
+                                {parsed.grade != null && (() => {
+                                    const r = 34
+                                    const circ = 2 * Math.PI * r
+                                    const color = parsed.grade >= 7 ? 'text-emerald-500' : parsed.grade >= 5 ? 'text-amber-500' : 'text-red-400'
+                                    return (
+                                        <div className="relative w-20 h-20 shrink-0">
+                                            <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
+                                                <circle cx="40" cy="40" r={r} strokeWidth="5" fill="none"
+                                                    stroke="currentColor" className="text-gray-100 dark:text-gray-900" />
+                                                <circle cx="40" cy="40" r={r} strokeWidth="5" fill="none"
+                                                    stroke="currentColor" strokeLinecap="round"
+                                                    className={color}
+                                                    style={{
+                                                        strokeDasharray: circ,
+                                                        strokeDashoffset: reviewMounted
+                                                            ? circ * (1 - parsed.grade / 10)
+                                                            : circ,
+                                                        transition: 'stroke-dashoffset 1s cubic-bezier(0.4,0,0.2,1) 0.3s',
+                                                    }} />
+                                            </svg>
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                                <span className={`text-2xl font-bold ${color}`}>{parsed.grade}</span>
+                                                <span className="text-[10px] text-gray-400">/ 10</span>
+                                            </div>
+                                        </div>
+                                    )
+                                })()}
                             </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{parsed.text_grade}</p>
                         </div>
 
+                        {/* Basic fields */}
                         <div className="rounded-3xl border border-black dark:border-white p-8 space-y-5">
                             <p className="text-xs font-semibold text-black dark:text-white uppercase tracking-widest">
                                 {t('dashboard.resume.review.fields')}
                             </p>
 
-                            <div className="grid grid-cols-2 gap-4">
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <Field label={t('candidate.lastName')}>
                                     <input value={parsed.candidateData.last_name}
                                            onChange={e => setField('candidateData.last_name', e.target.value)}
@@ -413,7 +518,7 @@ export default function ResumePage() {
 
                             <div className="border-t border-gray-100 dark:border-gray-900" />
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <Field label={t('candidate.experienceYears')}>
                                     <input type="number" min={0}
                                            value={parsed.candidateData.experience_years ?? ''}
@@ -432,6 +537,196 @@ export default function ResumePage() {
                             </div>
                         </div>
 
+                        {/* Workplaces */}
+                        <div className="rounded-3xl border border-black dark:border-white p-8 space-y-6">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <BriefcaseIcon className="w-4 h-4 text-black dark:text-white" />
+                                    <p className="text-xs font-semibold text-black dark:text-white uppercase tracking-widest">
+                                        {t('dashboard.resume.review.workExperience')}
+                                    </p>
+                                </div>
+                                {parsed.candidateData.workplaces.length > 0 && (
+                                    <span className="text-xs px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-900 text-gray-500">
+                                        {parsed.candidateData.workplaces.length}
+                                    </span>
+                                )}
+                            </div>
+
+                            {parsed.candidateData.workplaces.length > 0 ? (
+                                <div className="relative space-y-4">
+                                    <div className="absolute left-[11px] top-3 bottom-3 w-px bg-gray-200 dark:bg-gray-800" />
+
+                                    {parsed.candidateData.workplaces.map((wp, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="relative pl-9"
+                                            style={{
+                                                opacity: reviewMounted ? 1 : 0,
+                                                transform: reviewMounted ? 'none' : 'translateX(-6px)',
+                                                transition: `opacity 0.4s ease ${0.15 + idx * 0.1}s, transform 0.4s ease ${0.15 + idx * 0.1}s`,
+                                            }}
+                                        >
+                                            <div className={`absolute left-0 top-4 w-[22px] h-[22px] rounded-full z-10
+                                                border-2 border-black dark:border-white bg-white dark:bg-black
+                                                flex items-center justify-center transition-transform hover:scale-110
+                                                ${!wp.ended_at ? 'shadow-[0_0_0_4px_rgba(0,0,0,0.08)] dark:shadow-[0_0_0_4px_rgba(255,255,255,0.08)]' : ''}`}>
+                                                <div className={`w-2 h-2 rounded-full bg-black dark:bg-white ${!wp.ended_at ? 'animate-pulse' : ''}`} />
+                                            </div>
+
+                                            <div className="rounded-2xl border border-gray-100 dark:border-gray-900
+                                                hover:border-gray-300 dark:hover:border-gray-700
+                                                transition-colors duration-200 p-5 space-y-4">
+
+                                                {(wp.company_name || wp.position) && (
+                                                    <div className="flex items-start justify-between gap-3">
+                                                        <div>
+                                                            <p className="font-semibold text-sm text-black dark:text-white">
+                                                                {wp.position || <span className="text-gray-400 italic font-normal">{t('dashboard.resume.workplace.position')}</span>}
+                                                            </p>
+                                                            <p className="text-xs text-gray-500 mt-0.5">
+                                                                {wp.company_name || <span className="text-gray-300 italic">{t('dashboard.resume.workplace.company')}</span>}
+                                                            </p>
+                                                        </div>
+                                                        {(wp.started_at || wp.ended_at) && (
+                                                            <span className="text-xs text-gray-400 flex items-center gap-1 shrink-0">
+                                                                <CalendarIcon className="w-3 h-3" />
+                                                                {formatPeriod(wp.started_at, wp.ended_at)}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    <Field label={t('dashboard.resume.workplace.company')}>
+                                                        <input value={wp.company_name}
+                                                               onChange={e => setWorkplace(idx, 'company_name', e.target.value)}
+                                                               className={inputClass} />
+                                                    </Field>
+                                                    <Field label={t('dashboard.resume.workplace.position')}>
+                                                        <input value={wp.position}
+                                                               onChange={e => setWorkplace(idx, 'position', e.target.value)}
+                                                               className={inputClass} />
+                                                    </Field>
+                                                </div>
+
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    <Field label={t('dashboard.resume.workplace.startDate')}>
+                                                        <input type="date" value={wp.started_at}
+                                                               onChange={e => setWorkplace(idx, 'started_at', e.target.value)}
+                                                               className={inputClass} />
+                                                    </Field>
+                                                    <Field label={t('dashboard.resume.workplace.endDate')}>
+                                                        <input type="date" value={wp.ended_at ?? ''}
+                                                               onChange={e => setWorkplace(idx, 'ended_at', e.target.value || null)}
+                                                               className={inputClass} />
+                                                    </Field>
+                                                </div>
+
+                                                {wp.description && (
+                                                    <Field label={t('dashboard.resume.workplace.description')}>
+                                                        <textarea value={wp.description}
+                                                                  onChange={e => setWorkplace(idx, 'description', e.target.value)}
+                                                                  rows={2}
+                                                                  className="w-full px-5 py-3.5 bg-white dark:bg-black
+                                                                      border border-gray-300 dark:border-gray-700 rounded-2xl
+                                                                      text-gray-900 dark:text-white placeholder-gray-400 text-sm
+                                                                      focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white
+                                                                      focus:border-transparent transition resize-none" />
+                                                    </Field>
+                                                )}
+
+                                                <button onClick={() => removeWorkplace(idx)}
+                                                        className="text-xs text-gray-300 dark:text-gray-700
+                                                            hover:text-red-400 dark:hover:text-red-500
+                                                            flex items-center gap-1 transition-colors">
+                                                    <Trash2Icon className="w-3 h-3" />
+                                                    {t('dashboard.resume.workplace.remove')}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-xs text-gray-400 text-center py-2">{t('dashboard.resume.review.noWorkplaces')}</p>
+                            )}
+
+                            <button onClick={addWorkplace}
+                                    className="w-full py-3 border border-dashed border-gray-200 dark:border-gray-800
+                                        rounded-2xl text-xs text-gray-400
+                                        hover:border-black dark:hover:border-white
+                                        hover:text-black dark:hover:text-white
+                                        transition-all duration-200 flex items-center justify-center gap-2">
+                                <PlusIcon className="w-3.5 h-3.5" />
+                                {t('dashboard.resume.review.addWorkplace')}
+                            </button>
+                        </div>
+
+                        {/* Socials */}
+                        <div className="rounded-3xl border border-black dark:border-white p-8 space-y-4">
+                            <div className="flex items-center gap-2">
+                                <LinkIcon className="w-4 h-4 text-black dark:text-white" />
+                                <p className="text-xs font-semibold text-black dark:text-white uppercase tracking-widest">
+                                    {t('dashboard.resume.review.socials')}
+                                </p>
+                            </div>
+
+                            {parsed.candidateData.socials.length > 0 ? (
+                                <div className="space-y-3">
+                                    {parsed.candidateData.socials.map((social, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="flex items-center gap-3 group"
+                                            style={{
+                                                opacity: reviewMounted ? 1 : 0,
+                                                transform: reviewMounted ? 'none' : 'translateX(-6px)',
+                                                transition: `opacity 0.4s ease ${0.25 + idx * 0.08}s, transform 0.4s ease ${0.25 + idx * 0.08}s`,
+                                            }}
+                                        >
+                                            <div className="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-800
+                                                flex items-center justify-center shrink-0
+                                                group-hover:border-black dark:group-hover:border-white
+                                                group-hover:bg-black dark:group-hover:bg-white
+                                                transition-all duration-200">
+                                                <GlobeIcon className="w-3.5 h-3.5 text-gray-400
+                                                    group-hover:text-white dark:group-hover:text-black transition-colors" />
+                                            </div>
+                                            <div className="w-24 sm:w-36 shrink-0">
+                                                <input value={social.name}
+                                                       onChange={e => setSocial(idx, 'name', e.target.value)}
+                                                       placeholder={t('dashboard.resume.social.name')}
+                                                       className={inputClass} />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <input value={social.url}
+                                                       onChange={e => setSocial(idx, 'url', e.target.value)}
+                                                       placeholder="URL"
+                                                       className={inputClass} />
+                                            </div>
+                                            <button onClick={() => removeSocial(idx)}
+                                                    className="p-2 text-gray-200 dark:text-gray-800
+                                                        hover:text-red-400 dark:hover:text-red-500
+                                                        transition-colors shrink-0">
+                                                <XIcon className="w-3.5 h-3.5" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-xs text-gray-400 text-center py-2">{t('dashboard.resume.review.noSocials')}</p>
+                            )}
+
+                            <button onClick={addSocial}
+                                    className="w-full py-3 border border-dashed border-gray-200 dark:border-gray-800
+                                        rounded-2xl text-xs text-gray-400
+                                        hover:border-black dark:hover:border-white
+                                        hover:text-black dark:hover:text-white
+                                        transition-all duration-200 flex items-center justify-center gap-2">
+                                <PlusIcon className="w-3.5 h-3.5" />
+                                {t('dashboard.resume.review.addSocial')}
+                            </button>
+                        </div>
+
                         {error && <p className="text-red-500 text-xs text-center">{error}</p>}
 
                         <div className="flex gap-3">
@@ -439,12 +734,12 @@ export default function ResumePage() {
                                     className="flex-1 py-4 border border-gray-300 dark:border-gray-700
                                     text-gray-500 rounded-full text-sm hover:border-black hover:text-black
                                     dark:hover:border-white dark:hover:text-white transition-all">
-                                Загрузить другое
+                                {t('dashboard.resume.review.uploadAnother')}
                             </button>
                             <button onClick={() => setStage('candidate')}
                                     className="flex-1 py-4 bg-black dark:bg-white text-white dark:text-black
                                     font-medium rounded-full transition-all text-sm flex items-center justify-center gap-2">
-                                Далее
+                                {t('dashboard.resume.review.next')}
                                 <ChevronRightIcon className="w-4 h-4" />
                             </button>
                         </div>
@@ -462,7 +757,7 @@ export default function ResumePage() {
                                             ? 'bg-black dark:bg-white text-white dark:text-black'
                                             : 'text-gray-500 hover:text-black dark:hover:text-white'
                                         }`}>
-                                    {mode === 'new' ? 'Новый кандидат' : 'Существующий'}
+                                    {mode === 'new' ? t('dashboard.resume.candidate.new') : t('dashboard.resume.candidate.existing')}
                                 </button>
                             ))}
                         </div>
@@ -470,7 +765,7 @@ export default function ResumePage() {
                         {candidateMode === 'new' && parsed && (
                             <div className="rounded-3xl border border-black dark:border-white p-6 space-y-2">
                                 <p className="text-xs text-gray-400 uppercase tracking-widest font-medium mb-3">
-                                    Будет создан кандидат
+                                    {t('dashboard.resume.candidate.willCreate')}
                                 </p>
                                 <p className="font-semibold text-black dark:text-white">
                                     {parsed.candidateData.last_name} {parsed.candidateData.first_name}
@@ -484,7 +779,7 @@ export default function ResumePage() {
                                 <button onClick={() => setStage('review')}
                                         className="text-xs text-gray-400 hover:text-black dark:hover:text-white
                                         underline underline-offset-4 transition mt-2 block">
-                                    ← Изменить данные
+                                    {t('dashboard.resume.candidate.editData')}
                                 </button>
                             </div>
                         )}
@@ -496,7 +791,7 @@ export default function ResumePage() {
                                         w-3.5 h-3.5 text-gray-400 pointer-events-none" />
                                     <input value={candidateSearch}
                                            onChange={e => { setCandidateSearch(e.target.value); setExistingCandidate(null) }}
-                                           placeholder="Поиск по имени или email..."
+                                           placeholder={t('dashboard.resume.candidate.search')}
                                            className="w-full pl-9 pr-4 py-3 rounded-full border border-gray-300
                                             dark:border-gray-700 bg-white dark:bg-black text-sm text-gray-900
                                             dark:text-white placeholder-gray-400 focus:outline-none
@@ -504,7 +799,7 @@ export default function ResumePage() {
                                 </div>
 
                                 {candidatesLoading && (
-                                    <p className="text-xs text-gray-400 text-center py-2">Поиск...</p>
+                                    <p className="text-xs text-gray-400 text-center py-2">{t('dashboard.resume.candidate.searching')}</p>
                                 )}
 
                                 {!candidatesLoading && candidates.length > 0 && (
@@ -536,7 +831,7 @@ export default function ResumePage() {
                                 )}
 
                                 {!candidatesLoading && candidateSearch && candidates.length === 0 && (
-                                    <p className="text-xs text-gray-400 text-center py-4">Кандидаты не найдены</p>
+                                    <p className="text-xs text-gray-400 text-center py-4">{t('dashboard.resume.candidate.notFound')}</p>
                                 )}
                             </div>
                         )}
@@ -548,7 +843,7 @@ export default function ResumePage() {
                                     className="flex-1 py-4 border border-gray-300 dark:border-gray-700
                                     text-gray-500 rounded-full text-sm hover:border-black hover:text-black
                                     dark:hover:border-white dark:hover:text-white transition-all">
-                                ← Назад
+                                {t('dashboard.resume.candidate.back')}
                             </button>
                             <button onClick={save}
                                     disabled={candidateMode === 'existing' && !existingCandidate}
@@ -556,7 +851,7 @@ export default function ResumePage() {
                                     font-medium rounded-full disabled:opacity-40 disabled:cursor-not-allowed
                                     transition-all text-sm flex items-center justify-center gap-2">
                                 <CheckIcon className="w-4 h-4" />
-                                {candidateMode === 'new' ? 'Создать кандидата' : 'Прикрепить резюме'}
+                                {candidateMode === 'new' ? t('dashboard.resume.candidate.create') : t('dashboard.resume.candidate.attach')}
                             </button>
                         </div>
                     </div>
@@ -568,7 +863,7 @@ export default function ResumePage() {
                         flex flex-col items-center justify-center gap-6">
                         <div className="w-8 h-8 rounded-full border-2 border-gray-200 dark:border-gray-800
                             border-t-black dark:border-t-white animate-spin" />
-                        <p className="text-sm text-gray-400">Сохранение...</p>
+                        <p className="text-sm text-gray-400">{t('dashboard.resume.saving.text')}</p>
                     </div>
                 )}
 

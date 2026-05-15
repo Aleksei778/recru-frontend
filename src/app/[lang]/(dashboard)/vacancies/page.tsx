@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { vacancies as vApi } from '@/lib/api'
-import type { Vacancy, VacancyForm, VacancyEmploymentType, VacancyWorkMode, VacancyStatus } from '@/types'
+import type { Vacancy, VacancyForm, VacancyEmploymentType, VacancyWorkMode, VacancyStatus, CandidateGrade, CandidateEducationLevel } from '@/types'
 import { PlusIcon, MapPinIcon, PencilIcon, Trash2Icon, XIcon } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
 import SkillsInput from '@/components/skills/SkillsInput'
@@ -19,7 +19,9 @@ const EMPTY_FORM: VacancyForm = {
     experience_years: null,
     status: 'draft',
     location: null,
-    skills: [],
+    grade: null,
+    education_level: null,
+    skills: []
 }
 
 const statusColors: Record<VacancyStatus, string> = {
@@ -84,6 +86,8 @@ export default function VacanciesPage() {
             experience_years: v.experience_years,
             status: v.status,
             location: v.location,
+            grade: v.grade,
+            education_level: v.education_level,
             skills: [...v.skills],
         })
         setModalOpen(true)
@@ -99,11 +103,12 @@ export default function VacanciesPage() {
         if (!token || !form.title.trim()) return
         setSaving(true)
         try {
+            const skill_ids: number[] = form.skills.map(skill => skill.id)
             if (editing) {
-                const updated = await vApi.update(editing.id, form, token)
+                const updated = await vApi.update(editing.id, form, skill_ids, token)
                 setItems(prev => prev.map(v => v.id === updated.id ? updated : v))
             } else {
-                const created = await vApi.create(form, token)
+                const created = await vApi.create(form, skill_ids, token)
                 setItems(prev => [created, ...prev])
             }
             closeModal()
@@ -125,10 +130,10 @@ export default function VacanciesPage() {
     }
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black p-8">
+        <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
 
             {/* Header */}
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center justify-between mb-6 sm:mb-10">
                 <div>
                     <h1 className="text-2xl font-bold text-black dark:text-white">
                         {t('dashboard.vacancies.heading')}
@@ -139,12 +144,12 @@ export default function VacanciesPage() {
                 </div>
                 <button
                     onClick={openCreate}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-black dark:bg-white
+                    className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-black dark:bg-white
                                text-white dark:text-black text-sm font-medium rounded-full
                                hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-200"
                 >
                     <PlusIcon className="w-4 h-4" />
-                    {t('dashboard.vacancies.create')}
+                    <span className="hidden sm:inline">{t('dashboard.vacancies.create')}</span>
                 </button>
             </div>
 
@@ -318,7 +323,7 @@ export default function VacanciesPage() {
                             </div>
 
                             {/* Employment type + Work mode */}
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5 block">
                                         {t('dashboard.vacancies.modal.employmentType')}
@@ -356,7 +361,7 @@ export default function VacanciesPage() {
                             </div>
 
                             {/* Status + Experience */}
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5 block">
                                         {t('dashboard.vacancies.modal.status')}
@@ -388,12 +393,52 @@ export default function VacanciesPage() {
                                 </div>
                             </div>
 
+                            {/* Grade */}
+                            <div>
+                                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5 block">
+                                    {t('dashboard.vacancies.modal.grade')}
+                                </label>
+                                <div className="relative">
+                                    <select
+                                        value={form.grade ?? ''}
+                                        onChange={e => setForm(f => ({ ...f, grade: (e.target.value || null) as CandidateGrade | null }))}
+                                        className={selectClass}
+                                    >
+                                        <option value="">{t('dashboard.vacancies.modal.gradePlaceholder')}</option>
+                                        {(['junior', 'middle', 'senior', 'lead'] as CandidateGrade[]).map(g => (
+                                            <option key={g} value={g}>{t(`dashboard.vacancies.grade.${g}`)}</option>
+                                        ))}
+                                    </select>
+                                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+                                </div>
+                            </div>
+
+                            {/* Education level */}
+                            <div>
+                                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5 block">
+                                    {t('dashboard.vacancies.modal.educationLevel')}
+                                </label>
+                                <div className="relative">
+                                    <select
+                                        value={form.education_level ?? ''}
+                                        onChange={e => setForm(f => ({ ...f, education_level: (e.target.value || null) as CandidateEducationLevel | null }))}
+                                        className={selectClass}
+                                    >
+                                        <option value="">{t('dashboard.vacancies.modal.educationLevelPlaceholder')}</option>
+                                        {(['secondary', 'incomplete_higher', 'bachelor', 'master', 'specialist', 'doctor'] as CandidateEducationLevel[]).map(level => (
+                                            <option key={level} value={level}>{t(`dashboard.vacancies.educationLevel.${level}`)}</option>
+                                        ))}
+                                    </select>
+                                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+                                </div>
+                            </div>
+
                             {/* Salary */}
                             <div>
                                 <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5 block">
                                     {t('dashboard.vacancies.modal.salaryMin')} / {t('dashboard.vacancies.modal.salaryMax')}
                                 </label>
-                                <div className="grid grid-cols-3 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     <input
                                         type="number"
                                         min={0}

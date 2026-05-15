@@ -159,7 +159,7 @@ export default function ProfilePage() {
     ]
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black p-8">
+        <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
             <div className="max-w-lg mx-auto">
 
                 {/* Header */}
@@ -174,14 +174,7 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-5 p-6 rounded-3xl border border-black dark:border-white mb-8">
                     <div className="w-14 h-14 rounded-full border-2 border-black dark:border-white
                                     flex items-center justify-center bg-gray-50 dark:bg-gray-950 shrink-0">
-                        {user?.avatar ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
-                        ) : (
-                            <span className="text-lg font-bold text-black dark:text-white">
-                                {user?.tenant?.name?.charAt(0).toUpperCase()}
-                            </span>
-                        )}
+                        <UserIcon/>
                     </div>
                     <div className="flex-1 min-w-0">
                         <p className="font-semibold text-black dark:text-white truncate">{user?.name}</p>
@@ -209,14 +202,14 @@ export default function ProfilePage() {
                         <button
                             key={id}
                             onClick={() => setTab(id)}
-                            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2
-                                        rounded-full text-sm font-medium transition-all duration-200
+                            className={`flex-1 flex items-center justify-center gap-1.5 px-2 sm:px-4 py-2
+                                        rounded-full text-xs sm:text-sm font-medium transition-all duration-200
                                         ${tab === id
                                 ? 'bg-black dark:bg-white text-white dark:text-black'
                                 : 'text-gray-500 hover:text-black dark:hover:text-white'
                             }`}
                         >
-                            <Icon className="w-3.5 h-3.5" />
+                            <Icon className="w-3.5 h-3.5 shrink-0" />
                             {label}
                         </button>
                     ))}
@@ -224,7 +217,7 @@ export default function ProfilePage() {
 
                 {/* Profile */}
                 {tab === 'profile' && (
-                    <div className="rounded-3xl border border-black dark:border-white p-8">
+                    <div className="rounded-3xl border border-black dark:border-white p-5 sm:p-8">
                         <form onSubmit={saveProfile} className="space-y-4">
                             <div>
                                 <Label>{t('dashboard.profile.profile.name')}</Label>
@@ -252,7 +245,7 @@ export default function ProfilePage() {
 
                 {/* Company */}
                 {tab === 'company' && (
-                    <div className="rounded-3xl border border-black dark:border-white p-8">
+                    <div className="rounded-3xl border border-black dark:border-white p-5 sm:p-8">
                         <form onSubmit={saveCompany} className="space-y-4">
                             <div>
                                 <Label>{t('dashboard.profile.company.name')}</Label>
@@ -293,7 +286,7 @@ export default function ProfilePage() {
 
                 {/* Password */}
                 {tab === 'password' && (
-                    <div className="rounded-3xl border border-black dark:border-white p-8">
+                    <div className="rounded-3xl border border-black dark:border-white p-5 sm:p-8">
                         <form onSubmit={savePassword} className="space-y-4">
                             <div>
                                 <Label>{t('dashboard.profile.password.current')}</Label>

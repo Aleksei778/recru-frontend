@@ -19,22 +19,44 @@
     "login": "Вход",
     "registeringIn": "Регистрируем Вас в системе..."
   },
+  "candidate": {
+    "lastName": "Фамилия",
+    "firstName": "Имя",
+    "middleName": "Отчество",
+    "email": "Email",
+    "phone": "Телефон",
+    "experienceYears": "Опыт (лет)",
+    "educationLevel": "Уровень образования"
+  },
+  "interview": {
+    "intro": {
+      "aiInterview": "AI-интервью",
+      "howItWorks": "Как это работает",
+      "questionStep": "Вопрос",
+      "questionStepDesc": "Система зачитает вопрос вслух и покажет его на экране",
+      "answerStep": "Ответ",
+      "answerStepDesc": "Нажмите «Начать запись» и ответьте устно — развёрнуто и честно",
+      "evaluationStep": "Оценка",
+      "evaluationStepDesc": "После всех вопросов ИИ проанализирует ответы и передаст результат рекрутеру",
+      "micHint": "Убедитесь, что микрофон доступен и вы находитесь в тихом месте",
+      "start": "Начать интервью"
+    },
+    "question": "Вопрос {{number}}",
+    "stop": "Остановить",
+    "reRecord": "Перезаписать",
+    "nextQuestion": "Следующий вопрос",
+    "completed": {
+      "title": "Интервью завершено",
+      "text": "Ваши ответы приняты. Мы свяжемся с вами после рассмотрения."
+    },
+    "error": {
+      "retry": "Попробовать снова",
+      "noMic": "Нет доступа к микрофону",
+      "loadQuestion": "Не удалось загрузить вопрос",
+      "submitAnswer": "Не удалось отправить ответ"
+    }
+  },
   "dashboard": {
-    "candidates": {
-      "last_name": "Фамилия",
-      "first_name": "Имя",
-      "middle_name": "Отчество"
-    },
-    "emails": {
-      "heading": "Переписка с кандидатами",
-      "total": "Всего писем",
-      "search": "Поиск",
-      "status": {
-        "sent": "Отправлено",
-        "pending": "Ожидает",
-        "failed": "Провалено"
-      }
-    },
     "sidebar": {
       "vacancies": "Вакансии",
       "candidates": "Кандидаты",
@@ -42,9 +64,171 @@
       "emails": "Почта",
       "resume": "Резюме",
       "statistics": "Статистика",
+      "team": "Команда",
       "profile": "Профиль",
       "settings": "Настройки",
       "logout": "Выход"
+    },
+    "candidates": {
+      "heading": "Кандидаты",
+      "total": "{{count}} кандидатов",
+      "add": "Добавить кандидата",
+      "empty": "Нет кандидатов",
+      "addFirst": "Добавить первого кандидата →",
+      "interviewCount": "{{count}} интервью",
+      "interviewButton": "Интервью",
+      "last_name": "Фамилия",
+      "first_name": "Имя",
+      "middle_name": "Отчество",
+      "tableHeaders": {
+        "candidate": "Кандидат",
+        "contacts": "Контакты",
+        "skills": "Навыки",
+        "lastPosition": "Последняя должность",
+        "interview": "Интервью"
+      },
+      "modal": {
+        "newTitle": "Новый кандидат",
+        "step1": "Шаг 1 из 2 — основная информация",
+        "lastName": "Фамилия *",
+        "firstName": "Имя *",
+        "middleName": "Отчество",
+        "email": "Email",
+        "phone": "Телефон",
+        "experience": "Опыт (лет)",
+        "education": "Образование",
+        "nextStep": "Далее — навыки и опыт",
+        "cancel": "Отмена",
+        "skillsTitle": "Навыки и опыт",
+        "step2prefix": "Шаг 2 из 2 —",
+        "goBack": "вернуться назад",
+        "skills": "Навыки",
+        "workExperience": "Опыт работы",
+        "addWorkplace": "+ добавить",
+        "noWorkplaces": "Нет данных об опыте работы",
+        "position": "Должность {{number}}",
+        "company": "Компания",
+        "companyPosition": "Должность",
+        "description": "Описание",
+        "socials": "Соцсети",
+        "addSocial": "+ добавить",
+        "noSocials": "Нет данных о соцсетях",
+        "socialPlaceholder": "tg, linkedin...",
+        "grade": "Грейд",
+        "gradePlaceholder": "Любой грейд",
+        "saving": "Сохранение...",
+        "add": "Добавить кандидата"
+      },
+      "interview": {
+        "title": "Создать интервью",
+        "selectVacancy": "Выберите вакансию",
+        "questionsNumber": "Количество вопросов",
+        "generate": "Сгенерировать ссылку",
+        "cancel": "Отмена",
+        "linkReady": "Ссылка готова — отправьте её кандидату:",
+        "copied": "Скопировано",
+        "copy": "Скопировать",
+        "validity": "Ссылка действительна 7 дней.",
+        "close": "Закрыть"
+      }
+    },
+    "vacancies": {
+      "heading": "Вакансии",
+      "total": "{{count}} вакансий",
+      "create": "Создать вакансию",
+      "createFirst": "Создать первую вакансию →",
+      "empty": "Нет вакансий",
+      "edit": "Редактировать",
+      "delete": "Удалить",
+      "deleteConfirm": "Удалить вакансию?",
+      "deleteText": "Это действие необратимо.",
+      "cancel": "Отмена",
+      "saving": "Сохранение...",
+      "experience": "Опыт: {{years}}+ лет",
+      "modal": {
+        "createTitle": "Новая вакансия",
+        "editTitle": "Редактировать вакансию",
+        "title": "Название *",
+        "titlePlaceholder": "Например: Senior Frontend Developer",
+        "description": "Описание",
+        "descriptionPlaceholder": "Описание вакансии...",
+        "location": "Местоположение",
+        "locationPlaceholder": "Например: Москва",
+        "salaryMin": "Зарплата от",
+        "salaryMax": "Зарплата до",
+        "salaryCurrency": "Валюта",
+        "experienceYears": "Опыт (лет)",
+        "employmentType": "Тип занятости",
+        "workMode": "Формат работы",
+        "status": "Статус",
+        "skillsLabel": "Требуемые навыки",
+        "skillPlaceholder": "Введите навык и нажмите Enter",
+        "grade": "Грейд",
+        "gradePlaceholder": "Любой грейд",
+        "educationLevel": "Уровень образования",
+        "educationLevelPlaceholder": "Любое образование",
+        "add": "Создать",
+        "update": "Сохранить изменения"
+      },
+      "status": {
+        "draft": "Черновик",
+        "published": "Опубликована",
+        "closed": "Закрыта"
+      },
+      "employment": {
+        "full_time": "Полная занятость",
+        "part_time": "Частичная занятость",
+        "contract": "Контракт",
+        "internship": "Стажировка"
+      },
+      "workMode": {
+        "office": "Офис",
+        "remote": "Удалённо",
+        "hybrid": "Гибрид"
+      },
+      "grade": {
+        "junior": "Junior",
+        "middle": "Middle",
+        "senior": "Senior",
+        "lead": "Lead"
+      },
+      "educationLevel": {
+        "secondary": "Среднее",
+        "incomplete_higher": "Неполное высшее",
+        "bachelor": "Бакалавр",
+        "master": "Магистр",
+        "specialist": "Специалист",
+        "doctor": "Доктор"
+      }
+    },
+    "emails": {
+      "heading": "Переписка с кандидатами",
+      "total": "Всего писем",
+      "search": "Поиск",
+      "empty": "Нет писем",
+      "inbox": "Входящие",
+      "sentTab": "Отправленные",
+      "statusFilter": {
+        "all": "Все",
+        "sent": "Отправленные",
+        "pending": "Ожидают",
+        "failed": "Ошибки"
+      },
+      "to": "Кому:",
+      "from": "От:",
+      "types": {
+        "interview_invite": "Приглашение на интервью",
+        "questions_ready": "Вопросы готовы",
+        "results": "Результаты",
+        "decision": "Отказ"
+      },
+      "interviewLabel": "Интервью #{{id}}",
+      "previewUnavailable": "Предпросмотр письма недоступен",
+      "status": {
+        "sent": "Отправлено",
+        "pending": "Ожидает",
+        "failed": "Провалено"
+      }
     },
     "profile": {
       "heading": "Профиль",
@@ -88,57 +272,6 @@
         "confirmPlaceholder": "Подтвердите новый пароль"
       }
     },
-    "vacancies": {
-      "heading": "Вакансии",
-      "total": "{{count}} вакансий",
-      "create": "Создать вакансию",
-      "createFirst": "Создать первую вакансию →",
-      "empty": "Нет вакансий",
-      "edit": "Редактировать",
-      "delete": "Удалить",
-      "deleteConfirm": "Удалить вакансию?",
-      "deleteText": "Это действие необратимо.",
-      "cancel": "Отмена",
-      "saving": "Сохранение...",
-      "experience": "Опыт: {{years}}+ лет",
-      "modal": {
-        "createTitle": "Новая вакансия",
-        "editTitle": "Редактировать вакансию",
-        "title": "Название *",
-        "titlePlaceholder": "Например: Senior Frontend Developer",
-        "description": "Описание",
-        "descriptionPlaceholder": "Описание вакансии...",
-        "location": "Местоположение",
-        "locationPlaceholder": "Например: Москва",
-        "salaryMin": "Зарплата от",
-        "salaryMax": "Зарплата до",
-        "salaryCurrency": "Валюта",
-        "experienceYears": "Опыт (лет)",
-        "employmentType": "Тип занятости",
-        "workMode": "Формат работы",
-        "status": "Статус",
-        "skillsLabel": "Требуемые навыки",
-        "skillPlaceholder": "Введите навык и нажмите Enter",
-        "add": "Создать",
-        "update": "Сохранить изменения"
-      },
-      "status": {
-        "draft": "Черновик",
-        "published": "Опубликована",
-        "closed": "Закрыта"
-      },
-      "employment": {
-        "full_time": "Полная занятость",
-        "part_time": "Частичная занятость",
-        "contract": "Контракт",
-        "internship": "Стажировка"
-      },
-      "workMode": {
-        "office": "Офис",
-        "remote": "Удалённо",
-        "hybrid": "Гибрид"
-      }
-    },
     "resume": {
       "heading": "Парсинг резюме",
       "subheading": "Превращаем резюме в структурированные данные",
@@ -146,10 +279,12 @@
         "error": "Ошибка при обработке резюме! Попробуйте еще раз позже"
       },
       "saving": {
-        "error": "Ошибка при сохранении пользователя из резюме! Попробуйте еще раз позже"
+        "error": "Ошибка при сохранении пользователя из резюме! Попробуйте еще раз позже",
+        "text": "Сохранение..."
       },
       "steps": {
         "upload": "Загрузка",
+        "candidate": "Кандидат",
         "review": "Ревью",
         "done": "Готово"
       },
@@ -167,11 +302,51 @@
         "hint": "Готовим персональную выжимку... Секундочку, уже почти готово..."
       },
       "review": {
-        "summary": "Заключение о кандидате"
+        "summary": "Заключение о кандидате",
+        "fields": "Данные кандидата",
+        "workExperience": "Опыт работы",
+        "noWorkplaces": "Нет данных об опыте работы",
+        "addWorkplace": "Добавить место работы",
+        "socials": "Социальные сети",
+        "noSocials": "Нет данных о соцсетях",
+        "addSocial": "Добавить соцсеть",
+        "uploadAnother": "Загрузить другое",
+        "next": "Далее"
+      },
+      "workplace": {
+        "company": "Компания",
+        "position": "Должность",
+        "startDate": "Начало",
+        "endDate": "Конец (пусто = наст. время)",
+        "description": "Описание",
+        "remove": "Удалить",
+        "present": "наст. время"
+      },
+      "social": {
+        "name": "Название"
+      },
+      "candidate": {
+        "new": "Новый кандидат",
+        "existing": "Существующий",
+        "willCreate": "Будет создан кандидат",
+        "editData": "← Изменить данные",
+        "search": "Поиск по имени или email...",
+        "searching": "Поиск...",
+        "notFound": "Кандидаты не найдены",
+        "back": "← Назад",
+        "create": "Создать кандидата",
+        "attach": "Прикрепить резюме"
+      },
+      "done": {
+        "title": "Кандидат сохранён",
+        "hint": "Резюме обработано и прикреплено к кандидату",
+        "another": "Загрузить ещё"
       }
     },
     "interviews": {
       "heading": "Интервью",
+      "total": "{{count}} интервью",
+      "empty": "Нет интервью. Создайте интервью на странице кандидатов.",
       "status": {
         "pending": "Ожидает",
         "generating_questions": "Генерация вопросов",
@@ -199,6 +374,24 @@
         "aiEvaluation": "Оценка ИИ",
         "strength": "Сильные стороны",
         "skills": "Навыки",
+        "questionsReady": "Вопросы готовы к проверке",
+        "questionsReadyHint": "Проверьте и при необходимости отредактируйте вопросы",
+        "checkQuestions": "Проверить вопросы",
+        "processingHint": "Это займёт несколько секунд",
+        "readyToSend": "Интервью готово к отправке",
+        "readyToSendHint": "Кандидат получит письмо со ссылкой для прохождения интервью",
+        "on": "на",
+        "inviteSent": "Приглашение отправлено",
+        "sending": "Отправляем...",
+        "sendInvite": "Отправить приглашение",
+        "evaluationResults": "Результаты оценки",
+        "outOf100": "из 100",
+        "sendApproval": "Отправить аппрув",
+        "sendRejection": "Отправить отказ",
+        "candidateAnswers": "Ответы кандидата",
+        "questionNumber": "Вопрос {{number}}",
+        "answer": "Ответ",
+        "processing": "Обрабатывается...",
         "questions": {
           "heading": "Проверка вопросов",
           "can_edit": "Отредактируйте и подтвердите порядок вопросов перед отправкой кандидату. Настоятельно рекомендуем занять на 5 минут технического спеца из Вашей компании!",
@@ -241,6 +434,38 @@
         "strength": "Сильные стороны",
         "weaknesses": "Зоны роста",
         "type_message": "Ваш ответ..."
+      }
+    },
+    "team": {
+      "heading": "Команда",
+      "total": "{{count}} участников",
+      "invite": "Пригласить участника",
+      "adminOnly": "Только администраторы могут управлять членами команды.",
+      "empty": "Нет участников команды",
+      "inviteFirst": "Пригласить первого участника →",
+      "you": "вы",
+      "headers": {
+        "member": "Участник",
+        "email": "Email",
+        "role": "Роль",
+        "joined": "Вступил"
+      },
+      "modal": {
+        "title": "Пригласить участника",
+        "sending": "Отправка...",
+        "send": "Отправить приглашение",
+        "cancel": "Отмена"
+      },
+      "remove": {
+        "title": "Удалить участника?",
+        "hint": "{{name}} потеряет доступ к панели.",
+        "removing": "Удаление...",
+        "confirm": "Удалить",
+        "cancel": "Отмена"
+      },
+      "roles": {
+        "admin": "Администратор",
+        "hr": "HR"
       }
     }
   }

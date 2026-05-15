@@ -4,9 +4,10 @@
 
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/auth-context'
+import { useTranslation } from '@/hooks/useTranslation'
 import { candidates as cApi, interviews as iApi, vacancies as vApi } from '@/lib/api'
 import {
-    Candidate, CandidateEducationLevel, CandidateSource,
+    Candidate, CandidateEducationLevel, CandidateSource, CandidateGrade,
     CandidateData, Vacancy, Skill
 } from '@/types'
 import { PlusIcon, LinkIcon, CheckIcon, XIcon, ChevronRightIcon } from 'lucide-react'
@@ -15,7 +16,7 @@ import SkillsInput from '@/components/skills/SkillsInput'
 const EMPTY_FORM: CandidateData = {
     first_name: '', last_name: '', middle_name: null,
     email: '', phone: '', source: 'hh',
-    experience_years: 0, education_level: 'bachelor',
+    grade: null, experience_years: 0, education_level: 'bachelor',
     workplaces: [], socials: [], skills: [],
 }
 
@@ -39,6 +40,7 @@ type ModalStep = null | 'basic' | 'details'
 
 export default function CandidatePage() {
     const { token } = useAuth()
+    const { t } = useTranslation()
 
     const [items, setItems] = useState<Candidate[]>([])
     const [loading, setLoading] = useState(true)
@@ -50,6 +52,7 @@ export default function CandidatePage() {
     const [selectedVacancy, setSelectedVacancy] = useState<Vacancy | null>(null)
     const [generatedLink, setGeneratedLink] = useState('')
     const [copied, setCopied] = useState(false)
+    const [questionsNumber, setQuestionsNumber] = useState(5)
 
     useEffect(() => {
         if (!token) return
@@ -72,7 +75,8 @@ export default function CandidatePage() {
         if (!token) return
         setSaving(true)
         try {
-            const candidate = await cApi.create(form, token)
+            const skill_ids: number[] = form.skills.map(skill => skill.id)
+            const candidate = await cApi.create(form, skill_ids, token)
             setItems(prev => [candidate, ...prev])
             closeModals()
         } finally {
@@ -85,6 +89,7 @@ export default function CandidatePage() {
         const result = await iApi.create({
             vacancy_id: selectedVacancy.id,
             candidate_id: linkModal.id,
+            questions_number: questionsNumber
         }, token)
         setGeneratedLink(result.link)
     }
@@ -131,21 +136,21 @@ export default function CandidatePage() {
     const canProceed = form.first_name.trim() && form.last_name.trim()
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black p-8">
+        <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
 
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center justify-between mb-6 sm:mb-10">
                 <div>
-                    <h1 className="text-2xl font-bold text-black dark:text-white">Candidates</h1>
-                    <p className="text-sm text-gray-400 mt-1">{items.length} candidates</p>
+                    <h1 className="text-2xl font-bold text-black dark:text-white">{t('dashboard.candidates.heading')}</h1>
+                    <p className="text-sm text-gray-400 mt-1">{t('dashboard.candidates.total', { count: items.length })}</p>
                 </div>
                 <button
                     onClick={() => setStep('basic')}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-black dark:bg-white
+                    className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-black dark:bg-white
                                text-white dark:text-black text-sm font-medium rounded-full
                                hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-200"
                 >
                     <PlusIcon className="w-4 h-4" />
-                    Add candidate
+                    <span className="hidden sm:inline">{t('dashboard.candidates.add')}</span>
                 </button>
             </div>
 
@@ -157,21 +162,29 @@ export default function CandidatePage() {
                 </div>
             ) : items.length === 0 ? (
                 <div className="text-center py-20">
-                    <p className="text-gray-400 mb-3">No candidates</p>
+                    <p className="text-gray-400 mb-3">{t('dashboard.candidates.empty')}</p>
                     <button
                         onClick={() => setStep('basic')}
                         className="text-sm text-black dark:text-white underline underline-offset-4 hover:opacity-60 transition"
                     >
-                        Add first candidate →
+                        {t('dashboard.candidates.addFirst')}
                     </button>
                 </div>
             ) : (
                 <div className="rounded-3xl border border-black dark:border-white overflow-hidden">
-                    <table className="w-full text-sm">
+                    <div className="overflow-x-auto">
+                    <table className="w-full text-sm min-w-[700px]">
                         <thead>
                         <tr className="border-b border-black dark:border-white">
-                            {['Candidate', 'Contacts', 'Skills', 'Last position', 'Interview', ''].map(h => (
-                                <th key={h} className="text-left px-6 py-4 text-xs font-semibold
+                            {[
+                                t('dashboard.candidates.tableHeaders.candidate'),
+                                t('dashboard.candidates.tableHeaders.contacts'),
+                                t('dashboard.candidates.tableHeaders.skills'),
+                                t('dashboard.candidates.tableHeaders.lastPosition'),
+                                t('dashboard.candidates.tableHeaders.interview'),
+                                ''
+                            ].map((h, i) => (
+                                <th key={i} className="text-left px-6 py-4 text-xs font-semibold
                                         text-black dark:text-white uppercase tracking-widest">
                                     {h}
                                 </th>
@@ -220,7 +233,7 @@ export default function CandidatePage() {
                                     ) : '—'}
                                 </td>
                                 <td className="px-6 py-4 text-gray-400 text-xs">
-                                    {c.interviews?.length ?? 0} interviews
+                                    {t('dashboard.candidates.interviewCount', { count: c.interviews?.length ?? 0 })}
                                 </td>
                                 <td className="px-6 py-4">
                                     <button
@@ -231,13 +244,14 @@ export default function CandidatePage() {
                                                 dark:hover:bg-white dark:hover:text-black transition-all duration-200"
                                     >
                                         <LinkIcon className="w-3.5 h-3.5" />
-                                        Interview
+                                        {t('dashboard.candidates.interviewButton')}
                                     </button>
                                 </td>
                             </tr>
                         ))}
                         </tbody>
                     </table>
+                    </div>
                 </div>
             )}
 
@@ -248,25 +262,25 @@ export default function CandidatePage() {
                                     shadow-2xl w-full max-w-md p-8">
 
                         <div className="flex items-center justify-between mb-2">
-                            <h2 className="text-xl font-bold text-black dark:text-white">New candidate</h2>
+                            <h2 className="text-xl font-bold text-black dark:text-white">{t('dashboard.candidates.modal.newTitle')}</h2>
                             <button onClick={closeModals} className="text-gray-400 hover:text-black dark:hover:text-white transition">
                                 <XIcon className="w-5 h-5" />
                             </button>
                         </div>
-                        <p className="text-xs text-gray-400 mb-7">Step 1 of 2 — basic info</p>
+                        <p className="text-xs text-gray-400 mb-7">{t('dashboard.candidates.modal.step1')}</p>
 
                         <div className="space-y-3">
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <input
                                     value={form.last_name}
                                     onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))}
-                                    placeholder="Last name *"
+                                    placeholder={t('dashboard.candidates.modal.lastName')}
                                     className={inputClass}
                                 />
                                 <input
                                     value={form.first_name}
                                     onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))}
-                                    placeholder="First name *"
+                                    placeholder={t('dashboard.candidates.modal.firstName')}
                                     className={inputClass}
                                 />
                             </div>
@@ -274,7 +288,7 @@ export default function CandidatePage() {
                             <input
                                 value={form.middle_name ?? ''}
                                 onChange={e => setForm(f => ({ ...f, middle_name: e.target.value || null }))}
-                                placeholder="Middle name"
+                                placeholder={t('dashboard.candidates.modal.middleName')}
                                 className={inputClass}
                             />
 
@@ -284,26 +298,26 @@ export default function CandidatePage() {
                                 type="email"
                                 value={form.email}
                                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                                placeholder="Email"
+                                placeholder={t('dashboard.candidates.modal.email')}
                                 className={inputClass}
                             />
                             <input
                                 type="tel"
                                 value={form.phone}
                                 onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-                                placeholder="Phone"
+                                placeholder={t('dashboard.candidates.modal.phone')}
                                 className={inputClass}
                             />
 
                             <div className="border-t border-gray-100 dark:border-gray-900" />
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <input
                                     type="number"
                                     min={0}
                                     value={form.experience_years}
                                     onChange={e => setForm(f => ({ ...f, experience_years: +e.target.value }))}
-                                    placeholder="Experience (years)"
+                                    placeholder={t('dashboard.candidates.modal.experience')}
                                     className={inputClass}
                                 />
                                 <div className="relative">
@@ -320,18 +334,33 @@ export default function CandidatePage() {
                                 </div>
                             </div>
 
-                            <div className="relative">
-                                <select
-                                    value={form.education_level}
-                                    onChange={e => setForm(f => ({ ...f, education_level: e.target.value as CandidateEducationLevel }))}
-                                    className={selectClass}
-                                >
-                                    <option value="">Education</option>
-                                    {(['secondary', 'incomplete_higher', 'bachelor', 'master', 'specialist', 'doctor'] as CandidateEducationLevel[]).map(v => (
-                                        <option key={v} value={v}>{v}</option>
-                                    ))}
-                                </select>
-                                <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="relative">
+                                    <select
+                                        value={form.education_level}
+                                        onChange={e => setForm(f => ({ ...f, education_level: e.target.value as CandidateEducationLevel }))}
+                                        className={selectClass}
+                                    >
+                                        <option value="">{t('dashboard.candidates.modal.education')}</option>
+                                        {(['secondary', 'incomplete_higher', 'bachelor', 'master', 'specialist', 'doctor'] as CandidateEducationLevel[]).map(v => (
+                                            <option key={v} value={v}>{t(`dashboard.vacancies.educationLevel.${v}`)}</option>
+                                        ))}
+                                    </select>
+                                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+                                </div>
+                                <div className="relative">
+                                    <select
+                                        value={form.grade ?? ''}
+                                        onChange={e => setForm(f => ({ ...f, grade: (e.target.value || null) as CandidateGrade | null }))}
+                                        className={selectClass}
+                                    >
+                                        <option value="">{t('dashboard.candidates.modal.gradePlaceholder')}</option>
+                                        {(['junior', 'middle', 'senior', 'lead'] as CandidateGrade[]).map(g => (
+                                            <option key={g} value={g}>{t(`dashboard.vacancies.grade.${g}`)}</option>
+                                        ))}
+                                    </select>
+                                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+                                </div>
                             </div>
                         </div>
 
@@ -344,7 +373,7 @@ export default function CandidatePage() {
                                            font-medium rounded-full disabled:opacity-40
                                            disabled:cursor-not-allowed transition-all duration-200 text-sm"
                             >
-                                Next — skills & experience
+                                {t('dashboard.candidates.modal.nextStep')}
                                 <ChevronRightIcon className="w-4 h-4" />
                             </button>
                             <button
@@ -353,7 +382,7 @@ export default function CandidatePage() {
                                            text-gray-500 rounded-full text-sm hover:border-black
                                            hover:text-black dark:hover:border-white dark:hover:text-white transition-all"
                             >
-                                Cancel
+                                {t('dashboard.candidates.modal.cancel')}
                             </button>
                         </div>
                     </div>
@@ -367,23 +396,23 @@ export default function CandidatePage() {
                                     shadow-2xl w-full max-w-lg p-8 max-h-[90vh] overflow-y-auto">
 
                         <div className="flex items-center justify-between mb-2">
-                            <h2 className="text-xl font-bold text-black dark:text-white">Skills & experience</h2>
+                            <h2 className="text-xl font-bold text-black dark:text-white">{t('dashboard.candidates.modal.skillsTitle')}</h2>
                             <button onClick={closeModals} className="text-gray-400 hover:text-black dark:hover:text-white transition">
                                 <XIcon className="w-5 h-5" />
                             </button>
                         </div>
                         <p className="text-xs text-gray-400 mb-7">
-                            Step 2 of 2 —{' '}
+                            {t('dashboard.candidates.modal.step2prefix')}{' '}
                             <button
                                 onClick={() => setStep('basic')}
                                 className="underline hover:text-black dark:hover:text-white transition"
                             >
-                                go back
+                                {t('dashboard.candidates.modal.goBack')}
                             </button>
                         </p>
 
                         <div className="mb-6">
-                            <p className="text-sm font-medium text-black dark:text-white mb-3">Skills</p>
+                            <p className="text-sm font-medium text-black dark:text-white mb-3">{t('dashboard.candidates.modal.skills')}</p>
                             <SkillsInput
                                 value={form.skills}
                                 onChange={(skills: Skill[]) => setForm(f => ({ ...f, skills }))}
@@ -394,7 +423,7 @@ export default function CandidatePage() {
 
                         <div className="mb-6">
                             <div className="flex items-center justify-between mb-3">
-                                <p className="text-sm font-medium text-black dark:text-white">Work experience</p>
+                                <p className="text-sm font-medium text-black dark:text-white">{t('dashboard.candidates.modal.workExperience')}</p>
                                 <button
                                     onClick={() => setForm(f => ({
                                         ...f,
@@ -405,18 +434,18 @@ export default function CandidatePage() {
                                     }))}
                                     className="text-xs text-black dark:text-white underline hover:opacity-60 transition"
                                 >
-                                    + add
+                                    {t('dashboard.candidates.modal.addWorkplace')}
                                 </button>
                             </div>
 
                             {form.workplaces.length === 0 && (
-                                <p className="text-xs text-gray-400">No work experience added</p>
+                                <p className="text-xs text-gray-400">{t('dashboard.candidates.modal.noWorkplaces')}</p>
                             )}
 
                             {form.workplaces.map((w, idx) => (
                                 <div key={idx} className="space-y-2 mb-4 p-4 rounded-2xl border border-gray-200 dark:border-gray-800">
                                     <div className="flex justify-between items-center mb-1">
-                                        <p className="text-xs text-gray-400">Position {idx + 1}</p>
+                                        <p className="text-xs text-gray-400">{t('dashboard.candidates.modal.position', { number: idx + 1 })}</p>
                                         <button
                                             onClick={() => setForm(f => ({
                                                 ...f,
@@ -427,11 +456,11 @@ export default function CandidatePage() {
                                             <XIcon className="w-3.5 h-3.5" />
                                         </button>
                                     </div>
-                                    <input className={inputClass} placeholder="Company"
+                                    <input className={inputClass} placeholder={t('dashboard.candidates.modal.company')}
                                            value={w.company_name} onChange={e => updateWorkplace(idx, 'company_name', e.target.value)} />
-                                    <input className={inputClass} placeholder="Position"
+                                    <input className={inputClass} placeholder={t('dashboard.candidates.modal.companyPosition')}
                                            value={w.position} onChange={e => updateWorkplace(idx, 'position', e.target.value)} />
-                                    <input className={inputClass} placeholder="Description"
+                                    <input className={inputClass} placeholder={t('dashboard.candidates.modal.description')}
                                            value={w.description} onChange={e => updateWorkplace(idx, 'description', e.target.value)} />
                                     <div className="grid grid-cols-2 gap-2">
                                         <input className={inputClass} type="date"
@@ -447,7 +476,7 @@ export default function CandidatePage() {
 
                         <div className="mb-6">
                             <div className="flex items-center justify-between mb-3">
-                                <p className="text-sm font-medium text-black dark:text-white">Socials</p>
+                                <p className="text-sm font-medium text-black dark:text-white">{t('dashboard.candidates.modal.socials')}</p>
                                 <button
                                     onClick={() => setForm(f => ({
                                         ...f,
@@ -455,17 +484,17 @@ export default function CandidatePage() {
                                     }))}
                                     className="text-xs text-black dark:text-white underline hover:opacity-60 transition"
                                 >
-                                    + add
+                                    {t('dashboard.candidates.modal.addSocial')}
                                 </button>
                             </div>
 
                             {form.socials.length === 0 && (
-                                <p className="text-xs text-gray-400">No socials added</p>
+                                <p className="text-xs text-gray-400">{t('dashboard.candidates.modal.noSocials')}</p>
                             )}
 
                             {form.socials.map((s, idx) => (
                                 <div key={idx} className="flex gap-2 mb-2 items-center">
-                                    <input className={inputClass} placeholder="tg, linkedin..."
+                                    <input className={inputClass} placeholder={t('dashboard.candidates.modal.socialPlaceholder')}
                                            value={s.name} onChange={e => updateSocial(idx, 'name', e.target.value)} />
                                     <input className={inputClass} placeholder="URL"
                                            value={s.url} onChange={e => updateSocial(idx, 'url', e.target.value)} />
@@ -490,7 +519,7 @@ export default function CandidatePage() {
                                            font-medium rounded-full disabled:opacity-40
                                            disabled:cursor-not-allowed transition-all duration-200 text-sm"
                             >
-                                {saving ? 'Saving...' : 'Add candidate'}
+                                {saving ? t('dashboard.candidates.modal.saving') : t('dashboard.candidates.modal.add')}
                             </button>
                             <button
                                 onClick={closeModals}
@@ -498,7 +527,7 @@ export default function CandidatePage() {
                                            text-gray-500 rounded-full text-sm hover:border-black
                                            hover:text-black dark:hover:border-white dark:hover:text-white transition-all"
                             >
-                                Cancel
+                                {t('dashboard.candidates.modal.cancel')}
                             </button>
                         </div>
                     </div>
@@ -512,7 +541,7 @@ export default function CandidatePage() {
                                     shadow-2xl w-full max-w-md p-8">
 
                         <div className="flex items-center justify-between mb-2">
-                            <h2 className="text-xl font-bold text-black dark:text-white">Create interview</h2>
+                            <h2 className="text-xl font-bold text-black dark:text-white">{t('dashboard.candidates.interview.title')}</h2>
                             <button onClick={closeModals} className="text-gray-400 hover:text-black dark:hover:text-white transition">
                                 <XIcon className="w-5 h-5" />
                             </button>
@@ -529,13 +558,26 @@ export default function CandidatePage() {
                                         onChange={e => setSelectedVacancy(allVacancies.find(v => v.id === +e.target.value) ?? null)}
                                         className={selectClass}
                                     >
-                                        <option value="">Select vacancy</option>
+                                        <option value="">{t('dashboard.candidates.interview.selectVacancy')}</option>
                                         {allVacancies
                                             .filter(v => v.status === 'published')
                                             .map(v => <option key={v.id} value={v.id}>{v.title}</option>)
                                         }
                                     </select>
                                     <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+                                </div>
+
+                                <div className="relative mb-7">
+                                    <input
+                                        type="number"
+                                        id="questionsNumber"
+                                        name="questionsNumber"
+                                        onInput={(e) => setQuestionsNumber(Number(e.currentTarget.value))}
+                                        min={5}
+                                        value={questionsNumber ?? ''}
+                                        className={inputClass}
+                                        placeholder={t('dashboard.candidates.interview.questionsNumber')}
+                                    />
                                 </div>
 
                                 <div className="flex flex-col gap-3">
@@ -545,19 +587,19 @@ export default function CandidatePage() {
                                         className="w-full py-3.5 bg-black dark:bg-white text-white dark:text-black
                                                    font-medium rounded-full disabled:opacity-40 transition-all text-sm"
                                     >
-                                        Generate link
+                                        {t('dashboard.candidates.interview.generate')}
                                     </button>
                                     <button onClick={closeModals}
                                             className="w-full py-3.5 border border-gray-300 dark:border-gray-700
                                                    text-gray-500 rounded-full text-sm hover:border-black
                                                    hover:text-black dark:hover:border-white dark:hover:text-white transition-all">
-                                        Cancel
+                                        {t('dashboard.candidates.interview.cancel')}
                                     </button>
                                 </div>
                             </>
                         ) : (
                             <>
-                                <p className="text-sm text-gray-400 mb-4">Link ready — send it to the candidate:</p>
+                                <p className="text-sm text-gray-400 mb-4">{t('dashboard.candidates.interview.linkReady')}</p>
                                 <div className="flex gap-2 mb-2">
                                     <input readOnly value={generatedLink}
                                            className="flex-1 px-4 py-3 text-xs bg-gray-50 dark:bg-gray-950 rounded-full
@@ -566,17 +608,17 @@ export default function CandidatePage() {
                                             className="flex items-center gap-1.5 px-4 py-3 rounded-full text-xs font-medium
                                                    bg-black dark:bg-white text-white dark:text-black transition-all">
                                         {copied
-                                            ? <><CheckIcon className="w-3.5 h-3.5" /> Copied</>
-                                            : <><LinkIcon className="w-3.5 h-3.5" /> Copy</>
+                                            ? <><CheckIcon className="w-3.5 h-3.5" /> {t('dashboard.candidates.interview.copied')}</>
+                                            : <><LinkIcon className="w-3.5 h-3.5" /> {t('dashboard.candidates.interview.copy')}</>
                                         }
                                     </button>
                                 </div>
-                                <p className="text-xs text-gray-400 mb-7">Link is valid for 7 days.</p>
+                                <p className="text-xs text-gray-400 mb-7">{t('dashboard.candidates.interview.validity')}</p>
                                 <button onClick={closeModals}
                                         className="w-full py-3.5 border border-gray-300 dark:border-gray-700
                                                text-gray-500 rounded-full text-sm hover:border-black
                                                hover:text-black dark:hover:border-white dark:hover:text-white transition-all">
-                                    Close
+                                    {t('dashboard.candidates.interview.close')}
                                 </button>
                             </>
                         )}

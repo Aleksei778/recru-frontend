@@ -28,7 +28,7 @@ export default function QuestionsReviewPage() {
 
     useEffect(() => {
         if (!token) return
-        api.get(interviewId, token).then((res: any) => {
+        api.get(interviewId, token).then((res) => {
             const interview = res.data ?? res
             setQuestions(interview.questions ?? [])
             setLoading(false)
@@ -73,7 +73,7 @@ export default function QuestionsReviewPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-white dark:bg-black p-8">
+            <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
                 <div className="max-w-2xl mx-auto space-y-3">
                     {[...Array(5)].map((_, i) => (
                         <div key={i} className="h-20 rounded-2xl border border-gray-100 dark:border-gray-900 animate-pulse" />
@@ -84,15 +84,15 @@ export default function QuestionsReviewPage() {
     }
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black p-8">
+        <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
             <div className="max-w-2xl mx-auto">
 
                 <div className="mb-8">
                     <h1 className="text-2xl font-bold text-black dark:text-white">
-                        {t('dashboard.interviews.idNumber.questions.heading')}
+                        {t('dashboard.interviews.id.questions.heading')}
                     </h1>
                     <p className="text-sm text-gray-400">
-                        {t('dashboard.interviews.idNumber.questions.can_edit')}
+                        {t('dashboard.interviews.id.questions.can_edit')}
                     </p>
                 </div>
 
@@ -162,7 +162,7 @@ export default function QuestionsReviewPage() {
                         font-medium text-sm disabled:opacity-40 transition-all hover:opacity-80"
                 >
                     <CheckIcon className="w-4 h-4" />
-                    {saving ? 'Сохранение...' : 'Подтвердить и запустить синтез'}
+                    {saving ? t('dashboard.interviews.id.questions.saving') : t('dashboard.interviews.id.questions.confirm')}
                 </button>
             </div>
         </div>

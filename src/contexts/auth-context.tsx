@@ -2,7 +2,7 @@
 
 'use client'
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react"
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react"
 import type {
     User,
     Tenant,
@@ -22,8 +22,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [tenant, setTenant] = useState<Tenant | null>(null)
     const [token, setToken] = useState<string | null>(null)
     const [loading, setLoading] = useState<boolean>(true)
+    const initialized = useRef(false)
 
     useEffect(() => {
+        if (initialized.current) return
+        initialized.current = true
+
         const initAuth = async () => {
             const t = localStorage.getItem("recru-token")
 

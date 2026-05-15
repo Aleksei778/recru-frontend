@@ -19,6 +19,43 @@
     "login": "Login",
     "registeringIn": "Register into system..."
   },
+  "candidate": {
+    "lastName": "Last name",
+    "firstName": "First name",
+    "middleName": "Middle name",
+    "email": "Email",
+    "phone": "Phone",
+    "experienceYears": "Experience (years)",
+    "educationLevel": "Education level"
+  },
+  "interview": {
+    "intro": {
+      "aiInterview": "AI interview",
+      "howItWorks": "How it works",
+      "questionStep": "Question",
+      "questionStepDesc": "The system will read the question aloud and display it on screen",
+      "answerStep": "Answer",
+      "answerStepDesc": "Click «Start recording» and answer verbally — in detail and honestly",
+      "evaluationStep": "Evaluation",
+      "evaluationStepDesc": "After all questions, AI will analyze answers and pass the result to the recruiter",
+      "micHint": "Make sure your microphone is accessible and you are in a quiet place",
+      "start": "Start interview"
+    },
+    "question": "Question {{number}}",
+    "stop": "Stop",
+    "reRecord": "Re-record",
+    "nextQuestion": "Next question",
+    "completed": {
+      "title": "Interview completed",
+      "text": "Your answers have been accepted. We will contact you after review."
+    },
+    "error": {
+      "retry": "Try again",
+      "noMic": "No microphone access",
+      "loadQuestion": "Failed to load question",
+      "submitAnswer": "Failed to submit answer"
+    }
+  },
   "dashboard": {
     "sidebar": {
       "vacancies": "Vacancies",
@@ -27,9 +64,73 @@
       "emails": "Emails",
       "resume": "Resume",
       "statistics": "Statistics",
+      "team": "Team",
       "profile": "Profile",
       "settings": "Settings",
       "logout": "Logout"
+    },
+    "candidates": {
+      "heading": "Candidates",
+      "total": "{{count}} candidates",
+      "add": "Add candidate",
+      "empty": "No candidates",
+      "addFirst": "Add first candidate →",
+      "interviewCount": "{{count}} interviews",
+      "interviewButton": "Interview",
+      "last_name": "Last name",
+      "first_name": "First name",
+      "middle_name": "Middle name",
+      "tableHeaders": {
+        "candidate": "Candidate",
+        "contacts": "Contacts",
+        "skills": "Skills",
+        "lastPosition": "Last position",
+        "interview": "Interview"
+      },
+      "modal": {
+        "newTitle": "New candidate",
+        "step1": "Step 1 of 2 — basic info",
+        "lastName": "Last name *",
+        "firstName": "First name *",
+        "middleName": "Middle name",
+        "email": "Email",
+        "phone": "Phone",
+        "experience": "Experience (years)",
+        "education": "Education",
+        "nextStep": "Next — skills & experience",
+        "cancel": "Cancel",
+        "skillsTitle": "Skills & experience",
+        "step2prefix": "Step 2 of 2 —",
+        "goBack": "go back",
+        "skills": "Skills",
+        "workExperience": "Work experience",
+        "addWorkplace": "+ add",
+        "noWorkplaces": "No work experience added",
+        "position": "Position {{number}}",
+        "company": "Company",
+        "companyPosition": "Position",
+        "description": "Description",
+        "socials": "Socials",
+        "addSocial": "+ add",
+        "noSocials": "No socials added",
+        "socialPlaceholder": "tg, linkedin...",
+        "grade": "Grade",
+        "gradePlaceholder": "Any grade",
+        "saving": "Saving...",
+        "add": "Add candidate"
+      },
+      "interview": {
+        "title": "Create interview",
+        "selectVacancy": "Select vacancy",
+        "questionsNumber": "Number of questions",
+        "generate": "Generate link",
+        "cancel": "Cancel",
+        "linkReady": "Link ready — send it to the candidate:",
+        "copied": "Copied",
+        "copy": "Copy",
+        "validity": "Link is valid for 7 days.",
+        "close": "Close"
+      }
     },
     "vacancies": {
       "heading": "Vacancies",
@@ -62,6 +163,10 @@
         "status": "Status",
         "skillsLabel": "Required skills",
         "skillPlaceholder": "Add skill and press Enter",
+        "grade": "Grade",
+        "gradePlaceholder": "Any grade",
+        "educationLevel": "Education level",
+        "educationLevelPlaceholder": "Any education level",
         "add": "Create",
         "update": "Save changes"
       },
@@ -80,6 +185,49 @@
         "office": "Office",
         "remote": "Remote",
         "hybrid": "Hybrid"
+      },
+      "grade": {
+        "junior": "Junior",
+        "middle": "Middle",
+        "senior": "Senior",
+        "lead": "Lead"
+      },
+      "educationLevel": {
+        "secondary": "Secondary",
+        "incomplete_higher": "Incomplete higher",
+        "bachelor": "Bachelor",
+        "master": "Master",
+        "specialist": "Specialist",
+        "doctor": "Doctor"
+      }
+    },
+    "emails": {
+      "heading": "Chat with candidates",
+      "total": "Total",
+      "search": "Search",
+      "empty": "No emails",
+      "inbox": "Inbox",
+      "sentTab": "Sent",
+      "statusFilter": {
+        "all": "All",
+        "sent": "Sent",
+        "pending": "Pending",
+        "failed": "Errors"
+      },
+      "to": "To:",
+      "from": "From:",
+      "types": {
+        "interview_invite": "Interview invite",
+        "questions_ready": "Questions ready",
+        "results": "Results",
+        "decision": "Decision"
+      },
+      "interviewLabel": "Interview #{{id}}",
+      "previewUnavailable": "Email preview unavailable",
+      "status": {
+        "sent": "Sent",
+        "pending": "Pending",
+        "failed": "Failed"
       }
     },
     "profile": {
@@ -95,11 +243,6 @@
         "error": "Error updating profile",
         "namePlaceholder": "Enter your name",
         "emailPlaceholder": "Enter your email"
-      },
-      "emails": {
-        "heading": "Chat with candidates",
-        "total": "Total",
-        "search": "Search"
       },
       "company": {
         "tab": "Company",
@@ -136,11 +279,13 @@
         "error": "Error processing resume! Please try again later"
       },
       "saving": {
-        "error": "Error saving user from parsed resume! Please try again later"
+        "error": "Error saving user from parsed resume! Please try again later",
+        "text": "Saving..."
       },
       "steps": {
         "upload": "Upload",
         "review": "Review",
+        "candidate": "Candidate",
         "done": "Done"
       },
       "upload": {
@@ -157,11 +302,51 @@
         "hint": "Creating your personal summary... Hang on, we're almost there..."
       },
       "review": {
-        "summary": "Conclusion about the candidate"
+        "summary": "Conclusion about the candidate",
+        "fields": "Candidate data",
+        "workExperience": "Work experience",
+        "noWorkplaces": "No work experience data",
+        "addWorkplace": "Add workplace",
+        "socials": "Social networks",
+        "noSocials": "No social network data",
+        "addSocial": "Add social network",
+        "uploadAnother": "Upload another",
+        "next": "Next"
+      },
+      "workplace": {
+        "company": "Company",
+        "position": "Position",
+        "startDate": "Start",
+        "endDate": "End (empty = present)",
+        "description": "Description",
+        "remove": "Remove",
+        "present": "present"
+      },
+      "social": {
+        "name": "Name"
+      },
+      "candidate": {
+        "new": "New candidate",
+        "existing": "Existing",
+        "willCreate": "Will create candidate",
+        "editData": "← Edit data",
+        "search": "Search by name or email...",
+        "searching": "Searching...",
+        "notFound": "No candidates found",
+        "back": "← Back",
+        "create": "Create candidate",
+        "attach": "Attach resume"
+      },
+      "done": {
+        "title": "Candidate saved",
+        "hint": "Resume has been processed and linked to the candidate",
+        "another": "Upload another"
       }
     },
     "interviews": {
       "heading": "Interviews",
+      "total": "{{count}} interviews",
+      "empty": "No interviews. Create an interview on the candidates' page",
       "status": {
         "pending": "Pending",
         "generating_questions": "Generating questions",
@@ -189,6 +374,24 @@
         "aiEvaluation": "AI evaluation",
         "strength": "Strengths",
         "skills": "Skills",
+        "questionsReady": "Questions ready for review",
+        "questionsReadyHint": "Check and edit the questions if needed",
+        "checkQuestions": "Check questions",
+        "processingHint": "This will take a few seconds",
+        "readyToSend": "Interview ready to send",
+        "readyToSendHint": "The candidate will receive an email with a link to the interview",
+        "on": "at",
+        "inviteSent": "Invite sent",
+        "sending": "Sending...",
+        "sendInvite": "Send invite",
+        "evaluationResults": "Evaluation results",
+        "outOf100": "out of 100",
+        "sendApproval": "Send approval",
+        "sendRejection": "Send rejection",
+        "candidateAnswers": "Candidate's answers",
+        "questionNumber": "Question {{number}}",
+        "answer": "Answer",
+        "processing": "Processing...",
         "questions": {
           "heading": "Checking questions",
           "can_edit": "Edit and confirm the order of the questions before sending them to the candidate. We strongly recommend that you hire a technical specialist from your company for 5 minutes!",
@@ -231,6 +434,38 @@
         "strength": "Strengths",
         "weaknesses": "Weaknesses",
         "type_message": "Your answer..."
+      }
+    },
+    "team": {
+      "heading": "Team",
+      "total": "{{count}} members",
+      "invite": "Invite member",
+      "adminOnly": "Only admins can manage team members.",
+      "empty": "No team members",
+      "inviteFirst": "Invite first member →",
+      "you": "you",
+      "headers": {
+        "member": "Member",
+        "email": "Email",
+        "role": "Role",
+        "joined": "Joined"
+      },
+      "modal": {
+        "title": "Invite member",
+        "sending": "Sending...",
+        "send": "Send invite",
+        "cancel": "Cancel"
+      },
+      "remove": {
+        "title": "Remove member?",
+        "hint": "{{name}} will lose access to the panel.",
+        "removing": "Removing...",
+        "confirm": "Remove",
+        "cancel": "Cancel"
+      },
+      "roles": {
+        "admin": "Admin",
+        "hr": "HR"
       }
     }
   }

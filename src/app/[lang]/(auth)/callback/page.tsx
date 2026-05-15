@@ -2,26 +2,32 @@
 
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { auth as api } from '@/lib/api'
+import {useLanguage} from "@/contexts/language-context";
 
 export default function AuthCallbackPage() {
-    const router       = useRouter()
+    const router = useRouter()
+    const { language } = useLanguage()
     const searchParams = useSearchParams()
     const { setTokenAndUser } = useAuth()
+    const initialized = useRef(false)
 
     useEffect(() => {
+        if (initialized.current) return
+        initialized.current = true
+
         const token = searchParams.get('token')
         if (!token) { router.replace('/login'); return }
 
         api.me(token).then(({ user, tenant }) => {
             localStorage.setItem('recru-token', token)
             setTokenAndUser(token, user, tenant)
-            router.replace('/vacancies')
+            router.replace(`/${language}/vacancies`)
         }).catch(() => {
-            router.replace('/login')
+            router.replace('/${language}/login')
         })
     }, [])
 
