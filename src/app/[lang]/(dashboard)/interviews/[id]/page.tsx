@@ -167,7 +167,7 @@ export default function InterviewDetailPage() {
                                 <p className="text-4xl font-bold text-black dark:text-white">
                                     {interview.grade}
                                 </p>
-                                <p className="text-xs text-gray-400">{t('dashboard.interviews.id.outOf100')}</p>
+                                <p className="text-xs text-gray-400">{t('dashboard.interviews.id.outOf10')}</p>
                             </div>
                             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed flex-1">
                                 {interview.text_grade}
