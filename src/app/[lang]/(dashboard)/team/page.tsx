@@ -1,6 +1,9 @@
+// src/app/[lang]/(dashboard)/team/page.tsx
+
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useLanguage } from '@/contexts/language-context'
@@ -28,6 +31,7 @@ export default function TeamPage() {
     const { token, user: me } = useAuth()
     const { t } = useTranslation()
     const { language } = useLanguage()
+    const router = useRouter()
 
     const [members, setMembers] = useState<User[]>([])
     const [loading, setLoading] = useState(true)
@@ -41,12 +45,18 @@ export default function TeamPage() {
     const isAdmin = me?.role === 'admin'
 
     useEffect(() => {
-        if (!token) return
+        if (me && !isAdmin) {
+            router.replace(`/${language}/vacancies`)
+        }
+    }, [me, isAdmin, language, router])
+
+    useEffect(() => {
+        if (!token || !isAdmin) return
         teamApi.list(token).then(data => {
             setMembers(data)
             setLoading(false)
         }).catch(() => setLoading(false))
-    }, [token])
+    }, [token, isAdmin])
 
     const closeInvite = () => {
         setShowInvite(false)
@@ -164,7 +174,7 @@ export default function TeamPage() {
                                             </div>
                                             <div>
                                                 <p className="font-semibold text-black dark:text-white">
-                                                    {member.first_name} {member.last_name}
+                                                    {member.name}
                                                     {isSelf && (
                                                         <span className="ml-2 text-xs text-gray-400 font-normal">{t('dashboard.team.you')}</span>
                                                     )}
@@ -295,7 +305,7 @@ export default function TeamPage() {
                                     shadow-2xl w-full max-w-sm p-8">
                         <h2 className="text-xl font-bold text-black dark:text-white mb-2">{t('dashboard.team.remove.title')}</h2>
                         <p className="text-sm text-gray-400 mb-7">
-                            {t('dashboard.team.remove.hint', { name: `${confirmRemove.first_name} ${confirmRemove.last_name}` })}
+                            {t('dashboard.team.remove.hint', { name: confirmRemove.name })}
                         </p>
                         <div className="flex flex-col gap-3">
                             <button

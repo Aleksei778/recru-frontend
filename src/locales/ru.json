@@ -67,7 +67,8 @@
       "team": "Команда",
       "profile": "Профиль",
       "settings": "Настройки",
-      "logout": "Выход"
+      "logout": "Выход",
+      "locale": "Локаль"
     },
     "candidates": {
       "heading": "Кандидаты",
@@ -117,7 +118,11 @@
         "grade": "Грейд",
         "gradePlaceholder": "Любой грейд",
         "saving": "Сохранение...",
-        "add": "Добавить кандидата"
+        "add": "Добавить кандидата",
+        "locale": {
+          "ru": "Русский",
+          "en": "English"
+        }
       },
       "interview": {
         "title": "Создать интервью",
@@ -206,6 +211,7 @@
       "total": "Всего писем",
       "search": "Поиск",
       "empty": "Нет писем",
+      "system": "Система",
       "inbox": "Входящие",
       "sentTab": "Отправленные",
       "statusFilter": {
@@ -218,12 +224,11 @@
       "from": "От:",
       "types": {
         "interview_invite": "Приглашение на интервью",
-        "questions_ready": "Вопросы готовы",
-        "results": "Результаты",
-        "decision": "Отказ"
+        "interview_finished": "Интервью завершилось",
+        "approve": "Апрув кандидата",
+        "reject": "Отказ кандидату"
       },
-      "interviewLabel": "Интервью #{{id}}",
-      "previewUnavailable": "Предпросмотр письма недоступен",
+      "interviewLabel": "Интервью #{{token}}",
       "status": {
         "sent": "Отправлено",
         "pending": "Ожидает",
@@ -235,21 +240,28 @@
       "logout": "Выход",
       "profile": {
         "tab": "Профиль",
-        "name": "Имя",
+        "firstName": "Имя",
+        "lastName": "Фамилия",
         "email": "Почта",
         "role": "Роль",
         "save": "Сохранить личные настройки",
         "saved": "Личные настройки успешно сохранены",
         "error": "Ошибка при обновлении профиля",
-        "namePlaceholder": "Введите Ваше имя",
-        "emailPlaceholder": "Введите Вашу почту"
+        "firstNamePlaceholder": "Введите Ваше имя",
+        "lastNamePlaceholder": "Введите Вашу фамилию",
+        "emailPlaceholder": "Введите Вашу почту",
+        "locale": "Системный язык",
+        "localeOptions": {
+          "ru": "Русский",
+          "en": "Английский"
+        }
       },
       "company": {
         "tab": "Компания",
         "name": "Компания",
         "website": "Веб-сайт",
         "industry": "Отрасль",
-        "domains": "Домены",
+        "subdomain": "Поддомен",
         "save": "Сохранить настройки компании",
         "saved": "Настройки компании успешно сохранены",
         "error": "Ошибка при обновлении компании",

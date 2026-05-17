@@ -66,7 +66,7 @@ export default function InterviewsPage() {
                         {t('dashboard.interviews.heading')}
                     </h1>
                     <p className="text-sm text-gray-400 mt-1">
-                        {items.length} {t('dashboard.interviews.total')}
+                        {t('dashboard.interviews.total', { count: items.length })}
                     </p>
                 </div>
             </div>

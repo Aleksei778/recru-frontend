@@ -5,26 +5,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { emails as api } from '@/lib/api'
-import type { Email, EmailStatus } from '@/types'
-import { MailIcon, SearchIcon, ClockIcon, CheckIcon, XCircleIcon } from 'lucide-react'
+import type { Email } from '@/types'
+import { MailIcon, SearchIcon } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useLanguage } from '@/contexts/language-context'
 import React from 'react'
 
 type Tab = 'inbox' | 'sent'
-
-const getStatusConfig = (t: (key: string) => string) => ({
-    sent: { label: t('dashboard.emails.status.sent'), icon: CheckIcon, color: 'text-black dark:text-white' },
-    pending: { label: t('dashboard.emails.status.pending'), icon: ClockIcon, color: 'text-gray-400 dark:text-gray-500' },
-    failed: { label: t('dashboard.emails.status.failed'), icon: XCircleIcon, color: 'text-red-500 dark:text-red-400' },
-})
-
-const getStatuses = (t: (key: string) => string) => [
-    { value: 'all', label: t('dashboard.emails.statusFilter.all') },
-    { value: 'sent', label: t('dashboard.emails.statusFilter.sent') },
-    { value: 'pending', label: t('dashboard.emails.statusFilter.pending') },
-    { value: 'failed', label: t('dashboard.emails.statusFilter.failed') },
-] as const
 
 function getRecipientName(email: Email): string {
     if (email.recipient_type === 'candidate') {
@@ -39,14 +26,11 @@ export default function EmailsPage() {
     const { token } = useAuth()
     const { t } = useTranslation()
     const { language } = useLanguage()
-    const STATUS_CONFIG = getStatusConfig(t)
-    const STATUSES = getStatuses(t)
 
     const [items, setItems] = useState<Email[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
     const [selected, setSelected] = useState<Email | null>(null)
-    const [statusFilter, setStatusFilter] = useState<EmailStatus | 'all'>('all')
     const [tab, setTab] = useState<Tab>('inbox')
 
     useEffect(() => {
@@ -63,15 +47,11 @@ export default function EmailsPage() {
     const filtered = useMemo(() => {
         return items.filter(e => {
             const name = getRecipientName(e).toLowerCase()
-            const matchSearch = search === '' ||
+            return search === '' ||
                 e.subject.toLowerCase().includes(search.toLowerCase()) ||
                 name.includes(search.toLowerCase())
-
-            const matchStatus = statusFilter === 'all' || e.status === statusFilter
-
-            return matchSearch && matchStatus
         })
-    }, [items, search, statusFilter])
+    }, [items, search])
 
     return (
         <div className="h-full bg-white dark:bg-black flex flex-col">
@@ -122,22 +102,6 @@ export default function EmailsPage() {
                         </div>
                     </div>
 
-                    <div className="px-4 pb-3 flex gap-1.5 flex-wrap shrink-0">
-                        {STATUSES.map(s => (
-                            <button
-                                key={s.value}
-                                onClick={() => setStatusFilter(s.value)}
-                                className={`text-xs px-3 py-1.5 rounded-full border transition-all
-                                    ${statusFilter === s.value
-                                    ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white'
-                                    : 'border-gray-200 dark:border-gray-800 text-gray-500 hover:border-black hover:text-black dark:hover:border-white dark:hover:text-white'
-                                }`}
-                            >
-                                {s.label}
-                            </button>
-                        ))}
-                    </div>
-
                     <div className="flex-1 overflow-y-auto">
                         {loading ? (
                             <div className="space-y-1 px-2">
@@ -153,8 +117,6 @@ export default function EmailsPage() {
                         ) : (
                             <div className="space-y-px px-2 pb-4">
                                 {filtered.map(email => {
-                                    const cfg        = STATUS_CONFIG[email.status]
-                                    const StatusIcon = cfg.icon
                                     const isSelected = selected?.id === email.id
                                     const name       = getRecipientName(email)
 
@@ -173,7 +135,6 @@ export default function EmailsPage() {
                                                     ${isSelected ? 'text-white dark:text-black' : 'text-black dark:text-white'}`}>
                                                     {name}
                                                 </p>
-                                                <StatusIcon className={`w-3 h-3 shrink-0 ${isSelected ? 'text-gray-300 dark:text-gray-600' : cfg.color}`} />
                                             </div>
                                             <p className={`text-xs truncate
                                                 ${isSelected ? 'text-gray-300 dark:text-gray-600' : 'text-gray-400'}`}>
@@ -207,7 +168,7 @@ export default function EmailsPage() {
                                 </p>
                                 {selected.sender && (
                                     <p className="text-xs text-gray-400 mt-0.5">
-                                        {t('dashboard.emails.from')} {selected.sender.name}
+                                        {t('dashboard.emails.from')} {selected.sender?.email ?? t('dashboard.emails.system')}
                                     </p>
                                 )}
                             </div>
@@ -227,14 +188,18 @@ export default function EmailsPage() {
                             </span>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-4 sm:p-8 text-sm text-gray-600
-                            dark:text-gray-400 leading-relaxed">
+                        <div className="flex-1 flex flex-col min-h-0 overflow-hidden p-4 sm:p-8">
                             {selected.interview && (
-                                <p className="text-xs text-gray-400 mb-4">
-                                    {t('dashboard.emails.interviewLabel', { id: selected.interview.id })} · {selected.interview.vacancy?.title}
+                                <p className="text-xs text-gray-400 mb-4 shrink-0">
+                                    {t('dashboard.emails.interviewLabel', { token: selected.interview.token })} · {selected.interview.vacancy?.title}
                                 </p>
                             )}
-                            <p className="text-gray-400 italic">{t('dashboard.emails.previewUnavailable')}</p>
+                            <iframe
+                                srcDoc={selected.body}
+                                className="w-full flex-1 min-h-0 border-0"
+                                sandbox="allow-same-origin"
+                                title="email body"
+                            />
                         </div>
                     </div>
                 )}

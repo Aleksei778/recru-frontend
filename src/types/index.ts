@@ -1,17 +1,5 @@
 export type UserRole = 'admin' | 'hr'
 
-export interface User {
-    id: number
-    name: string
-    email: string
-    role: UserRole
-    settings: Record<string, unknown> | null
-    email_verified_at: string | null
-    created_at: string
-    updated_at: string
-    tenant?: Tenant
-}
-
 export type VacancyEmploymentType =
     'full_time' |
     'part_time' |
@@ -61,19 +49,17 @@ export interface Tenant {
     name: string
     website: string | null
     industry: string | null
-    subdomain: string[]
+    subdomain: string
     created_at: string
     updated_at: string
 }
 
 export interface User {
     id: number
-    first_name: string
-    last_name: string
+    name: string
     email: string
     role: UserRole
-    avatar: string | null
-    settings: Record<string, unknown> | null
+    locale?: Locale
     email_verified_at: string | null
     created_at: string
     updated_at: string
@@ -106,6 +92,7 @@ export interface Candidate {
     status: string | null
     experience_years: number
     education_level: CandidateEducationLevel | null
+    locale?: Locale
     interviews?: Interview[]
     workplaces?: Workplace[]
     socials?: Social[]
@@ -117,11 +104,12 @@ export interface CandidateData {
     last_name: string
     middle_name: string | null
     email: string
-    phone: string | null
+    phone: string
     source: CandidateSource
     grade: CandidateGrade | null
     experience_years: number
     education_level: CandidateEducationLevel
+    locale: Locale
     workplaces: Workplace[]
     socials: Social[]
     skills: Skill[]
@@ -189,23 +177,12 @@ export interface Interview {
     candidate: Candidate
     vacancy: Vacancy
     questions: Question[]
+    token: string
     grade: number
     text_grade: string
     status: InterviewStatus
-    conversation: Message[]
     created_at: string
     updated_at: string
-}
-
-export interface InterviewSession {
-    id: number
-    status: InterviewStatus
-    turn: number
-    can_finish: boolean
-    conversation: Message[]
-    ai_evaluation: AiEvaluation | null
-    vacancy: Vacancy
-    candidate: Candidate
 }
 
 export interface Paginated<T> {
@@ -235,7 +212,7 @@ export interface RegisterData {
 export interface UpdateProfileData {
     name: string,
     email: string,
-    avatar: string | null,
+    locale: Locale,
 }
 
 export interface UpdateTenantData {
@@ -259,6 +236,8 @@ export interface AuthContext {
     logout: () => void
     loading: boolean
     setTokenAndUser: (token: string, user: User, tenant: Tenant) => void
+    setUser: (user: User) => void
+    setTenant: (tenant: Tenant) => void
 }
 
 export type InterviewStatus = 'pending' | 'generating_questions' | 'questions_review' |
@@ -276,11 +255,6 @@ export interface AiEvaluation {
     score: number
 }
 
-export interface Message {
-    role: 'user' | 'assistant';
-    content: string;
-}
-
 export type EmailRecipient =
     | { recipient_type: 'candidate'; recipient: Candidate }
     | { recipient_type: 'user'; recipient: User }
@@ -290,13 +264,11 @@ export type Email = EmailRecipient & {
     interview?: Interview
     sender?: User
     type: EmailType
-    status: EmailStatus
     locale: Locale
     subject: string
+    body: string
     sent_at: string | null
 }
-
-export type EmailStatus = 'pending' | 'sent' | 'failed'
 
 export type EmailType = 'interview_invite' | 'questions_ready' | 'results' | 'decision';
 

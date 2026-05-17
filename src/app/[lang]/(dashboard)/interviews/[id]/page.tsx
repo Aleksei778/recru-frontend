@@ -29,6 +29,7 @@ export default function InterviewDetailPage() {
     useEffect(() => {
         if (!token) return
         api.get(interviewId, token).then(res => {
+            // @ts-ignore
             const interview = res.data ?? res
             setInterview(interview)
             setLoading(false)

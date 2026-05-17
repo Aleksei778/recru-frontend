@@ -67,7 +67,8 @@
       "team": "Team",
       "profile": "Profile",
       "settings": "Settings",
-      "logout": "Logout"
+      "logout": "Logout",
+      "locale": "Locale"
     },
     "candidates": {
       "heading": "Candidates",
@@ -117,7 +118,11 @@
         "grade": "Grade",
         "gradePlaceholder": "Any grade",
         "saving": "Saving...",
-        "add": "Add candidate"
+        "add": "Add candidate",
+        "locale": {
+          "ru": "Russian",
+          "en": "English"
+        }
       },
       "interview": {
         "title": "Create interview",
@@ -207,6 +212,7 @@
       "search": "Search",
       "empty": "No emails",
       "inbox": "Inbox",
+      "system": "System",
       "sentTab": "Sent",
       "statusFilter": {
         "all": "All",
@@ -218,12 +224,11 @@
       "from": "From:",
       "types": {
         "interview_invite": "Interview invite",
-        "questions_ready": "Questions ready",
-        "results": "Results",
-        "decision": "Decision"
+        "interview_finished": "Interview finished",
+        "approve": "Approve candidate",
+        "reject": "Reject candidate"
       },
-      "interviewLabel": "Interview #{{id}}",
-      "previewUnavailable": "Email preview unavailable",
+      "interviewLabel": "Interview #{{token}}",
       "status": {
         "sent": "Sent",
         "pending": "Pending",
@@ -235,21 +240,28 @@
       "logout": "Logout",
       "profile": {
         "tab": "Profile",
-        "name": "Name",
+        "firstName": "First name",
+        "lastName": "Last name",
         "email": "Email",
         "role": "Role",
         "save": "Save personal settings",
         "saved": "Personal settings successfully saved",
         "error": "Error updating profile",
-        "namePlaceholder": "Enter your name",
-        "emailPlaceholder": "Enter your email"
+        "firstNamePlaceholder": "Enter your first name",
+        "lastNamePlaceholder": "Enter your last name",
+        "emailPlaceholder": "Enter your email",
+        "locale": "System language",
+        "localeOptions": {
+          "ru": "Russian",
+          "en": "English"
+        }
       },
       "company": {
         "tab": "Company",
         "name": "Company",
         "website": "Website",
         "industry": "Industry",
-        "domains": "Domains",
+        "subdomain": "Subdomain",
         "save": "Save company settings",
         "saved": "Company settings successfully saved",
         "error": "Error updating company",

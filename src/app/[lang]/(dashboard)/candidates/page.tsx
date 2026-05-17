@@ -8,7 +8,7 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { candidates as cApi, interviews as iApi, vacancies as vApi } from '@/lib/api'
 import {
     Candidate, CandidateEducationLevel, CandidateSource, CandidateGrade,
-    CandidateData, Vacancy, Skill
+    CandidateData, Vacancy, Skill, Locale
 } from '@/types'
 import { PlusIcon, LinkIcon, CheckIcon, XIcon, ChevronRightIcon } from 'lucide-react'
 import SkillsInput from '@/components/skills/SkillsInput'
@@ -17,6 +17,7 @@ const EMPTY_FORM: CandidateData = {
     first_name: '', last_name: '', middle_name: null,
     email: '', phone: '', source: 'hh',
     grade: null, experience_years: 0, education_level: 'bachelor',
+    locale: 'ru',
     workplaces: [], socials: [], skills: [],
 }
 
@@ -303,7 +304,7 @@ export default function CandidatePage() {
                             />
                             <input
                                 type="tel"
-                                value={form.phone}
+                                value={form?.phone ?? ''}
                                 onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
                                 placeholder={t('dashboard.candidates.modal.phone')}
                                 className={inputClass}
@@ -332,6 +333,19 @@ export default function CandidatePage() {
                                     </select>
                                     <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
                                 </div>
+                            </div>
+
+                            <div className="relative">
+                                <select
+                                    value={form.locale}
+                                    onChange={e => setForm(f => ({ ...f, locale: e.target.value as Locale }))}
+                                    className={selectClass}
+                                >
+                                    {(['ru', 'en'] as Locale[]).map(v => (
+                                        <option key={v} value={v}>{t(`dashboard.candidates.modal.locale.${v}`)}</option>
+                                    ))}
+                                </select>
+                                <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

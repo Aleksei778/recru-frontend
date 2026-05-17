@@ -23,6 +23,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { useTranslation } from "@/hooks/useTranslation";
 import { nauryzRedKeds } from "@/lib/font";
 import { useTheme } from "@/contexts/theme-context";
+import { useAuth } from "@/contexts/auth-context";
 
 interface SidebarProps {
     isOpen?: boolean;
@@ -34,6 +35,9 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
     const { language, toggleLanguage } = useLanguage();
     const { theme, toggleTheme } = useTheme();
     const { t } = useTranslation();
+    const { user } = useAuth();
+
+    const isAdmin = user?.role === 'admin';
 
     const menuItems = [
         {
@@ -66,11 +70,11 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
             label: t("dashboard.sidebar.statistics"),
             href: `/${language}/statistics`,
         },
-        {
+        ...(isAdmin ? [{
             icon: UsersRound,
             label: t("dashboard.sidebar.team"),
             href: `/${language}/team`,
-        },
+        }] : []),
         {
             icon: User,
             label: t("dashboard.sidebar.profile"),

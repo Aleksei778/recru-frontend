@@ -62,7 +62,8 @@ async function request<T>(
         throw new ApiError(res.status, err?.error ?? err?.message ?? 'Server Error', err)
     }
 
-    return res.json()
+    const text = await res.text()
+    return text ? JSON.parse(text) : ({} as T)
 }
 
 export class ApiError extends Error {
@@ -93,21 +94,23 @@ export const auth = {
 
     me: (token: string) =>
         request<{ user: User, tenant: Tenant }>('/auth/me', {}, token),
+}
 
+export const profile = {
     updateProfile: (updateProfileData: UpdateProfileData, token: string) =>
-        request<{ user: User, tenant: Tenant }>('/auth/me', {
+        request<{ user?: User }>('/profile/user/data', {
             method: 'PATCH',
             body: JSON.stringify(updateProfileData),
         }, token),
 
     updateTenant: (updateTenantData: UpdateTenantData, token: string) =>
-        request<{ tenant: Tenant }>('/auth/tenant', {
+        request<{ tenant?: Tenant }>('/profile/tenant', {
             method: 'PATCH',
             body: JSON.stringify(updateTenantData)
         }, token),
 
     updatePassword: (updateProfileData: UpdatePasswordData, token: string) =>
-        request<{ user: User, tenant: Tenant }>('/auth/me/password', {
+        request<{ message?: string }>('/profile/user/password', {
             method: 'PATCH',
             body: JSON.stringify(updateProfileData),
         }, token),

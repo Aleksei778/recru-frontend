@@ -5,8 +5,9 @@
 import { useState } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { useTranslation } from '@/hooks/useTranslation'
-import { auth as api, ApiError } from '@/lib/api'
-import { UserIcon, LockIcon, BuildingIcon, LogOutIcon, CheckIcon } from 'lucide-react'
+import { profile as api, ApiError } from '@/lib/api'
+import { Locale } from '@/types'
+import { UserIcon, LockIcon, BuildingIcon, CheckIcon } from 'lucide-react'
 import React from 'react'
 
 const inputClass = `
@@ -56,16 +57,17 @@ const SubmitButton = ({ saving, success, label, successLabel }: {
     </button>
 )
 
-type Tab = 'profile' | 'company' | 'password' | 'settings'
+type Tab = 'profile' | 'company' | 'password'
 
 export default function ProfilePage() {
     const { t } = useTranslation()
-    const { token, user, tenant, logout } = useAuth()
+    const { token, user, tenant, setUser, setTenant } = useAuth()
 
     const [tab, setTab] = useState<Tab>('profile')
 
     const [name, setName] = useState(user?.name ?? '')
     const [email, setEmail] = useState(user?.email ?? '')
+    const [locale, setLocale] = useState<Locale>(user?.locale ?? 'ru')
     const [profileSaving, setProfileSaving] = useState(false)
     const [profileSuccess, setProfileSuccess] = useState(false)
     const [profileError, setProfileError] = useState<string | null>(null)
@@ -95,8 +97,12 @@ export default function ProfilePage() {
         setProfileSaving(true)
         setProfileError(null)
         try {
-            const updated = await api.updateProfile({ name, email, avatar }, token)
-
+            const updated = await api.updateProfile({ name, email, locale }, token)
+            if (updated?.user) {
+                setUser(updated.user)
+            } else if (user) {
+                setUser({ ...user, name, email, locale })
+            }
             flashSuccess(setProfileSuccess)
         } catch (err) {
             setProfileError(err instanceof ApiError ? err.message : t('dashboard.profile.profile.error'))
@@ -111,7 +117,12 @@ export default function ProfilePage() {
         setCompanySaving(true)
         setCompanyError(null)
         try {
-            await api.updateTenant({ name: companyName, website, industry }, token)
+            const updated = await api.updateTenant({ name: companyName, website: website ?? '', industry: industry ?? '' }, token)
+            if (updated?.tenant) {
+                setTenant(updated.tenant)
+            } else if (tenant) {
+                setTenant({ ...tenant, name: companyName, website: website ?? null, industry: industry ?? null })
+            }
             flashSuccess(setCompanySuccess)
         } catch (err) {
             setCompanyError(err instanceof ApiError ? err.message : t('dashboard.profile.company.error'))
@@ -152,11 +163,15 @@ export default function ProfilePage() {
         }
     }
 
+    const isAdmin = user?.role === 'admin'
+
     const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
         { id: 'profile',  label: t('dashboard.profile.profile.tab'),  icon: UserIcon     },
-        { id: 'company',  label: t('dashboard.profile.company.tab'),  icon: BuildingIcon },
+        ...(isAdmin ? [{ id: 'company' as Tab, label: t('dashboard.profile.company.tab'), icon: BuildingIcon }] : []),
         { id: 'password', label: t('dashboard.profile.password.tab'), icon: LockIcon     },
     ]
+
+    const displayName = user?.name || user?.email
 
     return (
         <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
@@ -164,20 +179,19 @@ export default function ProfilePage() {
 
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-2xl font-bold text-black dark:text-white">
+                    <h1 className="text-3xl font-bold text-black dark:text-white">
                         {t('dashboard.profile.heading')}
                     </h1>
-                    <p className="text-sm text-gray-400">{user?.email}</p>
                 </div>
 
                 {/* Avatar card */}
                 <div className="flex items-center gap-5 p-6 rounded-3xl border border-black dark:border-white mb-8">
                     <div className="w-14 h-14 rounded-full border-2 border-black dark:border-white
                                     flex items-center justify-center bg-gray-50 dark:bg-gray-950 shrink-0">
-                        <UserIcon/>
+                        <UserIcon />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-black dark:text-white truncate">{user?.name}</p>
+                        <p className="font-semibold text-black dark:text-white truncate">{displayName}</p>
                         <p className="text-sm text-gray-400 mt-0.5">{user?.role}</p>
                         {tenant && (
                             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
@@ -220,25 +234,51 @@ export default function ProfilePage() {
                     <div className="rounded-3xl border border-black dark:border-white p-5 sm:p-8">
                         <form onSubmit={saveProfile} className="space-y-4">
                             <div>
-                                <Label>{t('dashboard.profile.profile.name')}</Label>
-                                <input value={name} onChange={e => setName(e.target.value)}
-                                       required placeholder={t('dashboard.profile.profile.namePlaceholder')}
-                                       className={inputClass} />
+                                <Label>{t('dashboard.profile.profile.firstName')}</Label>
+                                <input
+                                    value={name}
+                                    onChange={e => setName(e.target.value)}
+                                    required
+                                    placeholder={t('dashboard.profile.profile.firstNamePlaceholder')}
+                                    className={inputClass}
+                                />
                             </div>
                             <div>
                                 <Label>{t('dashboard.profile.profile.email')}</Label>
-                                <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-                                       required placeholder={t('dashboard.profile.profile.emailPlaceholder')}
-                                       className={inputClass} />
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
+                                    required
+                                    placeholder={t('dashboard.profile.profile.emailPlaceholder')}
+                                    className={inputClass}
+                                />
+                            </div>
+                            <div>
+                                <Label>{t('dashboard.profile.profile.locale')}</Label>
+                                <div className="relative">
+                                    <select
+                                        value={locale}
+                                        onChange={e => setLocale(e.target.value as Locale)}
+                                        className={inputClass + ' appearance-none'}
+                                    >
+                                        <option value="ru">{t('dashboard.profile.profile.localeOptions.ru')}</option>
+                                        <option value="en">{t('dashboard.profile.profile.localeOptions.en')}</option>
+                                    </select>
+                                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+                                </div>
                             </div>
                             <div>
                                 <Label>{t('dashboard.profile.profile.role')}</Label>
                                 <div className={readonlyClass}>{user?.role}</div>
                             </div>
                             {profileError && <p className="text-red-500 text-xs text-center">{profileError}</p>}
-                            <SubmitButton saving={profileSaving} success={profileSuccess}
-                                          label={t('dashboard.profile.profile.save')}
-                                          successLabel={t('dashboard.profile.profile.saved')} />
+                            <SubmitButton
+                                saving={profileSaving}
+                                success={profileSuccess}
+                                label={t('dashboard.profile.profile.save')}
+                                successLabel={t('dashboard.profile.profile.saved')}
+                            />
                         </form>
                     </div>
                 )}
@@ -249,37 +289,52 @@ export default function ProfilePage() {
                         <form onSubmit={saveCompany} className="space-y-4">
                             <div>
                                 <Label>{t('dashboard.profile.company.name')}</Label>
-                                <input value={companyName} onChange={e => setCompanyName(e.target.value)}
-                                       required placeholder={t('dashboard.profile.company.namePlaceholder')}
-                                       className={inputClass} />
+                                <input
+                                    value={companyName}
+                                    onChange={e => setCompanyName(e.target.value)}
+                                    required
+                                    placeholder={t('dashboard.profile.company.namePlaceholder')}
+                                    className={inputClass}
+                                />
                             </div>
                             <div>
                                 <Label>{t('dashboard.profile.company.website')}</Label>
-                                <input value={website} onChange={e => setWebsite(e.target.value)}
-                                       placeholder="https://company.com" className={inputClass} />
+                                <input
+                                    value={website ?? ''}
+                                    onChange={e => setWebsite(e.target.value)}
+                                    placeholder="https://company.com"
+                                    className={inputClass}
+                                />
                             </div>
                             <div>
                                 <Label>{t('dashboard.profile.company.industry')}</Label>
-                                <input value={industry} onChange={e => setIndustry(e.target.value)}
-                                       placeholder="IT, FinTech, HealthTech" className={inputClass} />
+                                <input
+                                    value={industry ?? ''}
+                                    onChange={e => setIndustry(e.target.value)}
+                                    placeholder="IT, FinTech, HealthTech"
+                                    className={inputClass}
+                                />
                             </div>
 
                             {tenant?.subdomain && (
                                 <div>
-                                    <Label>{t('dashboard.profile.company.domains')}</Label>
+                                    <Label>{t('dashboard.profile.company.subdomain')}</Label>
                                     <div className="flex flex-wrap gap-2">
                                         <span className="text-xs border border-gray-300 dark:border-gray-700
                                             text-gray-500 px-3 py-1 rounded-full">
-                                                {tenant.subdomain}
+                                            {tenant.subdomain}
                                         </span>
                                     </div>
                                 </div>
                             )}
 
                             {companyError && <p className="text-red-500 text-xs text-center">{companyError}</p>}
-                            <SubmitButton saving={companySaving} success={companySuccess}
-                                          label={t('dashboard.profile.company.save')}
-                                          successLabel={t('dashboard.profile.company.saved')} />
+                            <SubmitButton
+                                saving={companySaving}
+                                success={companySuccess}
+                                label={t('dashboard.profile.company.save')}
+                                successLabel={t('dashboard.profile.company.saved')}
+                            />
                         </form>
                     </div>
                 )}
@@ -290,40 +345,47 @@ export default function ProfilePage() {
                         <form onSubmit={savePassword} className="space-y-4">
                             <div>
                                 <Label>{t('dashboard.profile.password.current')}</Label>
-                                <input type="password" value={currentPassword}
-                                       onChange={e => setCurrentPassword(e.target.value)}
-                                       required placeholder={t('dashboard.profile.password.currentPlaceholder')}
-                                       className={inputClass} />
+                                <input
+                                    type="password"
+                                    value={currentPassword}
+                                    onChange={e => setCurrentPassword(e.target.value)}
+                                    required
+                                    placeholder={t('dashboard.profile.password.currentPlaceholder')}
+                                    className={inputClass}
+                                />
                             </div>
                             <div>
                                 <Label>{t('dashboard.profile.password.new')}</Label>
-                                <input type="password" value={newPassword}
-                                       onChange={e => setNewPassword(e.target.value)}
-                                       required placeholder={t('dashboard.profile.password.newPlaceholder')}
-                                       className={inputClass} />
+                                <input
+                                    type="password"
+                                    value={newPassword}
+                                    onChange={e => setNewPassword(e.target.value)}
+                                    required
+                                    placeholder={t('dashboard.profile.password.newPlaceholder')}
+                                    className={inputClass}
+                                />
                             </div>
                             <div>
                                 <Label>{t('dashboard.profile.password.confirm')}</Label>
-                                <input type="password" value={confirmPassword}
-                                       onChange={e => setConfirmPassword(e.target.value)}
-                                       required placeholder={t('dashboard.profile.password.confirmPlaceholder')}
-                                       className={inputClass} />
+                                <input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={e => setConfirmPassword(e.target.value)}
+                                    required
+                                    placeholder={t('dashboard.profile.password.confirmPlaceholder')}
+                                    className={inputClass}
+                                />
                             </div>
                             {passwordError && <p className="text-red-500 text-xs text-center">{passwordError}</p>}
-                            <SubmitButton saving={passwordSaving} success={passwordSuccess}
-                                          label={t('dashboard.profile.password.save')}
-                                          successLabel={t('dashboard.profile.password.saved')} />
+                            <SubmitButton
+                                saving={passwordSaving}
+                                success={passwordSuccess}
+                                label={t('dashboard.profile.password.save')}
+                                successLabel={t('dashboard.profile.password.saved')}
+                            />
                         </form>
                     </div>
                 )}
-
-                {/* Logout */}
-                <button onClick={logout}
-                        className="flex items-center gap-2 mt-8 text-sm text-gray-400
-                               hover:text-black dark:hover:text-white transition-colors">
-                    <LogOutIcon className="w-4 h-4" />
-                    {t('dashboard.profile.logout')}
-                </button>
             </div>
         </div>
     )
