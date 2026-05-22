@@ -135,6 +135,31 @@
         "copy": "Скопировать",
         "validity": "Ссылка действительна 7 дней.",
         "close": "Закрыть"
+      },
+      "detail": {
+        "back": "К кандидатам",
+        "contacts": "Контакты",
+        "education": "Образование",
+        "source": "Источник",
+        "skills": "Навыки",
+        "workExperience": "Опыт работы",
+        "interviews": "Интервью",
+        "present": "наст. время",
+        "yearsExp": "{{years}} лет опыта",
+        "status": {
+          "new": "Новый",
+          "screened": "Проверен",
+          "approved": "Одобрен",
+          "rejected": "Отклонён"
+        },
+        "sources": {
+          "hh": "hh.ru",
+          "habr": "Habr Карьера",
+          "social": "Социальные сети",
+          "email": "Email",
+          "resume_parsing": "Парсинг резюме",
+          "bulk_import": "Массовый импорт"
+        }
       }
     },
     "vacancies": {

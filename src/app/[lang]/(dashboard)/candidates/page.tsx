@@ -3,7 +3,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
+import { useLanguage } from '@/contexts/language-context'
 import { useTranslation } from '@/hooks/useTranslation'
 import { candidates as cApi, interviews as iApi, vacancies as vApi } from '@/lib/api'
 import {
@@ -41,6 +43,7 @@ type ModalStep = null | 'basic' | 'details'
 
 export default function CandidatePage() {
     const { token } = useAuth()
+    const { language } = useLanguage()
     const { t } = useTranslation()
 
     const [items, setItems] = useState<Candidate[]>([])
@@ -197,12 +200,14 @@ export default function CandidatePage() {
                             <tr key={c.id} className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-950
                                     ${idx !== items.length - 1 ? 'border-b border-gray-100 dark:border-gray-900' : ''}`}>
                                 <td className="px-6 py-4">
-                                    <p className="font-semibold text-black dark:text-white">
-                                        {c.last_name} {c.first_name}
-                                    </p>
-                                    {c.middle_name && (
-                                        <p className="text-xs text-gray-400 mt-0.5">{c.middle_name}</p>
-                                    )}
+                                    <Link href={`/${language}/candidates/${c.id}`} className="group">
+                                        <p className="font-semibold text-black dark:text-white group-hover:underline underline-offset-2 transition">
+                                            {c.last_name} {c.first_name}
+                                        </p>
+                                        {c.middle_name && (
+                                            <p className="text-xs text-gray-400 mt-0.5">{c.middle_name}</p>
+                                        )}
+                                    </Link>
                                 </td>
                                 <td className="px-6 py-4">
                                     <p className="text-gray-600 dark:text-gray-400">{c.email ?? '—'}</p>

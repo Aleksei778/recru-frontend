@@ -135,6 +135,31 @@
         "copy": "Copy",
         "validity": "Link is valid for 7 days.",
         "close": "Close"
+      },
+      "detail": {
+        "back": "Back to candidates",
+        "contacts": "Contacts",
+        "education": "Education",
+        "source": "Source",
+        "skills": "Skills",
+        "workExperience": "Work experience",
+        "interviews": "Interviews",
+        "present": "present",
+        "yearsExp": "{{years}} yrs experience",
+        "status": {
+          "new": "New",
+          "screened": "Screened",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        },
+        "sources": {
+          "hh": "hh.ru",
+          "habr": "Habr Career",
+          "social": "Social media",
+          "email": "Email",
+          "resume_parsing": "Resume parsing",
+          "bulk_import": "Bulk import"
+        }
       }
     },
     "vacancies": {

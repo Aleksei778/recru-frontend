@@ -155,7 +155,8 @@ export const candidates = {
         request<Paginated<Candidate>>(`/candidates?page=${page}`, {}, token),
 
     get: (id: number, token: string) =>
-        request<Candidate>(`/candidates/${id}`, {}, token),
+        request<{ data: Candidate } | Candidate>(`/candidates/${id}`, {}, token)
+            .then(r => ('data' in r ? r.data : r)),
 
     create: (form: CandidateData, skill_ids: number[], token: string) =>
         request<Candidate>('/candidates', {
