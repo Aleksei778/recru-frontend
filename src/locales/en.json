@@ -175,6 +175,15 @@
       "cancel": "Cancel",
       "saving": "Saving...",
       "experience": "Experience: {{years}}+ yrs",
+      "tableHeaders": {
+        "vacancy": "Vacancy",
+        "company": "Company",
+        "location": "Location",
+        "salary": "Salary",
+        "skills": "Skills",
+        "experience": "Experience",
+        "status": "Status"
+      },
       "modal": {
         "createTitle": "New vacancy",
         "editTitle": "Edit vacancy",

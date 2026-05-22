@@ -175,6 +175,15 @@
       "cancel": "Отмена",
       "saving": "Сохранение...",
       "experience": "Опыт: {{years}}+ лет",
+      "tableHeaders": {
+        "vacancy": "Вакансия",
+        "company": "Компания",
+        "location": "Локация",
+        "salary": "Зарплата",
+        "skills": "Навыки",
+        "experience": "Опыт",
+        "status": "Статус"
+      },
       "modal": {
         "createTitle": "Новая вакансия",
         "editTitle": "Редактировать вакансию",

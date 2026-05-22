@@ -153,11 +153,11 @@ export default function VacanciesPage() {
                 </button>
             </div>
 
-            {/* Grid */}
+            {/* Table */}
             {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {[...Array(6)].map((_, i) => (
-                        <div key={i} className="h-52 rounded-3xl border border-gray-200 dark:border-gray-800 animate-pulse" />
+                <div className="space-y-3">
+                    {[...Array(5)].map((_, i) => (
+                        <div key={i} className="h-16 rounded-2xl border border-gray-100 dark:border-gray-900 animate-pulse" />
                     ))}
                 </div>
             ) : items.length === 0 ? (
@@ -171,91 +171,113 @@ export default function VacanciesPage() {
                     </button>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {items.map(v => (
-                        <div
-                            key={v.id}
-                            className="flex flex-col rounded-3xl border border-black dark:border-white
-                                       p-7 hover:shadow-2xl transition-all duration-200"
-                        >
-                            {/* Title + status */}
-                            <div className="flex items-start justify-between gap-2 mb-4">
-                                <h2 className="text-base font-bold text-black dark:text-white leading-snug">
-                                    {v.title}
-                                </h2>
-                                <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium flex-shrink-0 ${statusColors[v.status]}`}>
-                                    {t(`dashboard.vacancies.status.${v.status}`)}
-                                </span>
-                            </div>
-
-                            {/* Company */}
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                                {tenant?.name ?? 'NDA Company'}
-                            </p>
-
-                            {/* Location */}
-                            {v.location && (
-                                <div className="flex items-center gap-1 text-xs text-gray-400 mb-4">
-                                    <MapPinIcon className="w-3.5 h-3.5 flex-shrink-0" />
-                                    {v.location}
-                                </div>
-                            )}
-
-                            {/* Salary */}
-                            {(v.salary_min || v.salary_max) && (
-                                <p className="text-sm font-semibold text-black dark:text-white mb-4">
-                                    {v.salary_min ?? 0} — {v.salary_max ?? '∞'} {v.salary_currency ?? 'RUB'}
-                                </p>
-                            )}
-
-                            {/* Skills */}
-                            <div className="flex flex-wrap gap-1.5 mb-5">
-                                {v.skills.slice(0, 4).map(skill => (
-                                    <span
-                                        key={skill.id}
-                                        className="text-xs border border-gray-300 dark:border-gray-600
-                                                   text-gray-600 dark:text-gray-300 px-2.5 py-0.5 rounded-full"
-                                    >
-                                        {skill.name}
-                                    </span>
+                <div className="rounded-3xl border border-black dark:border-white overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm min-w-[900px]">
+                            <thead>
+                                <tr className="border-b border-black dark:border-white">
+                                    {[
+                                        t('dashboard.vacancies.tableHeaders.vacancy'),
+                                        t('dashboard.vacancies.tableHeaders.company'),
+                                        t('dashboard.vacancies.tableHeaders.location'),
+                                        t('dashboard.vacancies.tableHeaders.salary'),
+                                        t('dashboard.vacancies.tableHeaders.skills'),
+                                        t('dashboard.vacancies.tableHeaders.experience'),
+                                        t('dashboard.vacancies.tableHeaders.status'),
+                                        '',
+                                    ].map((h, i) => (
+                                        <th key={i} className="text-left px-6 py-4 text-xs font-semibold
+                                                text-black dark:text-white uppercase tracking-widest">
+                                            {h}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {items.map((v, idx) => (
+                                    <tr key={v.id} className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-950
+                                            ${idx !== items.length - 1 ? 'border-b border-gray-100 dark:border-gray-900' : ''}`}>
+                                        {/* Title */}
+                                        <td className="px-6 py-4">
+                                            <p className="font-semibold text-black dark:text-white">{v.title}</p>
+                                        </td>
+                                        {/* Company */}
+                                        <td className="px-6 py-4">
+                                            <p className="text-gray-500 dark:text-gray-400">{tenant?.name ?? 'NDA Company'}</p>
+                                        </td>
+                                        {/* Location */}
+                                        <td className="px-6 py-4">
+                                            {v.location ? (
+                                                <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                                                    <MapPinIcon className="w-3.5 h-3.5 flex-shrink-0" />
+                                                    {v.location}
+                                                </div>
+                                            ) : '—'}
+                                        </td>
+                                        {/* Salary */}
+                                        <td className="px-6 py-4">
+                                            {(v.salary_min || v.salary_max) ? (
+                                                <p className="font-semibold text-black dark:text-white whitespace-nowrap">
+                                                    {v.salary_min ?? 0} — {v.salary_max ?? '∞'} {v.salary_currency ?? 'RUB'}
+                                                </p>
+                                            ) : <span className="text-gray-400">—</span>}
+                                        </td>
+                                        {/* Skills */}
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-wrap gap-1">
+                                                {v.skills.slice(0, 3).map(skill => (
+                                                    <span key={skill.id} className="text-xs border border-gray-200
+                                                            dark:border-gray-800 text-gray-500 px-2 py-0.5 rounded-full">
+                                                        {skill.name}
+                                                    </span>
+                                                ))}
+                                                {v.skills.length > 3 && (
+                                                    <span className="text-xs text-gray-400">+{v.skills.length - 3}</span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        {/* Experience */}
+                                        <td className="px-6 py-4 text-gray-400 text-xs">
+                                            {v.experience_years !== null
+                                                ? t('dashboard.vacancies.experience', { years: v.experience_years })
+                                                : '—'}
+                                        </td>
+                                        {/* Status */}
+                                        <td className="px-6 py-4">
+                                            <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${statusColors[v.status]}`}>
+                                                {t(`dashboard.vacancies.status.${v.status}`)}
+                                            </span>
+                                        </td>
+                                        {/* Actions */}
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => openEdit(v)}
+                                                    className="flex items-center gap-1.5 text-xs px-3.5 py-1.5
+                                                               border border-black dark:border-white rounded-full
+                                                               text-black dark:text-white hover:bg-black hover:text-white
+                                                               dark:hover:bg-white dark:hover:text-black transition-all duration-200"
+                                                >
+                                                    <PencilIcon className="w-3.5 h-3.5" />
+                                                    {t('dashboard.vacancies.edit')}
+                                                </button>
+                                                <button
+                                                    onClick={() => setDeleteTarget(v)}
+                                                    className="flex items-center gap-1.5 text-xs px-3.5 py-1.5
+                                                               border border-gray-300 dark:border-gray-700 rounded-full
+                                                               text-gray-400 hover:border-red-500 hover:text-red-500
+                                                               transition-all duration-200"
+                                                >
+                                                    <Trash2Icon className="w-3.5 h-3.5" />
+                                                    {t('dashboard.vacancies.delete')}
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 ))}
-                                {v.skills.length > 4 && (
-                                    <span className="text-xs text-gray-400">+{v.skills.length - 4}</span>
-                                )}
-                            </div>
-
-                            {/* Footer */}
-                            <div className="mt-auto flex items-center justify-between gap-2">
-                                {v.experience_years !== null && (
-                                    <span className="text-xs text-gray-400">
-                                        {t('dashboard.vacancies.experience', { years: v.experience_years })}
-                                    </span>
-                                )}
-                                <div className="flex items-center gap-2 ml-auto">
-                                    <button
-                                        onClick={() => openEdit(v)}
-                                        className="flex items-center gap-1.5 text-xs px-3.5 py-1.5
-                                                   border border-black dark:border-white rounded-full
-                                                   text-black dark:text-white hover:bg-black hover:text-white
-                                                   dark:hover:bg-white dark:hover:text-black transition-all duration-200"
-                                    >
-                                        <PencilIcon className="w-3.5 h-3.5" />
-                                        {t('dashboard.vacancies.edit')}
-                                    </button>
-                                    <button
-                                        onClick={() => setDeleteTarget(v)}
-                                        className="flex items-center gap-1.5 text-xs px-3.5 py-1.5
-                                                   border border-gray-300 dark:border-gray-700 rounded-full
-                                                   text-gray-400 hover:border-red-500 hover:text-red-500
-                                                   transition-all duration-200"
-                                    >
-                                        <Trash2Icon className="w-3.5 h-3.5" />
-                                        {t('dashboard.vacancies.delete')}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
 
