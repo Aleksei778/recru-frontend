@@ -4,8 +4,14 @@ import { Suspense, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
 import { useLanguage } from '@/contexts/language-context'
-import { vacancies as vApi, ApiError } from '@/lib/api'
+import { vacancies as vApi } from '@/lib/api'
 import type { Vacancy, VacancyForm, VacancyEmploymentType, VacancyWorkMode, VacancyStatus, CandidateGrade, CandidateEducationLevel } from '@/types'
+import {
+    type VacancyFieldErrors,
+    validateVacancyForm,
+    applyVacancyApiError,
+    buildVacancyMessages,
+} from '@/lib/vacancy-validation'
 import { PlusIcon, MapPinIcon, PencilIcon, Trash2Icon, XIcon } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useUrlFilters } from '@/hooks/useUrlFilters'
@@ -38,21 +44,23 @@ const statusColors: Record<VacancyStatus, string> = {
     closed: 'border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500',
 }
 
-const inputClass = `
-    w-full px-5 py-3 bg-white dark:bg-black
-    border border-gray-300 dark:border-gray-700 rounded-full
-    text-gray-900 dark:text-white placeholder-gray-400 text-sm
-    focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white
-    focus:border-transparent transition
-`
+const inputCls = (err?: string) =>
+    `w-full px-5 py-3 bg-white dark:bg-black
+    border ${err ? 'border-red-400 focus:ring-red-300' : 'border-gray-300 dark:border-gray-700 focus:ring-black dark:focus:ring-white'}
+    rounded-full text-gray-900 dark:text-white placeholder-gray-400 text-sm
+    focus:outline-none focus:ring-2 focus:border-transparent transition`
 
-const selectClass = `
-    w-full px-5 py-3 bg-white dark:bg-black
-    border border-gray-300 dark:border-gray-700 rounded-full
-    text-gray-900 dark:text-white text-sm appearance-none
-    focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white
-    focus:border-transparent transition
-`
+const selectCls = (err?: string) =>
+    `w-full px-5 py-3 bg-white dark:bg-black
+    border ${err ? 'border-red-400 focus:ring-red-300' : 'border-gray-300 dark:border-gray-700 focus:ring-black dark:focus:ring-white'}
+    rounded-full text-gray-900 dark:text-white text-sm appearance-none
+    focus:outline-none focus:ring-2 focus:border-transparent transition`
+
+const textareaCls = (err?: string) =>
+    `w-full px-5 py-3 bg-white dark:bg-black
+    border ${err ? 'border-red-400 focus:ring-red-300' : 'border-gray-300 dark:border-gray-700 focus:ring-black dark:focus:ring-white'}
+    rounded-2xl text-gray-900 dark:text-white placeholder-gray-400 text-sm
+    focus:outline-none focus:ring-2 focus:border-transparent transition resize-none`
 
 const FILTER_DEFAULTS = {
     search: '',
@@ -86,7 +94,7 @@ function VacanciesPageContent() {
     const [editing, setEditing] = useState<Vacancy | null>(null)
     const [form, setForm] = useState<VacancyForm>(EMPTY_FORM)
     const [saving, setSaving] = useState(false)
-    const [saveError, setSaveError] = useState<string | null>(null)
+    const [fieldErrors, setFieldErrors] = useState<VacancyFieldErrors>({})
     const [deleteTarget, setDeleteTarget] = useState<Vacancy | null>(null)
     const [deleting, setDeleting] = useState(false)
 
@@ -127,7 +135,7 @@ function VacanciesPageContent() {
             location: v.location,
             grade: v.grade,
             education_level: v.education_level,
-            skills: [...v.skills],
+            skills: [...(v.skills ?? [])],
         })
         setModalOpen(true)
     }
@@ -136,13 +144,31 @@ function VacanciesPageContent() {
         setModalOpen(false)
         setEditing(null)
         setForm(EMPTY_FORM)
-        setSaveError(null)
+        setFieldErrors({})
+    }
+
+    // Обновить поле формы и сбросить его ошибку
+    const updateField = <K extends keyof VacancyForm>(key: K, value: VacancyForm[K]) => {
+        setForm(f => ({ ...f, [key]: value }))
+        if (fieldErrors[key as keyof VacancyFieldErrors]) {
+            setFieldErrors(prev => ({ ...prev, [key]: undefined }))
+        }
     }
 
     const handleSave = async () => {
-        if (!token || !form.title.trim()) return
+        if (!token) return
+
+        const mode = editing ? 'update' : 'create'
+        const msgs = buildVacancyMessages(t, 'dashboard.vacancies.modal.saveError')
+        const errs = validateVacancyForm(form, mode, msgs)
+
+        if (Object.keys(errs).length > 0) {
+            setFieldErrors(errs)
+            return
+        }
+
         setSaving(true)
-        setSaveError(null)
+        setFieldErrors({})
         try {
             const skill_ids: number[] = form.skills.map(skill => skill.id)
             if (editing) {
@@ -155,7 +181,7 @@ function VacanciesPageContent() {
             }
             closeModal()
         } catch (err) {
-            setSaveError(err instanceof ApiError ? err.message : t('dashboard.vacancies.modal.saveError'))
+            setFieldErrors(applyVacancyApiError(err, t('dashboard.vacancies.modal.saveError')))
         } finally {
             setSaving(false)
         }
@@ -335,7 +361,7 @@ function VacanciesPageContent() {
                                 </thead>
                                 <tbody>
                                     {items.map((v, idx) => (
-                                        <tr key={v.id} className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-950
+                                        <tr key={v.id ?? idx} className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-950
                                                 ${idx !== items.length - 1 ? 'border-b border-gray-100 dark:border-gray-900' : ''}`}>
                                             {/* Title */}
                                             <td className="px-6 py-4">
@@ -370,14 +396,14 @@ function VacanciesPageContent() {
                                             {/* Skills */}
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-wrap gap-1">
-                                                    {v.skills.slice(0, 3).map(skill => (
+                                                    {(v.skills ?? []).slice(0, 3).map(skill => (
                                                         <span key={skill.id} className="text-xs border border-gray-200
                                                                 dark:border-gray-800 text-gray-500 px-2 py-0.5 rounded-full">
                                                             {skill.name}
                                                         </span>
                                                     ))}
-                                                    {v.skills.length > 3 && (
-                                                        <span className="text-xs text-gray-400">+{v.skills.length - 3}</span>
+                                                    {(v.skills ?? []).length > 3 && (
+                                                        <span className="text-xs text-gray-400">+{(v.skills ?? []).length - 3}</span>
                                                     )}
                                                 </div>
                                             </td>
@@ -459,10 +485,13 @@ function VacanciesPageContent() {
                                 </label>
                                 <input
                                     value={form.title}
-                                    onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                                    onChange={e => updateField('title', e.target.value)}
                                     placeholder={t('dashboard.vacancies.modal.titlePlaceholder')}
-                                    className={inputClass}
+                                    className={inputCls(fieldErrors.title)}
                                 />
+                                {fieldErrors.title && (
+                                    <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.title}</p>
+                                )}
                             </div>
 
                             {/* Description */}
@@ -472,15 +501,14 @@ function VacanciesPageContent() {
                                 </label>
                                 <textarea
                                     value={form.description ?? ''}
-                                    onChange={e => setForm(f => ({ ...f, description: e.target.value || null }))}
+                                    onChange={e => updateField('description', e.target.value || null)}
                                     placeholder={t('dashboard.vacancies.modal.descriptionPlaceholder')}
                                     rows={3}
-                                    className="w-full px-5 py-3 bg-white dark:bg-black
-                                               border border-gray-300 dark:border-gray-700 rounded-2xl
-                                               text-gray-900 dark:text-white placeholder-gray-400 text-sm
-                                               focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white
-                                               focus:border-transparent transition resize-none"
+                                    className={textareaCls(fieldErrors.description)}
                                 />
+                                {fieldErrors.description && (
+                                    <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.description}</p>
+                                )}
                             </div>
 
                             {/* Location */}
@@ -490,10 +518,13 @@ function VacanciesPageContent() {
                                 </label>
                                 <input
                                     value={form.location ?? ''}
-                                    onChange={e => setForm(f => ({ ...f, location: e.target.value || null }))}
+                                    onChange={e => updateField('location', e.target.value || null)}
                                     placeholder={t('dashboard.vacancies.modal.locationPlaceholder')}
-                                    className={inputClass}
+                                    className={inputCls(fieldErrors.location)}
                                 />
+                                {fieldErrors.location && (
+                                    <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.location}</p>
+                                )}
                             </div>
 
                             {/* Employment type + Work mode */}
@@ -505,8 +536,8 @@ function VacanciesPageContent() {
                                     <div className="relative">
                                         <select
                                             value={form.employment_type}
-                                            onChange={e => setForm(f => ({ ...f, employment_type: e.target.value as VacancyEmploymentType }))}
-                                            className={selectClass}
+                                            onChange={e => updateField('employment_type', e.target.value as VacancyEmploymentType)}
+                                            className={selectCls(fieldErrors.employment_type)}
                                         >
                                             {(['full_time', 'part_time', 'contract', 'internship'] as VacancyEmploymentType[]).map(v => (
                                                 <option key={v} value={v}>{t(`dashboard.vacancies.employment.${v}`)}</option>
@@ -514,6 +545,9 @@ function VacanciesPageContent() {
                                         </select>
                                         <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
                                     </div>
+                                    {fieldErrors.employment_type && (
+                                        <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.employment_type}</p>
+                                    )}
                                 </div>
                                 <div>
                                     <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5 block">
@@ -522,8 +556,8 @@ function VacanciesPageContent() {
                                     <div className="relative">
                                         <select
                                             value={form.work_mode}
-                                            onChange={e => setForm(f => ({ ...f, work_mode: e.target.value as VacancyWorkMode }))}
-                                            className={selectClass}
+                                            onChange={e => updateField('work_mode', e.target.value as VacancyWorkMode)}
+                                            className={selectCls(fieldErrors.work_mode)}
                                         >
                                             {(['office', 'remote', 'hybrid'] as VacancyWorkMode[]).map(v => (
                                                 <option key={v} value={v}>{t(`dashboard.vacancies.workMode.${v}`)}</option>
@@ -531,6 +565,9 @@ function VacanciesPageContent() {
                                         </select>
                                         <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
                                     </div>
+                                    {fieldErrors.work_mode && (
+                                        <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.work_mode}</p>
+                                    )}
                                 </div>
                             </div>
 
@@ -543,8 +580,8 @@ function VacanciesPageContent() {
                                     <div className="relative">
                                         <select
                                             value={form.status}
-                                            onChange={e => setForm(f => ({ ...f, status: e.target.value as VacancyStatus }))}
-                                            className={selectClass}
+                                            onChange={e => updateField('status', e.target.value as VacancyStatus)}
+                                            className={selectCls(fieldErrors.status)}
                                         >
                                             {(['draft', 'published', 'closed'] as VacancyStatus[]).map(v => (
                                                 <option key={v} value={v}>{t(`dashboard.vacancies.status.${v}`)}</option>
@@ -561,9 +598,12 @@ function VacanciesPageContent() {
                                         type="number"
                                         min={0}
                                         value={form.experience_years ?? ''}
-                                        onChange={e => setForm(f => ({ ...f, experience_years: e.target.value ? +e.target.value : null }))}
-                                        className={inputClass}
+                                        onChange={e => updateField('experience_years', e.target.value ? +e.target.value : null)}
+                                        className={inputCls(fieldErrors.experience_years)}
                                     />
+                                    {fieldErrors.experience_years && (
+                                        <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.experience_years}</p>
+                                    )}
                                 </div>
                             </div>
 
@@ -575,8 +615,8 @@ function VacanciesPageContent() {
                                 <div className="relative">
                                     <select
                                         value={form.grade ?? ''}
-                                        onChange={e => setForm(f => ({ ...f, grade: (e.target.value || null) as CandidateGrade | null }))}
-                                        className={selectClass}
+                                        onChange={e => updateField('grade', (e.target.value || null) as CandidateGrade | null)}
+                                        className={selectCls(fieldErrors.grade)}
                                     >
                                         <option value="">{t('dashboard.vacancies.modal.gradePlaceholder')}</option>
                                         {(['junior', 'middle', 'senior', 'lead'] as CandidateGrade[]).map(g => (
@@ -585,6 +625,9 @@ function VacanciesPageContent() {
                                     </select>
                                     <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
                                 </div>
+                                {fieldErrors.grade && (
+                                    <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.grade}</p>
+                                )}
                             </div>
 
                             {/* Education level */}
@@ -595,8 +638,8 @@ function VacanciesPageContent() {
                                 <div className="relative">
                                     <select
                                         value={form.education_level ?? ''}
-                                        onChange={e => setForm(f => ({ ...f, education_level: (e.target.value || null) as CandidateEducationLevel | null }))}
-                                        className={selectClass}
+                                        onChange={e => updateField('education_level', (e.target.value || null) as CandidateEducationLevel | null)}
+                                        className={selectCls(fieldErrors.education_level)}
                                     >
                                         <option value="">{t('dashboard.vacancies.modal.educationLevelPlaceholder')}</option>
                                         {(['secondary', 'incomplete_higher', 'bachelor', 'master', 'specialist', 'doctor'] as CandidateEducationLevel[]).map(level => (
@@ -605,6 +648,9 @@ function VacanciesPageContent() {
                                     </select>
                                     <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
                                 </div>
+                                {fieldErrors.education_level && (
+                                    <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.education_level}</p>
+                                )}
                             </div>
 
                             {/* Salary */}
@@ -613,28 +659,43 @@ function VacanciesPageContent() {
                                     {t('dashboard.vacancies.modal.salaryMin')} / {t('dashboard.vacancies.modal.salaryMax')}
                                 </label>
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    <input
-                                        type="number"
-                                        min={0}
-                                        value={form.salary_min ?? ''}
-                                        onChange={e => setForm(f => ({ ...f, salary_min: e.target.value ? +e.target.value : null }))}
-                                        placeholder={t('dashboard.vacancies.modal.salaryMin')}
-                                        className={inputClass}
-                                    />
-                                    <input
-                                        type="number"
-                                        min={0}
-                                        value={form.salary_max ?? ''}
-                                        onChange={e => setForm(f => ({ ...f, salary_max: e.target.value ? +e.target.value : null }))}
-                                        placeholder={t('dashboard.vacancies.modal.salaryMax')}
-                                        className={inputClass}
-                                    />
-                                    <input
-                                        value={form.salary_currency ?? ''}
-                                        onChange={e => setForm(f => ({ ...f, salary_currency: e.target.value || null }))}
-                                        placeholder={t('dashboard.vacancies.modal.salaryCurrency')}
-                                        className={inputClass}
-                                    />
+                                    <div>
+                                        <input
+                                            type="number"
+                                            min={0}
+                                            value={form.salary_min ?? ''}
+                                            onChange={e => updateField('salary_min', e.target.value ? +e.target.value : null)}
+                                            placeholder={t('dashboard.vacancies.modal.salaryMin')}
+                                            className={inputCls(fieldErrors.salary_min)}
+                                        />
+                                        {fieldErrors.salary_min && (
+                                            <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.salary_min}</p>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <input
+                                            type="number"
+                                            min={0}
+                                            value={form.salary_max ?? ''}
+                                            onChange={e => updateField('salary_max', e.target.value ? +e.target.value : null)}
+                                            placeholder={t('dashboard.vacancies.modal.salaryMax')}
+                                            className={inputCls(fieldErrors.salary_max)}
+                                        />
+                                        {fieldErrors.salary_max && (
+                                            <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.salary_max}</p>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <input
+                                            value={form.salary_currency ?? ''}
+                                            onChange={e => updateField('salary_currency', e.target.value || null)}
+                                            placeholder={t('dashboard.vacancies.modal.salaryCurrency')}
+                                            className={inputCls(fieldErrors.salary_currency)}
+                                        />
+                                        {fieldErrors.salary_currency && (
+                                            <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.salary_currency}</p>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
@@ -645,21 +706,29 @@ function VacanciesPageContent() {
                                 </label>
                                 <SkillsInput
                                     value={form.skills}
-                                    onChange={skills => setForm(f => ({ ...f, skills }))}
+                                    onChange={skills => {
+                                        setForm(f => ({ ...f, skills }))
+                                        if (fieldErrors.skill_ids) setFieldErrors(prev => ({ ...prev, skill_ids: undefined }))
+                                    }}
                                 />
+                                {fieldErrors.skill_ids && (
+                                    <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.skill_ids}</p>
+                                )}
                             </div>
                         </div>
 
-                        {/* Save error */}
-                        {saveError && (
-                            <p className="text-red-500 text-xs text-center mt-4">{saveError}</p>
+                        {/* General / unmapped server error */}
+                        {fieldErrors.general && (
+                            <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-2.5 mt-4">
+                                <p className="text-red-600 text-xs text-center">{fieldErrors.general}</p>
+                            </div>
                         )}
 
                         {/* Actions */}
                         <div className="flex flex-col gap-3 mt-8">
                             <button
                                 onClick={handleSave}
-                                disabled={saving || !form.title.trim()}
+                                disabled={saving}
                                 className="w-full py-3.5 bg-black dark:bg-white text-white dark:text-black
                                            font-medium rounded-full disabled:opacity-40
                                            disabled:cursor-not-allowed transition-all duration-200 text-sm"
