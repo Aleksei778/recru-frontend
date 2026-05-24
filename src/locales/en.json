@@ -19,6 +19,23 @@
     "login": "Login",
     "registeringIn": "Register into system..."
   },
+  "validation": {
+    "emailRequired": "Please enter your email",
+    "emailInvalid": "Please enter a valid email address",
+    "passwordRequired": "Please enter your password",
+    "passwordMin": "At least 8 characters",
+    "passwordUppercase": "At least one uppercase letter",
+    "passwordLowercase": "At least one lowercase letter",
+    "passwordNumber": "At least one number",
+    "passwordSymbol": "At least one special character",
+    "passwordConfirmRequired": "Please confirm your password",
+    "passwordConfirmMismatch": "Passwords do not match",
+    "companyRequired": "Please enter your company name",
+    "subdomainRequired": "Please enter a subdomain",
+    "subdomainInvalid": "Only lowercase letters, numbers, and hyphens (3–63 characters)",
+    "subdomainStartEnd": "Subdomain cannot start or end with a hyphen",
+    "invalidCredentials": "Invalid email or password"
+  },
   "candidate": {
     "lastName": "Last name",
     "firstName": "First name",

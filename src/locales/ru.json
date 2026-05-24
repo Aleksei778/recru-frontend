@@ -19,6 +19,23 @@
     "login": "Вход",
     "registeringIn": "Регистрируем Вас в системе..."
   },
+  "validation": {
+    "emailRequired": "Введите email",
+    "emailInvalid": "Введите корректный email",
+    "passwordRequired": "Введите пароль",
+    "passwordMin": "Минимум 8 символов",
+    "passwordUppercase": "Минимум одна заглавная буква",
+    "passwordLowercase": "Минимум одна строчная буква",
+    "passwordNumber": "Минимум одна цифра",
+    "passwordSymbol": "Минимум один спецсимвол",
+    "passwordConfirmRequired": "Подтвердите пароль",
+    "passwordConfirmMismatch": "Пароли не совпадают",
+    "companyRequired": "Введите название компании",
+    "subdomainRequired": "Введите субдомен",
+    "subdomainInvalid": "Только строчные буквы, цифры и дефисы (3–63 символа)",
+    "subdomainStartEnd": "Субдомен не может начинаться или заканчиваться на дефис",
+    "invalidCredentials": "Неверный email или пароль"
+  },
   "candidate": {
     "lastName": "Фамилия",
     "firstName": "Имя",

@@ -61,7 +61,9 @@ async function request<T>(
 
     if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new ApiError(res.status, err?.error ?? err?.message ?? 'Server Error', err)
+        const rawMessage = err?.message ?? err?.error
+        const message = typeof rawMessage === 'string' ? rawMessage : 'Server Error'
+        throw new ApiError(res.status, message, err)
     }
 
     const text = await res.text()
@@ -78,12 +80,24 @@ function buildQuery(params: Record<string, string | number | undefined>): string
 }
 
 export class ApiError extends Error {
+    public fieldErrors?: Record<string, string[]>;
+
     constructor(
         public status: number,
         message: string,
         public data?: unknown,
     ) {
         super(message);
+        if (data && typeof data === 'object') {
+            const d = data as Record<string, unknown>;
+            // Laravel 422: { message, errors: { field: ['msg', ...] } }
+            if (d.errors && typeof d.errors === 'object' && d.errors !== null) {
+                this.fieldErrors = d.errors as Record<string, string[]>;
+            // Laravel 401 login: { message, error: { field: ['msg', ...] } }
+            } else if (d.error && typeof d.error === 'object' && d.error !== null) {
+                this.fieldErrors = d.error as Record<string, string[]>;
+            }
+        }
     }
 }
 
