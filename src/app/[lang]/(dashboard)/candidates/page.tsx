@@ -1,12 +1,11 @@
-// src/app/[lang]/(dashboard)/candidates/page.tsx
-
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
 import { useLanguage } from '@/contexts/language-context'
 import { useTranslation } from '@/hooks/useTranslation'
+import { useUrlFilters } from '@/hooks/useUrlFilters'
 import { candidates as cApi, interviews as iApi, vacancies as vApi } from '@/lib/api'
 import {
     Candidate, CandidateEducationLevel, CandidateSource, CandidateGrade,
@@ -14,6 +13,11 @@ import {
 } from '@/types'
 import { PlusIcon, LinkIcon, CheckIcon, XIcon, ChevronRightIcon } from 'lucide-react'
 import SkillsInput from '@/components/skills/SkillsInput'
+import { SearchInput } from '@/components/filters/SearchInput'
+import { SelectFilter } from '@/components/filters/SelectFilter'
+import { SortControl } from '@/components/filters/SortControl'
+import { ActiveFilters } from '@/components/filters/ActiveFilters'
+import { Pagination } from '@/components/ui/Pagination'
 
 const EMPTY_FORM: CandidateData = {
     first_name: '', last_name: '', middle_name: null,
@@ -39,14 +43,35 @@ const selectClass = `
     focus:border-transparent transition
 `
 
+const FILTER_DEFAULTS = {
+    search: '',
+    status: '',
+    grade: '',
+    source: '',
+    sort: '',
+    order: '',
+    page: 1,
+}
+
+const CANDIDATE_SORT_OPTIONS = [
+    { value: 'created_at', labelKey: 'dashboard.filters.candidates.sort_created' },
+    { value: 'name', labelKey: 'dashboard.filters.candidates.sort_name' },
+    { value: 'experience_years', labelKey: 'dashboard.filters.candidates.sort_experience' },
+    { value: 'grade', labelKey: 'dashboard.filters.candidates.sort_grade' },
+    { value: 'status', labelKey: 'dashboard.filters.candidates.sort_status' },
+]
+
 type ModalStep = null | 'basic' | 'details'
 
-export default function CandidatePage() {
+function CandidatePageContent() {
     const { token } = useAuth()
     const { language } = useLanguage()
     const { t } = useTranslation()
 
+    const { filters, setFilter, setFilters, resetFilters } = useUrlFilters(FILTER_DEFAULTS)
+
     const [items, setItems] = useState<Candidate[]>([])
+    const [meta, setMeta] = useState({ current_page: 1, last_page: 1, total: 0 })
     const [loading, setLoading] = useState(true)
     const [step, setStep] = useState<ModalStep>(null)
     const [form, setForm] = useState<CandidateData>(EMPTY_FORM)
@@ -58,14 +83,28 @@ export default function CandidatePage() {
     const [copied, setCopied] = useState(false)
     const [questionsNumber, setQuestionsNumber] = useState(5)
 
+    const reqId = useRef(0)
+
+    // Fetch vacancies once for the interview modal
     useEffect(() => {
         if (!token) return
-        Promise.all([cApi.list(token), vApi.list(token)]).then(([c, v]) => {
-            setItems(c.data)
-            setAllVacancies(v.data)
-            setLoading(false)
-        })
+        vApi.list(token).then(r => setAllVacancies(r.data))
     }, [token])
+
+    // Fetch candidates whenever filters change
+    useEffect(() => {
+        if (!token) return
+        const id = ++reqId.current
+        setLoading(true)
+        cApi.list(token, filters).then(r => {
+            if (reqId.current !== id) return
+            setItems(r.data)
+            setMeta({ current_page: r.current_page, last_page: r.last_page, total: r.total })
+            setLoading(false)
+        }).catch(() => {
+            if (reqId.current === id) setLoading(false)
+        })
+    }, [token, JSON.stringify(filters)]) // eslint-disable-line react-hooks/exhaustive-deps
 
     const closeModals = () => {
         setStep(null)
@@ -82,6 +121,7 @@ export default function CandidatePage() {
             const skill_ids: number[] = form.skills.map(skill => skill.id)
             const candidate = await cApi.create(form, skill_ids, token)
             setItems(prev => [candidate, ...prev])
+            setMeta(m => ({ ...m, total: m.total + 1 }))
             closeModals()
         } finally {
             setSaving(false)
@@ -137,15 +177,34 @@ export default function CandidatePage() {
         })
     }
 
+    const handleSortChange = (field: string) => {
+        if (field) {
+            setFilters({ sort: field, order: filters.order || 'desc' })
+        } else {
+            setFilters({ sort: '', order: '' })
+        }
+    }
+
+    const handleOrderToggle = () => {
+        setFilter('order', filters.order === 'asc' ? 'desc' : 'asc')
+    }
+
+    const activeChips = [
+        filters.search ? { key: 'search', label: `"${filters.search}"` } : null,
+        filters.status ? { key: 'status', label: t(`dashboard.candidates.detail.status.${filters.status}`) } : null,
+        filters.grade  ? { key: 'grade',  label: t(`dashboard.vacancies.grade.${filters.grade}`) } : null,
+        filters.source ? { key: 'source', label: t(`dashboard.candidates.detail.sources.${filters.source}`) } : null,
+    ].filter((c): c is { key: string; label: string } => c !== null)
+
     const canProceed = form.first_name.trim() && form.last_name.trim()
 
     return (
         <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
 
-            <div className="flex items-center justify-between mb-6 sm:mb-10">
+            <div className="flex items-center justify-between mb-6 sm:mb-8">
                 <div>
                     <h1 className="text-2xl font-bold text-black dark:text-white">{t('dashboard.candidates.heading')}</h1>
-                    <p className="text-sm text-gray-400 mt-1">{t('dashboard.candidates.total', { count: items.length })}</p>
+                    <p className="text-sm text-gray-400 mt-1">{t('dashboard.candidates.total', { count: meta.total })}</p>
                 </div>
                 <button
                     onClick={() => setStep('basic')}
@@ -158,6 +217,65 @@ export default function CandidatePage() {
                 </button>
             </div>
 
+            {/* Filter bar */}
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+                <SearchInput
+                    value={filters.search}
+                    onChange={v => setFilter('search', v)}
+                    placeholder={t('dashboard.filters.candidates.search_placeholder')}
+                />
+                <SelectFilter
+                    value={filters.status}
+                    onChange={v => setFilter('status', v)}
+                    placeholder={t('dashboard.filters.candidates.filter_status')}
+                    options={[
+                        { value: 'new',      label: t('dashboard.candidates.detail.status.new') },
+                        { value: 'screened', label: t('dashboard.candidates.detail.status.screened') },
+                        { value: 'approved', label: t('dashboard.candidates.detail.status.approved') },
+                        { value: 'rejected', label: t('dashboard.candidates.detail.status.rejected') },
+                    ]}
+                />
+                <SelectFilter
+                    value={filters.grade}
+                    onChange={v => setFilter('grade', v)}
+                    placeholder={t('dashboard.filters.candidates.filter_grade')}
+                    options={[
+                        { value: 'junior', label: t('dashboard.vacancies.grade.junior') },
+                        { value: 'middle', label: t('dashboard.vacancies.grade.middle') },
+                        { value: 'senior', label: t('dashboard.vacancies.grade.senior') },
+                        { value: 'lead',   label: t('dashboard.vacancies.grade.lead') },
+                    ]}
+                />
+                <SelectFilter
+                    value={filters.source}
+                    onChange={v => setFilter('source', v)}
+                    placeholder={t('dashboard.filters.candidates.filter_source')}
+                    options={[
+                        { value: 'hh',             label: t('dashboard.candidates.detail.sources.hh') },
+                        { value: 'habr',           label: t('dashboard.candidates.detail.sources.habr') },
+                        { value: 'social',         label: t('dashboard.candidates.detail.sources.social') },
+                        { value: 'email',          label: t('dashboard.candidates.detail.sources.email') },
+                        { value: 'resume_parsing', label: t('dashboard.candidates.detail.sources.resume_parsing') },
+                        { value: 'bulk_import',    label: t('dashboard.candidates.detail.sources.bulk_import') },
+                    ]}
+                />
+                <SortControl
+                    sort={filters.sort}
+                    order={filters.order}
+                    label={t('dashboard.filters.sort_by')}
+                    options={CANDIDATE_SORT_OPTIONS.map(o => ({ value: o.value, label: t(o.labelKey) }))}
+                    onSortChange={handleSortChange}
+                    onOrderToggle={handleOrderToggle}
+                />
+            </div>
+
+            <ActiveFilters
+                chips={activeChips}
+                clearLabel={t('dashboard.filters.clear_all')}
+                onRemove={key => setFilter(key as keyof typeof FILTER_DEFAULTS, '')}
+                onClearAll={resetFilters}
+            />
+
             {loading ? (
                 <div className="space-y-3">
                     {[...Array(5)].map((_, i) => (
@@ -167,98 +285,108 @@ export default function CandidatePage() {
             ) : items.length === 0 ? (
                 <div className="text-center py-20">
                     <p className="text-gray-400 mb-3">{t('dashboard.candidates.empty')}</p>
-                    <button
-                        onClick={() => setStep('basic')}
-                        className="text-sm text-black dark:text-white underline underline-offset-4 hover:opacity-60 transition"
-                    >
-                        {t('dashboard.candidates.addFirst')}
-                    </button>
+                    {activeChips.length === 0 && (
+                        <button
+                            onClick={() => setStep('basic')}
+                            className="text-sm text-black dark:text-white underline underline-offset-4 hover:opacity-60 transition"
+                        >
+                            {t('dashboard.candidates.addFirst')}
+                        </button>
+                    )}
                 </div>
             ) : (
-                <div className="rounded-3xl border border-black dark:border-white overflow-hidden">
-                    <div className="overflow-x-auto">
-                    <table className="w-full text-sm min-w-[700px]">
-                        <thead>
-                        <tr className="border-b border-black dark:border-white">
-                            {[
-                                t('dashboard.candidates.tableHeaders.candidate'),
-                                t('dashboard.candidates.tableHeaders.contacts'),
-                                t('dashboard.candidates.tableHeaders.skills'),
-                                t('dashboard.candidates.tableHeaders.lastPosition'),
-                                t('dashboard.candidates.tableHeaders.interview'),
-                                ''
-                            ].map((h, i) => (
-                                <th key={i} className="text-left px-6 py-4 text-xs font-semibold
-                                        text-black dark:text-white uppercase tracking-widest">
-                                    {h}
-                                </th>
-                            ))}
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {items.map((c, idx) => (
-                            <tr key={c.id} className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-950
-                                    ${idx !== items.length - 1 ? 'border-b border-gray-100 dark:border-gray-900' : ''}`}>
-                                <td className="px-6 py-4">
-                                    <Link href={`/${language}/candidates/${c.id}`} className="group">
-                                        <p className="font-semibold text-black dark:text-white group-hover:underline underline-offset-2 transition">
-                                            {c.last_name} {c.first_name}
-                                        </p>
-                                        {c.middle_name && (
-                                            <p className="text-xs text-gray-400 mt-0.5">{c.middle_name}</p>
-                                        )}
-                                    </Link>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <p className="text-gray-600 dark:text-gray-400">{c.email ?? '—'}</p>
-                                    <p className="text-xs text-gray-400 mt-0.5">{c.phone ?? '—'}</p>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex flex-wrap gap-1">
-                                        {(c.skills ?? []).slice(0, 3).map(s => (
-                                            <span key={s.slug} className="text-xs border border-gray-200
-                                                    dark:border-gray-800 text-gray-500 px-2 py-0.5 rounded-full">
-                                                {s.name}
-                                            </span>
-                                        ))}
-                                        {(c.skills?.length ?? 0) > 3 && (
-                                            <span className="text-xs text-gray-400">+{c.skills!.length - 3}</span>
-                                        )}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    {c.workplaces?.[0] ? (
-                                        <div>
-                                            <p className="text-sm text-black dark:text-white">
-                                                {c.workplaces[0].position}
-                                            </p>
-                                            <p className="text-xs text-gray-400 mt-0.5">
-                                                {c.workplaces[0].company_name}
-                                            </p>
-                                        </div>
-                                    ) : '—'}
-                                </td>
-                                <td className="px-6 py-4 text-gray-400 text-xs">
-                                    {t('dashboard.candidates.interviewCount', { count: c.interviews?.length ?? 0 })}
-                                </td>
-                                <td className="px-6 py-4">
-                                    <button
-                                        onClick={() => { setLinkModal(c); setGeneratedLink(''); setSelectedVacancy(null) }}
-                                        className="flex items-center gap-1.5 text-xs px-3.5 py-1.5
-                                                border border-black dark:border-white rounded-full
-                                                text-black dark:text-white hover:bg-black hover:text-white
-                                                dark:hover:bg-white dark:hover:text-black transition-all duration-200"
-                                    >
-                                        <LinkIcon className="w-3.5 h-3.5" />
-                                        {t('dashboard.candidates.interviewButton')}
-                                    </button>
-                                </td>
+                <>
+                    <div className="rounded-3xl border border-black dark:border-white overflow-hidden">
+                        <div className="overflow-x-auto">
+                        <table className="w-full text-sm min-w-[700px]">
+                            <thead>
+                            <tr className="border-b border-black dark:border-white">
+                                {[
+                                    t('dashboard.candidates.tableHeaders.candidate'),
+                                    t('dashboard.candidates.tableHeaders.contacts'),
+                                    t('dashboard.candidates.tableHeaders.skills'),
+                                    t('dashboard.candidates.tableHeaders.lastPosition'),
+                                    t('dashboard.candidates.tableHeaders.interview'),
+                                    ''
+                                ].map((h, i) => (
+                                    <th key={i} className="text-left px-6 py-4 text-xs font-semibold
+                                            text-black dark:text-white uppercase tracking-widest">
+                                        {h}
+                                    </th>
+                                ))}
                             </tr>
-                        ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                            {items.map((c, idx) => (
+                                <tr key={c.id} className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-950
+                                        ${idx !== items.length - 1 ? 'border-b border-gray-100 dark:border-gray-900' : ''}`}>
+                                    <td className="px-6 py-4">
+                                        <Link href={`/${language}/candidates/${c.id}`} className="group">
+                                            <p className="font-semibold text-black dark:text-white group-hover:underline underline-offset-2 transition">
+                                                {c.last_name} {c.first_name}
+                                            </p>
+                                            {c.middle_name && (
+                                                <p className="text-xs text-gray-400 mt-0.5">{c.middle_name}</p>
+                                            )}
+                                        </Link>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <p className="text-gray-600 dark:text-gray-400">{c.email ?? '—'}</p>
+                                        <p className="text-xs text-gray-400 mt-0.5">{c.phone ?? '—'}</p>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex flex-wrap gap-1">
+                                            {(c.skills ?? []).slice(0, 3).map(s => (
+                                                <span key={s.slug} className="text-xs border border-gray-200
+                                                        dark:border-gray-800 text-gray-500 px-2 py-0.5 rounded-full">
+                                                    {s.name}
+                                                </span>
+                                            ))}
+                                            {(c.skills?.length ?? 0) > 3 && (
+                                                <span className="text-xs text-gray-400">+{c.skills!.length - 3}</span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        {c.workplaces?.[0] ? (
+                                            <div>
+                                                <p className="text-sm text-black dark:text-white">
+                                                    {c.workplaces[0].position}
+                                                </p>
+                                                <p className="text-xs text-gray-400 mt-0.5">
+                                                    {c.workplaces[0].company_name}
+                                                </p>
+                                            </div>
+                                        ) : '—'}
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-400 text-xs">
+                                        {t('dashboard.candidates.interviewCount', { count: c.interviews?.length ?? 0 })}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <button
+                                            onClick={() => { setLinkModal(c); setGeneratedLink(''); setSelectedVacancy(null) }}
+                                            className="flex items-center gap-1.5 text-xs px-3.5 py-1.5
+                                                    border border-black dark:border-white rounded-full
+                                                    text-black dark:text-white hover:bg-black hover:text-white
+                                                    dark:hover:bg-white dark:hover:text-black transition-all duration-200"
+                                        >
+                                            <LinkIcon className="w-3.5 h-3.5" />
+                                            {t('dashboard.candidates.interviewButton')}
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                        </div>
                     </div>
-                </div>
+
+                    <Pagination
+                        currentPage={meta.current_page}
+                        lastPage={meta.last_page}
+                        onPageChange={page => setFilter('page', page)}
+                    />
+                </>
             )}
 
             {/* Modal: Step 1 — basic info */}
@@ -645,5 +773,26 @@ export default function CandidatePage() {
                 </div>
             )}
         </div>
+    )
+}
+
+function PageSkeleton() {
+    return (
+        <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
+            <div className="h-8 w-40 rounded-full bg-gray-100 dark:bg-gray-900 animate-pulse mb-8" />
+            <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                    <div key={i} className="h-16 rounded-2xl border border-gray-100 dark:border-gray-900 animate-pulse" />
+                ))}
+            </div>
+        </div>
+    )
+}
+
+export default function CandidatePage() {
+    return (
+        <Suspense fallback={<PageSkeleton />}>
+            <CandidatePageContent />
+        </Suspense>
     )
 }

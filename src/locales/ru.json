@@ -174,6 +174,8 @@
       "deleteText": "Это действие необратимо.",
       "cancel": "Отмена",
       "saving": "Сохранение...",
+      "deleting": "Удаление...",
+      "unsavedChanges": "Есть несохранённые изменения. Всё равно уйти?",
       "experience": "Опыт: {{years}}+ лет",
       "tableHeaders": {
         "vacancy": "Вакансия",
@@ -207,7 +209,8 @@
         "educationLevel": "Уровень образования",
         "educationLevelPlaceholder": "Любое образование",
         "add": "Создать",
-        "update": "Сохранить изменения"
+        "update": "Сохранить изменения",
+        "saveError": "Не удалось сохранить. Попробуйте ещё раз."
       },
       "status": {
         "draft": "Черновик",
@@ -238,6 +241,23 @@
         "master": "Магистр",
         "specialist": "Специалист",
         "doctor": "Доктор"
+      },
+      "detail": {
+        "back": "Назад к вакансиям",
+        "notSpecified": "Не указано",
+        "notFound": "Вакансия не найдена.",
+        "createdAt": "Создана",
+        "publishedAt": "Опубликована",
+        "closedAt": "Закрыта",
+        "mainInfo": "О вакансии",
+        "conditions": "Условия",
+        "skills": "Требуемые навыки",
+        "metadata": "Детали",
+        "edit": "Редактировать",
+        "saveChanges": "Сохранить изменения",
+        "cancel": "Отмена",
+        "error": "Не удалось сохранить изменения",
+        "noSkills": "Навыки не указаны"
       }
     },
     "emails": {
@@ -480,6 +500,33 @@
         "strength": "Сильные стороны",
         "weaknesses": "Зоны роста",
         "type_message": "Ваш ответ..."
+      }
+    },
+    "filters": {
+      "clear_all": "Сбросить всё",
+      "sort_by": "Сортировка",
+      "all": "Все",
+      "candidates": {
+        "search_placeholder": "Поиск по имени, email, телефону...",
+        "filter_status": "Статус",
+        "filter_grade": "Грейд",
+        "filter_source": "Источник",
+        "sort_name": "Имя",
+        "sort_created": "Дата создания",
+        "sort_experience": "Опыт",
+        "sort_grade": "Грейд",
+        "sort_status": "Статус"
+      },
+      "vacancies": {
+        "search_placeholder": "Поиск по названию, городу...",
+        "filter_status": "Статус",
+        "filter_employment_type": "Занятость",
+        "filter_work_mode": "Формат",
+        "filter_grade": "Грейд",
+        "sort_title": "Название",
+        "sort_created": "Дата создания",
+        "sort_salary": "Зарплата",
+        "sort_status": "Статус"
       }
     },
     "team": {

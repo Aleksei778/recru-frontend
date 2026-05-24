@@ -70,8 +70,8 @@ export default function StatisticsPage() {
     useEffect(() => {
         if (!token) return
         Promise.all([
-            fetchAll(p => vacanciesApi.list(token, p)),
-            fetchAll(p => candidatesApi.list(token, p)),
+            fetchAll(p => vacanciesApi.list(token, { page: p })),
+            fetchAll(p => candidatesApi.list(token, { page: p })),
             fetchAll(p => interviewsApi.list(token, p)),
         ]).then(([v, c, i]) => {
             setAllVacancies(v)

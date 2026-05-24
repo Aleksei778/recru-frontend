@@ -5,6 +5,8 @@ import type {
     VacancyForm,
     Candidate,
     CandidateData,
+    CandidateFilters,
+    VacancyFilters,
     Paginated,
     Interview,
     Tenant,
@@ -64,6 +66,15 @@ async function request<T>(
 
     const text = await res.text()
     return text ? JSON.parse(text) : ({} as T)
+}
+
+function buildQuery(params: Record<string, string | number | undefined>): string {
+    const q = new URLSearchParams()
+    for (const [k, v] of Object.entries(params)) {
+        if (v !== undefined && v !== '') q.set(k, String(v))
+    }
+    const s = q.toString()
+    return s ? `?${s}` : ''
 }
 
 export class ApiError extends Error {
@@ -128,11 +139,12 @@ export const emails = {
 }
 
 export const vacancies = {
-    list: (token: string, page: number = 1) =>
-        request<Paginated<Vacancy>>(`/vacancies?page=${page}`, {}, token),
+    list: (token: string, filters: VacancyFilters = {}) =>
+        request<Paginated<Vacancy>>(`/vacancies${buildQuery({ page: 1, ...filters })}`, {}, token),
 
     get: (id: number, token: string) =>
-        request<Vacancy>(`/vacancies/${id}`, {}, token),
+        request<{ data: Vacancy } | Vacancy>(`/vacancies/${id}`, {}, token)
+            .then(r => ('data' in r ? r.data : r)),
 
     create: (data: VacancyForm, skill_ids: number[], token: string) =>
         request<Vacancy>('/vacancies', {
@@ -151,8 +163,8 @@ export const vacancies = {
 }
 
 export const candidates = {
-    list: (token: string, page: number = 1) =>
-        request<Paginated<Candidate>>(`/candidates?page=${page}`, {}, token),
+    list: (token: string, filters: CandidateFilters = {}) =>
+        request<Paginated<Candidate>>(`/candidates${buildQuery({ page: 1, ...filters })}`, {}, token),
 
     get: (id: number, token: string) =>
         request<{ data: Candidate } | Candidate>(`/candidates/${id}`, {}, token)
