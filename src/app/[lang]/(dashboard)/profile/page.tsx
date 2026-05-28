@@ -174,7 +174,7 @@ export default function ProfilePage() {
     const displayName = user?.name || user?.email
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
+        <div className="min-h-screen p-4 sm:p-8">
             <div className="max-w-lg mx-auto">
 
                 {/* Header */}

@@ -5,6 +5,8 @@ import type {
     VacancyForm,
     Candidate,
     CandidateData,
+    CandidateFilters,
+    VacancyFilters,
     Paginated,
     Interview,
     Tenant,
@@ -59,20 +61,64 @@ async function request<T>(
 
     if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new ApiError(res.status, err?.error ?? err?.message ?? 'Server Error', err)
+        const rawMessage = err?.message ?? err?.error
+        const message = typeof rawMessage === 'string' ? rawMessage : 'Server Error'
+        throw new ApiError(res.status, message, err)
     }
 
     const text = await res.text()
     return text ? JSON.parse(text) : ({} as T)
 }
 
+/**
+ * Laravel ResourceCollection оборачивает пагинацию в { data, meta, links }.
+ * Этот хелпер нормализует оба формата к плоскому Paginated<T>.
+ */
+function normalizePaginated<T>(raw: unknown): Paginated<T> {
+    const r = raw as Record<string, unknown>
+    if (r.meta && typeof r.meta === 'object') {
+        const m = r.meta as Record<string, unknown>
+        return {
+            data:         (r.data ?? []) as T[],
+            current_page: m.current_page as number,
+            last_page:    m.last_page    as number,
+            per_page:     m.per_page     as number,
+            total:        m.total        as number,
+            from:         (m.from  ?? null) as number | null,
+            to:           (m.to    ?? null) as number | null,
+        }
+    }
+    return raw as Paginated<T>
+}
+
+function buildQuery(params: Record<string, string | number | undefined>): string {
+    const q = new URLSearchParams()
+    for (const [k, v] of Object.entries(params)) {
+        if (v !== undefined && v !== '') q.set(k, String(v))
+    }
+    const s = q.toString()
+    return s ? `?${s}` : ''
+}
+
 export class ApiError extends Error {
+    public fieldErrors?: Record<string, string[]>;
+
     constructor(
         public status: number,
         message: string,
         public data?: unknown,
     ) {
         super(message);
+        if (data && typeof data === 'object') {
+            const d = data as Record<string, unknown>;
+            // Laravel 422: { message, errors: { field: ['msg', ...] } }
+            if (d.errors && typeof d.errors === 'object' && d.errors !== null) {
+                this.fieldErrors = d.errors as Record<string, string[]>;
+            // Laravel 401 login: { message, error: { field: ['msg', ...] } }
+            } else if (d.error && typeof d.error === 'object' && d.error !== null) {
+                this.fieldErrors = d.error as Record<string, string[]>;
+            }
+        }
     }
 }
 
@@ -128,11 +174,13 @@ export const emails = {
 }
 
 export const vacancies = {
-    list: (token: string, page: number = 1) =>
-        request<Paginated<Vacancy>>(`/vacancies?page=${page}`, {}, token),
+    list: (token: string, filters: VacancyFilters = {}) =>
+        request<unknown>(`/vacancies${buildQuery({ page: 1, ...filters })}`, {}, token)
+            .then(r => normalizePaginated<Vacancy>(r)),
 
     get: (id: number, token: string) =>
-        request<Vacancy>(`/vacancies/${id}`, {}, token),
+        request<{ data: Vacancy } | Vacancy>(`/vacancies/${id}`, {}, token)
+            .then(r => ('data' in r ? r.data : r)),
 
     create: (data: VacancyForm, skill_ids: number[], token: string) =>
         request<Vacancy>('/vacancies', {
@@ -151,11 +199,13 @@ export const vacancies = {
 }
 
 export const candidates = {
-    list: (token: string, page: number = 1) =>
-        request<Paginated<Candidate>>(`/candidates?page=${page}`, {}, token),
+    list: (token: string, filters: CandidateFilters = {}) =>
+        request<unknown>(`/candidates${buildQuery({ page: 1, ...filters })}`, {}, token)
+            .then(r => normalizePaginated<Candidate>(r)),
 
     get: (id: number, token: string) =>
-        request<Candidate>(`/candidates/${id}`, {}, token),
+        request<{ data: Candidate } | Candidate>(`/candidates/${id}`, {}, token)
+            .then(r => ('data' in r ? r.data : r)),
 
     create: (form: CandidateData, skill_ids: number[], token: string) =>
         request<Candidate>('/candidates', {

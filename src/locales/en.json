@@ -19,6 +19,44 @@
     "login": "Login",
     "registeringIn": "Register into system..."
   },
+  "validation": {
+    "emailRequired": "Please enter your email",
+    "emailInvalid": "Please enter a valid email address",
+    "passwordRequired": "Please enter your password",
+    "passwordMin": "At least 8 characters",
+    "passwordUppercase": "At least one uppercase letter",
+    "passwordLowercase": "At least one lowercase letter",
+    "passwordNumber": "At least one number",
+    "passwordSymbol": "At least one special character",
+    "passwordConfirmRequired": "Please confirm your password",
+    "passwordConfirmMismatch": "Passwords do not match",
+    "companyRequired": "Please enter your company name",
+    "subdomainRequired": "Please enter a subdomain",
+    "subdomainInvalid": "Only lowercase letters, numbers, and hyphens (3–63 characters)",
+    "subdomainStartEnd": "Subdomain cannot start or end with a hyphen",
+    "invalidCredentials": "Invalid email or password",
+    "vacancyTitleRequired": "Please enter a vacancy title",
+    "vacancyTitleMaxLength": "Title must be 255 characters or fewer",
+    "vacancyDescriptionRequired": "Please enter a description",
+    "vacancyExperienceRequired": "Please specify required experience (years)",
+    "vacancyExperienceMin": "Value cannot be negative",
+    "vacancyGradeRequired": "Please select a grade",
+    "vacancySalaryMaxMin": "Maximum salary must be ≥ minimum salary",
+    "candidateFirstNameRequired": "Please enter first name",
+    "candidateLastNameRequired": "Please enter last name",
+    "candidateNameMaxLength": "Max 255 characters",
+    "candidateGradeRequired": "Please select a grade",
+    "candidateSaveError": "Failed to save candidate",
+    "candidateCreateError": "Failed to create candidate",
+    "candidateWorkplacesMinRequired": "Add at least one workplace",
+    "candidateWorkplacePositionRequired": "Please enter position",
+    "candidateWorkplaceCompanyRequired": "Please enter company",
+    "candidateWorkplaceStartDateRequired": "Please enter start date",
+    "candidateSocialsMinRequired": "Add at least one social link",
+    "candidateSocialNameRequired": "Please enter social name",
+    "candidateSocialUrlRequired": "Please enter URL",
+    "candidateSocialUrlInvalid": "Please enter a valid URL (https://...)"
+  },
   "candidate": {
     "lastName": "Last name",
     "firstName": "First name",
@@ -119,6 +157,7 @@
         "gradePlaceholder": "Any grade",
         "saving": "Saving...",
         "add": "Add candidate",
+        "saveError": "Failed to create candidate",
         "locale": {
           "ru": "Russian",
           "en": "English"
@@ -135,6 +174,41 @@
         "copy": "Copy",
         "validity": "Link is valid for 7 days.",
         "close": "Close"
+      },
+      "detail": {
+        "back": "Back to candidates",
+        "contacts": "Contacts",
+        "education": "Education",
+        "source": "Source",
+        "skills": "Skills",
+        "workExperience": "Work experience",
+        "interviews": "Interviews",
+        "present": "present",
+        "yearsExp": "{{years}} yrs experience",
+        "notSpecified": "Not specified",
+        "professionalInfo": "Professional info",
+        "editButton": "Edit",
+        "cancelEdit": "Cancel",
+        "saveChanges": "Save",
+        "saveError": "Failed to save changes",
+        "unsavedChanges": "You have unsaved changes. Leave the page?",
+        "statusLabel": "Status",
+        "experienceLabel": "Experience (years)",
+        "localeLabel": "Language",
+        "status": {
+          "new": "New",
+          "screened": "Screened",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        },
+        "sources": {
+          "hh": "hh.ru",
+          "habr": "Habr Career",
+          "social": "Social media",
+          "email": "Email",
+          "resume_parsing": "Resume parsing",
+          "bulk_import": "Bulk import"
+        }
       }
     },
     "vacancies": {
@@ -149,31 +223,43 @@
       "deleteText": "This action is irreversible.",
       "cancel": "Cancel",
       "saving": "Saving...",
+      "deleting": "Deleting...",
+      "unsavedChanges": "You have unsaved changes. Leave anyway?",
       "experience": "Experience: {{years}}+ yrs",
+      "tableHeaders": {
+        "vacancy": "Vacancy",
+        "company": "Company",
+        "location": "Location",
+        "salary": "Salary",
+        "skills": "Skills",
+        "experience": "Experience",
+        "status": "Status"
+      },
       "modal": {
         "createTitle": "New vacancy",
         "editTitle": "Edit vacancy",
         "title": "Title *",
         "titlePlaceholder": "e.g. Senior Frontend Developer",
-        "description": "Description",
+        "description": "Description *",
         "descriptionPlaceholder": "Vacancy description...",
         "location": "Location",
         "locationPlaceholder": "e.g. Moscow",
         "salaryMin": "Salary from",
         "salaryMax": "Salary to",
         "salaryCurrency": "Currency",
-        "experienceYears": "Experience (years)",
+        "experienceYears": "Experience (years) *",
         "employmentType": "Employment type",
         "workMode": "Work mode",
         "status": "Status",
         "skillsLabel": "Required skills",
         "skillPlaceholder": "Add skill and press Enter",
-        "grade": "Grade",
-        "gradePlaceholder": "Any grade",
+        "grade": "Grade *",
+        "gradePlaceholder": "Select grade",
         "educationLevel": "Education level",
         "educationLevelPlaceholder": "Any education level",
         "add": "Create",
-        "update": "Save changes"
+        "update": "Save changes",
+        "saveError": "Failed to save. Please try again."
       },
       "status": {
         "draft": "Draft",
@@ -204,6 +290,23 @@
         "master": "Master",
         "specialist": "Specialist",
         "doctor": "Doctor"
+      },
+      "detail": {
+        "back": "Back to vacancies",
+        "notSpecified": "Not specified",
+        "notFound": "Vacancy not found.",
+        "createdAt": "Created",
+        "publishedAt": "Published",
+        "closedAt": "Closed",
+        "mainInfo": "About vacancy",
+        "conditions": "Conditions",
+        "skills": "Required skills",
+        "metadata": "Details",
+        "edit": "Edit",
+        "saveChanges": "Save changes",
+        "cancel": "Cancel",
+        "error": "Failed to save changes",
+        "noSkills": "No skills specified"
       }
     },
     "emails": {
@@ -446,6 +549,33 @@
         "strength": "Strengths",
         "weaknesses": "Weaknesses",
         "type_message": "Your answer..."
+      }
+    },
+    "filters": {
+      "clear_all": "Clear all",
+      "sort_by": "Sort by",
+      "all": "All",
+      "candidates": {
+        "search_placeholder": "Search by name, email, phone...",
+        "filter_status": "Status",
+        "filter_grade": "Grade",
+        "filter_source": "Source",
+        "sort_name": "Name",
+        "sort_created": "Created",
+        "sort_experience": "Experience",
+        "sort_grade": "Grade",
+        "sort_status": "Status"
+      },
+      "vacancies": {
+        "search_placeholder": "Search by title, location...",
+        "filter_status": "Status",
+        "filter_employment_type": "Employment",
+        "filter_work_mode": "Work mode",
+        "filter_grade": "Grade",
+        "sort_title": "Title",
+        "sort_created": "Created",
+        "sort_salary": "Salary",
+        "sort_status": "Status"
       }
     },
     "team": {
