@@ -73,7 +73,7 @@ export default function QuestionsReviewPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
+            <div className="min-h-screen p-4 sm:p-8">
                 <div className="max-w-2xl mx-auto space-y-3">
                     {[...Array(5)].map((_, i) => (
                         <div key={i} className="h-20 rounded-2xl border border-gray-100 dark:border-gray-900 animate-pulse" />
@@ -84,7 +84,7 @@ export default function QuestionsReviewPage() {
     }
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
+        <div className="min-h-screen p-4 sm:p-8">
             <div className="max-w-2xl mx-auto">
 
                 <div className="mb-8">

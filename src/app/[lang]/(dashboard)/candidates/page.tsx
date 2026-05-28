@@ -11,6 +11,14 @@ import {
     Candidate, CandidateEducationLevel, CandidateSource, CandidateGrade,
     CandidateData, Vacancy, Skill, Locale
 } from '@/types'
+import {
+    type CandidateFieldErrors,
+    validateCandidateForm,
+    validateCandidateStep2,
+    applyCandidateApiError,
+    buildCandidateMessages,
+    buildCandidateStep2Messages,
+} from '@/lib/candidate-validation'
 import { PlusIcon, LinkIcon, CheckIcon, XIcon, ChevronRightIcon } from 'lucide-react'
 import SkillsInput from '@/components/skills/SkillsInput'
 import { SearchInput } from '@/components/filters/SearchInput'
@@ -27,21 +35,19 @@ const EMPTY_FORM: CandidateData = {
     workplaces: [], socials: [], skills: [],
 }
 
-const inputClass = `
-    w-full px-5 py-3 bg-white dark:bg-black
-    border border-gray-300 dark:border-gray-700 rounded-full
-    text-gray-900 dark:text-white placeholder-gray-400 text-sm
-    focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white
-    focus:border-transparent transition
-`
+// ── Классы полей с поддержкой состояния ошибки ────────────────────────────────
 
-const selectClass = `
-    w-full px-5 py-3 bg-white dark:bg-black
-    border border-gray-300 dark:border-gray-700 rounded-full
-    text-gray-900 dark:text-white text-sm appearance-none
-    focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white
-    focus:border-transparent transition
-`
+const inputCls = (err?: string) =>
+    `w-full px-5 py-3 bg-white dark:bg-black
+    border ${err ? 'border-red-400 focus:ring-red-300' : 'border-gray-300 dark:border-gray-700 focus:ring-black dark:focus:ring-white'}
+    rounded-full text-gray-900 dark:text-white placeholder-gray-400 text-sm
+    focus:outline-none focus:ring-2 focus:border-transparent transition`
+
+const selectCls = (err?: string) =>
+    `w-full px-5 py-3 bg-white dark:bg-black
+    border ${err ? 'border-red-400 focus:ring-red-300' : 'border-gray-300 dark:border-gray-700 focus:ring-black dark:focus:ring-white'}
+    rounded-full text-gray-900 dark:text-white text-sm appearance-none
+    focus:outline-none focus:ring-2 focus:border-transparent transition`
 
 const FILTER_DEFAULTS = {
     search: '',
@@ -76,12 +82,13 @@ function CandidatePageContent() {
     const [step, setStep] = useState<ModalStep>(null)
     const [form, setForm] = useState<CandidateData>(EMPTY_FORM)
     const [saving, setSaving] = useState(false)
+    const [fieldErrors, setFieldErrors] = useState<CandidateFieldErrors>({})
     const [linkModal, setLinkModal] = useState<Candidate | null>(null)
     const [allVacancies, setAllVacancies] = useState<Vacancy[]>([])
     const [selectedVacancy, setSelectedVacancy] = useState<Vacancy | null>(null)
     const [generatedLink, setGeneratedLink] = useState('')
     const [copied, setCopied] = useState(false)
-    const [questionsNumber, setQuestionsNumber] = useState(5)
+    const [questionsNumber, setQuestionsNumber] = useState<number | ''>('')
 
     const reqId = useRef(0)
 
@@ -109,20 +116,69 @@ function CandidatePageContent() {
     const closeModals = () => {
         setStep(null)
         setForm(EMPTY_FORM)
+        setFieldErrors({})
         setLinkModal(null)
         setGeneratedLink('')
         setSelectedVacancy(null)
     }
 
+    // ── Хелпер: обновить поле и сбросить его ошибку ──────────────────────────
+    const setField = <K extends keyof CandidateData>(key: K, value: CandidateData[K]) => {
+        setForm(f => ({ ...f, [key]: value }))
+        if (fieldErrors[key as keyof CandidateFieldErrors]) {
+            setFieldErrors(prev => ({ ...prev, [key]: undefined }))
+        }
+    }
+
+    // ── Шаг 1 → Шаг 2: валидация базовых полей ───────────────────────────────
+    const handleProceedToDetails = () => {
+        const msgs = buildCandidateMessages(t, 'dashboard.candidates.modal.saveError')
+        const errs = validateCandidateForm(form, 'create', msgs)
+
+        if (Object.keys(errs).length > 0) {
+            setFieldErrors(errs)
+            return
+        }
+        setFieldErrors({})
+        setStep('details')
+    }
+
+    // ── Создать кандидата ─────────────────────────────────────────────────────
     const createCandidate = async () => {
         if (!token) return
+
+        // Повторная валидация шага 1 (на случай перехода назад)
+        const msgs  = buildCandidateMessages(t, 'dashboard.candidates.modal.saveError')
+        const errs1 = validateCandidateForm(form, 'create', msgs)
+        if (Object.keys(errs1).length > 0) {
+            setFieldErrors(errs1)
+            setStep('basic')
+            return
+        }
+
+        // Валидация шага 2: workplaces и socials
+        const msgs2 = buildCandidateStep2Messages(t)
+        const errs2 = validateCandidateStep2(form, msgs2)
+        if (Object.keys(errs2).length > 0) {
+            setFieldErrors(errs2)
+            return
+        }
+
         setSaving(true)
+        setFieldErrors({})
         try {
             const skill_ids: number[] = form.skills.map(skill => skill.id)
             const candidate = await cApi.create(form, skill_ids, token)
             setItems(prev => [candidate, ...prev])
             setMeta(m => ({ ...m, total: m.total + 1 }))
             closeModals()
+        } catch (err) {
+            const mapped = applyCandidateApiError(err, t('dashboard.candidates.modal.saveError'))
+            setFieldErrors(mapped)
+            // Если ошибки на полях шага 1 — вернуть туда пользователя
+            const step1Fields: (keyof CandidateFieldErrors)[] = ['first_name', 'last_name', 'email', 'grade', 'experience_years', 'education_level', 'source', 'locale']
+            const hasStep1Errors = step1Fields.some(f => mapped[f])
+            if (hasStep1Errors) setStep('basic')
         } finally {
             setSaving(false)
         }
@@ -133,7 +189,7 @@ function CandidatePageContent() {
         const result = await iApi.create({
             vacancy_id: selectedVacancy.id,
             candidate_id: linkModal.id,
-            questions_number: questionsNumber
+            questions_number: questionsNumber === '' ? 5 : questionsNumber
         }, token)
         setGeneratedLink(result.link)
     }
@@ -167,6 +223,14 @@ function CandidatePageContent() {
             updated[idx] = { ...updated[idx], [field]: value }
             return { ...f, workplaces: updated }
         })
+        // Сбрасываем ошибку конкретного поля workplace
+        if (fieldErrors.workplaces?.[idx]?.[field as keyof typeof fieldErrors.workplaces[0]]) {
+            setFieldErrors(prev => {
+                const wp = [...(prev.workplaces ?? [])]
+                wp[idx] = { ...wp[idx], [field]: undefined }
+                return { ...prev, workplaces: wp }
+            })
+        }
     }
 
     const updateSocial = (idx: number, field: string, value: string) => {
@@ -175,6 +239,14 @@ function CandidatePageContent() {
             updated[idx] = { ...updated[idx], [field]: value }
             return { ...f, socials: updated }
         })
+        // Сбрасываем ошибку конкретного поля social
+        if (fieldErrors.socials?.[idx]?.[field as keyof typeof fieldErrors.socials[0]]) {
+            setFieldErrors(prev => {
+                const sc = [...(prev.socials ?? [])]
+                sc[idx] = { ...sc[idx], [field]: undefined }
+                return { ...prev, socials: sc }
+            })
+        }
     }
 
     const handleSortChange = (field: string) => {
@@ -196,10 +268,8 @@ function CandidatePageContent() {
         filters.source ? { key: 'source', label: t(`dashboard.candidates.detail.sources.${filters.source}`) } : null,
     ].filter((c): c is { key: string; label: string } => c !== null)
 
-    const canProceed = form.first_name.trim() && form.last_name.trim()
-
     return (
-        <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
+        <div className="min-h-screen p-4 sm:p-8">
 
             <div className="flex items-center justify-between mb-6 sm:mb-8">
                 <div>
@@ -296,7 +366,7 @@ function CandidatePageContent() {
                 </div>
             ) : (
                 <>
-                    <div className="rounded-3xl border border-black dark:border-white overflow-hidden">
+                    <div className="rounded-3xl border border-black dark:border-white overflow-hidden bg-white dark:bg-black">
                         <div className="overflow-x-auto">
                         <table className="w-full text-sm min-w-[700px]">
                             <thead>
@@ -318,7 +388,7 @@ function CandidatePageContent() {
                             </thead>
                             <tbody>
                             {items.map((c, idx) => (
-                                <tr key={c.id} className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-950
+                                <tr key={c.id ?? idx} className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-950
                                         ${idx !== items.length - 1 ? 'border-b border-gray-100 dark:border-gray-900' : ''}`}>
                                     <td className="px-6 py-4">
                                         <Link href={`/${language}/candidates/${c.id}`} className="group">
@@ -389,7 +459,7 @@ function CandidatePageContent() {
                 </>
             )}
 
-            {/* Modal: Step 1 — basic info */}
+            {/* ── Modal: Step 1 — basic info ─────────────────────────────────── */}
             {step === 'basic' && (
                 <div className="fixed inset-0 bg-black/60 dark:bg-black/80 flex items-center justify-center z-50 p-4">
                     <div className="bg-white dark:bg-black rounded-3xl border border-black dark:border-white
@@ -404,75 +474,102 @@ function CandidatePageContent() {
                         <p className="text-xs text-gray-400 mb-7">{t('dashboard.candidates.modal.step1')}</p>
 
                         <div className="space-y-3">
+                            {/* Last name + First name */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <input
-                                    value={form.last_name}
-                                    onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))}
-                                    placeholder={t('dashboard.candidates.modal.lastName')}
-                                    className={inputClass}
-                                />
-                                <input
-                                    value={form.first_name}
-                                    onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))}
-                                    placeholder={t('dashboard.candidates.modal.firstName')}
-                                    className={inputClass}
-                                />
+                                <div>
+                                    <input
+                                        value={form.last_name}
+                                        onChange={e => setField('last_name', e.target.value)}
+                                        placeholder={t('dashboard.candidates.modal.lastName')}
+                                        className={inputCls(fieldErrors.last_name)}
+                                    />
+                                    {fieldErrors.last_name && (
+                                        <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.last_name}</p>
+                                    )}
+                                </div>
+                                <div>
+                                    <input
+                                        value={form.first_name}
+                                        onChange={e => setField('first_name', e.target.value)}
+                                        placeholder={t('dashboard.candidates.modal.firstName')}
+                                        className={inputCls(fieldErrors.first_name)}
+                                    />
+                                    {fieldErrors.first_name && (
+                                        <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.first_name}</p>
+                                    )}
+                                </div>
                             </div>
 
+                            {/* Middle name */}
                             <input
                                 value={form.middle_name ?? ''}
-                                onChange={e => setForm(f => ({ ...f, middle_name: e.target.value || null }))}
+                                onChange={e => setField('middle_name', e.target.value || null)}
                                 placeholder={t('dashboard.candidates.modal.middleName')}
-                                className={inputClass}
+                                className={inputCls()}
                             />
 
                             <div className="border-t border-gray-100 dark:border-gray-900" />
 
-                            <input
-                                type="email"
-                                value={form.email}
-                                onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                                placeholder={t('dashboard.candidates.modal.email')}
-                                className={inputClass}
-                            />
+                            {/* Email */}
+                            <div>
+                                <input
+                                    type="email"
+                                    value={form.email}
+                                    onChange={e => setField('email', e.target.value)}
+                                    placeholder={t('dashboard.candidates.modal.email')}
+                                    className={inputCls(fieldErrors.email)}
+                                />
+                                {fieldErrors.email && (
+                                    <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.email}</p>
+                                )}
+                            </div>
+
+                            {/* Phone */}
                             <input
                                 type="tel"
-                                value={form?.phone ?? ''}
-                                onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                                value={form.phone ?? ''}
+                                onChange={e => setField('phone', e.target.value)}
                                 placeholder={t('dashboard.candidates.modal.phone')}
-                                className={inputClass}
+                                className={inputCls()}
                             />
 
                             <div className="border-t border-gray-100 dark:border-gray-900" />
 
+                            {/* Experience + Source */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <input
-                                    type="number"
-                                    min={0}
-                                    value={form.experience_years}
-                                    onChange={e => setForm(f => ({ ...f, experience_years: +e.target.value }))}
-                                    placeholder={t('dashboard.candidates.modal.experience')}
-                                    className={inputClass}
-                                />
+                                <div>
+                                    <input
+                                        type="number"
+                                        min={0}
+                                        value={form.experience_years}
+                                        onChange={e => setField('experience_years', +e.target.value)}
+                                        placeholder={t('dashboard.candidates.modal.experience')}
+                                        className={inputCls(fieldErrors.experience_years)}
+                                    />
+                                    {fieldErrors.experience_years && (
+                                        <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.experience_years}</p>
+                                    )}
+                                </div>
                                 <div className="relative">
                                     <select
                                         value={form.source}
-                                        onChange={e => setForm(f => ({ ...f, source: e.target.value as CandidateSource }))}
-                                        className={selectClass}
+                                        onChange={e => setField('source', e.target.value as CandidateSource)}
+                                        className={selectCls(fieldErrors.source)}
                                     >
                                         {(['hh', 'habr', 'social', 'email', 'resume_parsing', 'bulk_import'] as CandidateSource[]).map(v => (
-                                            <option key={v} value={v}>{v}</option>
+                                            <option key={v} value={v}>{t(`dashboard.candidates.detail.sources.${v}`)}</option>
                                         ))}
                                     </select>
                                     <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
                                 </div>
                             </div>
 
+                            {/* Locale */}
                             <div className="relative">
                                 <select
                                     value={form.locale}
-                                    onChange={e => setForm(f => ({ ...f, locale: e.target.value as Locale }))}
-                                    className={selectClass}
+                                    onChange={e => setField('locale', e.target.value as Locale)}
+                                    className={selectCls()}
                                 >
                                     {(['ru', 'en'] as Locale[]).map(v => (
                                         <option key={v} value={v}>{t(`dashboard.candidates.modal.locale.${v}`)}</option>
@@ -481,12 +578,13 @@ function CandidatePageContent() {
                                 <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
                             </div>
 
+                            {/* Education + Grade */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="relative">
                                     <select
                                         value={form.education_level}
-                                        onChange={e => setForm(f => ({ ...f, education_level: e.target.value as CandidateEducationLevel }))}
-                                        className={selectClass}
+                                        onChange={e => setField('education_level', e.target.value as CandidateEducationLevel)}
+                                        className={selectCls(fieldErrors.education_level)}
                                     >
                                         <option value="">{t('dashboard.candidates.modal.education')}</option>
                                         {(['secondary', 'incomplete_higher', 'bachelor', 'master', 'specialist', 'doctor'] as CandidateEducationLevel[]).map(v => (
@@ -494,31 +592,44 @@ function CandidatePageContent() {
                                         ))}
                                     </select>
                                     <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+                                    {fieldErrors.education_level && (
+                                        <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.education_level}</p>
+                                    )}
                                 </div>
-                                <div className="relative">
-                                    <select
-                                        value={form.grade ?? ''}
-                                        onChange={e => setForm(f => ({ ...f, grade: (e.target.value || null) as CandidateGrade | null }))}
-                                        className={selectClass}
-                                    >
-                                        <option value="">{t('dashboard.candidates.modal.gradePlaceholder')}</option>
-                                        {(['junior', 'middle', 'senior', 'lead'] as CandidateGrade[]).map(g => (
-                                            <option key={g} value={g}>{t(`dashboard.vacancies.grade.${g}`)}</option>
-                                        ))}
-                                    </select>
-                                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+                                <div>
+                                    <div className="relative">
+                                        <select
+                                            value={form.grade ?? ''}
+                                            onChange={e => setField('grade', (e.target.value || null) as CandidateGrade | null)}
+                                            className={selectCls(fieldErrors.grade)}
+                                        >
+                                            <option value="">{t('dashboard.candidates.modal.gradePlaceholder')}</option>
+                                            {(['junior', 'middle', 'senior', 'lead'] as CandidateGrade[]).map(g => (
+                                                <option key={g} value={g}>{t(`dashboard.vacancies.grade.${g}`)}</option>
+                                            ))}
+                                        </select>
+                                        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+                                    </div>
+                                    {fieldErrors.grade && (
+                                        <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.grade}</p>
+                                    )}
                                 </div>
                             </div>
                         </div>
 
+                        {/* General server error on step 1 */}
+                        {fieldErrors.general && (
+                            <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-2.5 mt-4">
+                                <p className="text-red-600 text-xs text-center">{fieldErrors.general}</p>
+                            </div>
+                        )}
+
                         <div className="flex flex-col gap-3 mt-7">
                             <button
-                                onClick={() => setStep('details')}
-                                disabled={!canProceed}
+                                onClick={handleProceedToDetails}
                                 className="w-full flex items-center justify-center gap-2 py-3.5
                                            bg-black dark:bg-white text-white dark:text-black
-                                           font-medium rounded-full disabled:opacity-40
-                                           disabled:cursor-not-allowed transition-all duration-200 text-sm"
+                                           font-medium rounded-full transition-all duration-200 text-sm"
                             >
                                 {t('dashboard.candidates.modal.nextStep')}
                                 <ChevronRightIcon className="w-4 h-4" />
@@ -536,7 +647,7 @@ function CandidatePageContent() {
                 </div>
             )}
 
-            {/* Modal: Step 2 — skills & experience */}
+            {/* ── Modal: Step 2 — skills & experience ────────────────────────── */}
             {step === 'details' && (
                 <div className="fixed inset-0 bg-black/60 dark:bg-black/80 flex items-center justify-center z-50 p-4">
                     <div className="bg-white dark:bg-black rounded-3xl border border-black dark:border-white
@@ -558,105 +669,190 @@ function CandidatePageContent() {
                             </button>
                         </p>
 
+                        {/* Skills */}
                         <div className="mb-6">
                             <p className="text-sm font-medium text-black dark:text-white mb-3">{t('dashboard.candidates.modal.skills')}</p>
                             <SkillsInput
                                 value={form.skills}
-                                onChange={(skills: Skill[]) => setForm(f => ({ ...f, skills }))}
+                                onChange={(skills: Skill[]) => {
+                                    setForm(f => ({ ...f, skills }))
+                                    if (fieldErrors.skill_ids) setFieldErrors(prev => ({ ...prev, skill_ids: undefined }))
+                                }}
                             />
+                            {fieldErrors.skill_ids && (
+                                <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.skill_ids}</p>
+                            )}
                         </div>
 
                         <div className="border-t border-gray-100 dark:border-gray-900 mb-6" />
 
+                        {/* Workplaces */}
                         <div className="mb-6">
                             <div className="flex items-center justify-between mb-3">
                                 <p className="text-sm font-medium text-black dark:text-white">{t('dashboard.candidates.modal.workExperience')}</p>
                                 <button
-                                    onClick={() => setForm(f => ({
-                                        ...f,
-                                        workplaces: [...f.workplaces, {
-                                            company_name: '', position: '',
-                                            description: '', started_at: '', ended_at: null,
-                                        }]
-                                    }))}
+                                    onClick={() => {
+                                        setForm(f => ({
+                                            ...f,
+                                            workplaces: [...f.workplaces, {
+                                                company_name: '', position: '',
+                                                description: '', started_at: '', ended_at: null,
+                                            }]
+                                        }))
+                                        if (fieldErrors.workplaces_min) setFieldErrors(prev => ({ ...prev, workplaces_min: undefined }))
+                                    }}
                                     className="text-xs text-black dark:text-white underline hover:opacity-60 transition"
                                 >
                                     {t('dashboard.candidates.modal.addWorkplace')}
                                 </button>
                             </div>
 
-                            {form.workplaces.length === 0 && (
+                            {fieldErrors.workplaces_min && (
+                                <p className="text-red-500 text-xs mb-2">{fieldErrors.workplaces_min}</p>
+                            )}
+                            {form.workplaces.length === 0 && !fieldErrors.workplaces_min && (
                                 <p className="text-xs text-gray-400">{t('dashboard.candidates.modal.noWorkplaces')}</p>
                             )}
 
-                            {form.workplaces.map((w, idx) => (
-                                <div key={idx} className="space-y-2 mb-4 p-4 rounded-2xl border border-gray-200 dark:border-gray-800">
-                                    <div className="flex justify-between items-center mb-1">
-                                        <p className="text-xs text-gray-400">{t('dashboard.candidates.modal.position', { number: idx + 1 })}</p>
-                                        <button
-                                            onClick={() => setForm(f => ({
-                                                ...f,
-                                                workplaces: f.workplaces.filter((_, i) => i !== idx)
-                                            }))}
-                                            className="text-gray-300 hover:text-red-500 transition"
-                                        >
-                                            <XIcon className="w-3.5 h-3.5" />
-                                        </button>
+                            {form.workplaces.map((w, idx) => {
+                                const wpErr = fieldErrors.workplaces?.[idx]
+                                return (
+                                    <div key={idx} className={`space-y-2 mb-4 p-4 rounded-2xl border
+                                        ${wpErr ? 'border-red-300 dark:border-red-800' : 'border-gray-200 dark:border-gray-800'}`}>
+                                        <div className="flex justify-between items-center mb-1">
+                                            <p className="text-xs text-gray-400">{t('dashboard.candidates.modal.position', { number: idx + 1 })}</p>
+                                            <button
+                                                onClick={() => setForm(f => ({
+                                                    ...f,
+                                                    workplaces: f.workplaces.filter((_, i) => i !== idx)
+                                                }))}
+                                                className="text-gray-300 hover:text-red-500 transition"
+                                            >
+                                                <XIcon className="w-3.5 h-3.5" />
+                                            </button>
+                                        </div>
+                                        <div>
+                                            <input
+                                                className={inputCls(wpErr?.company_name)}
+                                                placeholder={t('dashboard.candidates.modal.company')}
+                                                value={w.company_name}
+                                                onChange={e => updateWorkplace(idx, 'company_name', e.target.value)}
+                                            />
+                                            {wpErr?.company_name && (
+                                                <p className="text-red-500 text-xs mt-1 ml-4">{wpErr.company_name}</p>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <input
+                                                className={inputCls(wpErr?.position)}
+                                                placeholder={t('dashboard.candidates.modal.companyPosition')}
+                                                value={w.position}
+                                                onChange={e => updateWorkplace(idx, 'position', e.target.value)}
+                                            />
+                                            {wpErr?.position && (
+                                                <p className="text-red-500 text-xs mt-1 ml-4">{wpErr.position}</p>
+                                            )}
+                                        </div>
+                                        <input
+                                            className={inputCls(wpErr?.description)}
+                                            placeholder={t('dashboard.candidates.modal.description')}
+                                            value={w.description}
+                                            onChange={e => updateWorkplace(idx, 'description', e.target.value)}
+                                        />
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <input
+                                                    className={inputCls(wpErr?.started_at)}
+                                                    type="date"
+                                                    value={w.started_at}
+                                                    onChange={e => updateWorkplace(idx, 'started_at', e.target.value)}
+                                                />
+                                                {wpErr?.started_at && (
+                                                    <p className="text-red-500 text-xs mt-1 ml-4">{wpErr.started_at}</p>
+                                                )}
+                                            </div>
+                                            <input
+                                                className={inputCls()}
+                                                type="date"
+                                                value={w.ended_at ?? ''}
+                                                onChange={e => updateWorkplace(idx, 'ended_at', e.target.value)}
+                                            />
+                                        </div>
                                     </div>
-                                    <input className={inputClass} placeholder={t('dashboard.candidates.modal.company')}
-                                           value={w.company_name} onChange={e => updateWorkplace(idx, 'company_name', e.target.value)} />
-                                    <input className={inputClass} placeholder={t('dashboard.candidates.modal.companyPosition')}
-                                           value={w.position} onChange={e => updateWorkplace(idx, 'position', e.target.value)} />
-                                    <input className={inputClass} placeholder={t('dashboard.candidates.modal.description')}
-                                           value={w.description} onChange={e => updateWorkplace(idx, 'description', e.target.value)} />
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <input className={inputClass} type="date"
-                                               value={w.started_at} onChange={e => updateWorkplace(idx, 'started_at', e.target.value)} />
-                                        <input className={inputClass} type="date"
-                                               value={w.ended_at ?? ''} onChange={e => updateWorkplace(idx, 'ended_at', e.target.value)} />
-                                    </div>
-                                </div>
-                            ))}
+                                )
+                            })}
                         </div>
 
                         <div className="border-t border-gray-100 dark:border-gray-900 mb-6" />
 
+                        {/* Socials */}
                         <div className="mb-6">
                             <div className="flex items-center justify-between mb-3">
                                 <p className="text-sm font-medium text-black dark:text-white">{t('dashboard.candidates.modal.socials')}</p>
                                 <button
-                                    onClick={() => setForm(f => ({
-                                        ...f,
-                                        socials: [...f.socials, { name: '', url: '' }]
-                                    }))}
+                                    onClick={() => {
+                                        setForm(f => ({ ...f, socials: [...f.socials, { name: '', url: '' }] }))
+                                        if (fieldErrors.socials_min) setFieldErrors(prev => ({ ...prev, socials_min: undefined }))
+                                    }}
                                     className="text-xs text-black dark:text-white underline hover:opacity-60 transition"
                                 >
                                     {t('dashboard.candidates.modal.addSocial')}
                                 </button>
                             </div>
 
-                            {form.socials.length === 0 && (
+                            {fieldErrors.socials_min && (
+                                <p className="text-red-500 text-xs mb-2">{fieldErrors.socials_min}</p>
+                            )}
+                            {form.socials.length === 0 && !fieldErrors.socials_min && (
                                 <p className="text-xs text-gray-400">{t('dashboard.candidates.modal.noSocials')}</p>
                             )}
 
-                            {form.socials.map((s, idx) => (
-                                <div key={idx} className="flex gap-2 mb-2 items-center">
-                                    <input className={inputClass} placeholder={t('dashboard.candidates.modal.socialPlaceholder')}
-                                           value={s.name} onChange={e => updateSocial(idx, 'name', e.target.value)} />
-                                    <input className={inputClass} placeholder="URL"
-                                           value={s.url} onChange={e => updateSocial(idx, 'url', e.target.value)} />
-                                    <button
-                                        onClick={() => setForm(f => ({
-                                            ...f,
-                                            socials: f.socials.filter((_, i) => i !== idx)
-                                        }))}
-                                        className="text-gray-300 hover:text-red-500 transition shrink-0"
-                                    >
-                                        <XIcon className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            ))}
+                            {form.socials.map((s, idx) => {
+                                const scErr = fieldErrors.socials?.[idx]
+                                return (
+                                    <div key={idx} className="flex gap-2 mb-3 items-start">
+                                        <div className="flex-1 space-y-1">
+                                            <input
+                                                className={inputCls(scErr?.name)}
+                                                placeholder={t('dashboard.candidates.modal.socialPlaceholder')}
+                                                value={s.name}
+                                                onChange={e => updateSocial(idx, 'name', e.target.value)}
+                                            />
+                                            {scErr?.name && (
+                                                <p className="text-red-500 text-xs ml-4">{scErr.name}</p>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 space-y-1">
+                                            <input
+                                                className={inputCls(scErr?.url)}
+                                                placeholder="URL"
+                                                value={s.url}
+                                                onChange={e => updateSocial(idx, 'url', e.target.value)}
+                                            />
+                                            {scErr?.url && (
+                                                <p className="text-red-500 text-xs ml-4">{scErr.url}</p>
+                                            )}
+                                        </div>
+                                        <button
+                                            onClick={() => setForm(f => ({
+                                                ...f,
+                                                socials: f.socials.filter((_, i) => i !== idx)
+                                            }))}
+                                            className="text-gray-300 hover:text-red-500 transition shrink-0 mt-3"
+                                        >
+                                            <XIcon className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                )
+                            })}
                         </div>
+
+                        {/* General server error */}
+                        {fieldErrors.general && (
+                            <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-2.5 mb-4">
+                                <p className="text-red-600 text-xs text-center">{fieldErrors.general}</p>
+                            </div>
+                        )}
 
                         <div className="flex flex-col gap-3">
                             <button
@@ -681,7 +877,7 @@ function CandidatePageContent() {
                 </div>
             )}
 
-            {/* Modal: create interview link */}
+            {/* ── Modal: create interview link ────────────────────────────────── */}
             {linkModal && (
                 <div className="fixed inset-0 bg-black/60 dark:bg-black/80 flex items-center justify-center z-50 p-4">
                     <div className="bg-white dark:bg-black rounded-3xl border border-black dark:border-white
@@ -703,7 +899,7 @@ function CandidatePageContent() {
                                     <select
                                         value={selectedVacancy?.id ?? ''}
                                         onChange={e => setSelectedVacancy(allVacancies.find(v => v.id === +e.target.value) ?? null)}
-                                        className={selectClass}
+                                        className={selectCls()}
                                     >
                                         <option value="">{t('dashboard.candidates.interview.selectVacancy')}</option>
                                         {allVacancies
@@ -722,7 +918,7 @@ function CandidatePageContent() {
                                         onInput={(e) => setQuestionsNumber(Number(e.currentTarget.value))}
                                         min={5}
                                         value={questionsNumber ?? ''}
-                                        className={inputClass}
+                                        className={inputCls()}
                                         placeholder={t('dashboard.candidates.interview.questionsNumber')}
                                     />
                                 </div>
@@ -778,7 +974,7 @@ function CandidatePageContent() {
 
 function PageSkeleton() {
     return (
-        <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
+        <div className="min-h-screen p-4 sm:p-8">
             <div className="h-8 w-40 rounded-full bg-gray-100 dark:bg-gray-900 animate-pulse mb-8" />
             <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (

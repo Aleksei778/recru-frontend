@@ -41,7 +41,21 @@
     "vacancyExperienceRequired": "Укажите требуемый опыт (лет)",
     "vacancyExperienceMin": "Значение не может быть отрицательным",
     "vacancyGradeRequired": "Выберите грейд",
-    "vacancySalaryMaxMin": "Максимальная зарплата должна быть ≥ минимальной"
+    "vacancySalaryMaxMin": "Максимальная зарплата должна быть ≥ минимальной",
+    "candidateFirstNameRequired": "Введите имя",
+    "candidateLastNameRequired": "Введите фамилию",
+    "candidateNameMaxLength": "Не более 255 символов",
+    "candidateGradeRequired": "Выберите грейд",
+    "candidateSaveError": "Не удалось сохранить кандидата",
+    "candidateCreateError": "Не удалось создать кандидата",
+    "candidateWorkplacesMinRequired": "Добавьте хотя бы одно место работы",
+    "candidateWorkplacePositionRequired": "Укажите должность",
+    "candidateWorkplaceCompanyRequired": "Укажите компанию",
+    "candidateWorkplaceStartDateRequired": "Укажите дату начала",
+    "candidateSocialsMinRequired": "Добавьте хотя бы одну соцсеть",
+    "candidateSocialNameRequired": "Введите название соцсети",
+    "candidateSocialUrlRequired": "Введите URL",
+    "candidateSocialUrlInvalid": "Введите корректный URL (https://...)"
   },
   "candidate": {
     "lastName": "Фамилия",
@@ -143,6 +157,7 @@
         "gradePlaceholder": "Любой грейд",
         "saving": "Сохранение...",
         "add": "Добавить кандидата",
+        "saveError": "Не удалось создать кандидата",
         "locale": {
           "ru": "Русский",
           "en": "English"
@@ -170,6 +185,16 @@
         "interviews": "Интервью",
         "present": "наст. время",
         "yearsExp": "{{years}} лет опыта",
+        "notSpecified": "Не указано",
+        "professionalInfo": "Профессиональные данные",
+        "editButton": "Редактировать",
+        "cancelEdit": "Отмена",
+        "saveChanges": "Сохранить",
+        "saveError": "Не удалось сохранить изменения",
+        "unsavedChanges": "Есть несохранённые изменения. Покинуть страницу?",
+        "statusLabel": "Статус",
+        "experienceLabel": "Опыт (лет)",
+        "localeLabel": "Язык",
         "status": {
           "new": "Новый",
           "screened": "Проверен",

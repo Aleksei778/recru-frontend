@@ -70,6 +70,27 @@ async function request<T>(
     return text ? JSON.parse(text) : ({} as T)
 }
 
+/**
+ * Laravel ResourceCollection оборачивает пагинацию в { data, meta, links }.
+ * Этот хелпер нормализует оба формата к плоскому Paginated<T>.
+ */
+function normalizePaginated<T>(raw: unknown): Paginated<T> {
+    const r = raw as Record<string, unknown>
+    if (r.meta && typeof r.meta === 'object') {
+        const m = r.meta as Record<string, unknown>
+        return {
+            data:         (r.data ?? []) as T[],
+            current_page: m.current_page as number,
+            last_page:    m.last_page    as number,
+            per_page:     m.per_page     as number,
+            total:        m.total        as number,
+            from:         (m.from  ?? null) as number | null,
+            to:           (m.to    ?? null) as number | null,
+        }
+    }
+    return raw as Paginated<T>
+}
+
 function buildQuery(params: Record<string, string | number | undefined>): string {
     const q = new URLSearchParams()
     for (const [k, v] of Object.entries(params)) {
@@ -154,7 +175,8 @@ export const emails = {
 
 export const vacancies = {
     list: (token: string, filters: VacancyFilters = {}) =>
-        request<Paginated<Vacancy>>(`/vacancies${buildQuery({ page: 1, ...filters })}`, {}, token),
+        request<unknown>(`/vacancies${buildQuery({ page: 1, ...filters })}`, {}, token)
+            .then(r => normalizePaginated<Vacancy>(r)),
 
     get: (id: number, token: string) =>
         request<{ data: Vacancy } | Vacancy>(`/vacancies/${id}`, {}, token)
@@ -178,7 +200,8 @@ export const vacancies = {
 
 export const candidates = {
     list: (token: string, filters: CandidateFilters = {}) =>
-        request<Paginated<Candidate>>(`/candidates${buildQuery({ page: 1, ...filters })}`, {}, token),
+        request<unknown>(`/candidates${buildQuery({ page: 1, ...filters })}`, {}, token)
+            .then(r => normalizePaginated<Candidate>(r)),
 
     get: (id: number, token: string) =>
         request<{ data: Candidate } | Candidate>(`/candidates/${id}`, {}, token)

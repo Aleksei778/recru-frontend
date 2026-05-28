@@ -95,7 +95,7 @@ export default function TeamPage() {
     }
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
+        <div className="min-h-screen p-4 sm:p-8">
 
             <div className="flex items-center justify-between mb-6 sm:mb-10">
                 <div>
@@ -141,7 +141,7 @@ export default function TeamPage() {
                     )}
                 </div>
             ) : (
-                <div className="rounded-3xl border border-black dark:border-white overflow-hidden">
+                <div className="rounded-3xl border border-black dark:border-white overflow-hidden bg-white dark:bg-black">
                     <div className="overflow-x-auto">
                     <table className="w-full text-sm min-w-[580px]">
                         <thead>

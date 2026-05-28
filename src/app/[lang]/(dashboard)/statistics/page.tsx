@@ -139,7 +139,7 @@ export default function StatisticsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
+            <div className="min-h-screen p-4 sm:p-8">
                 <div className="mb-10">
                     <div className="h-8 w-44 rounded-xl bg-gray-100 dark:bg-gray-900 animate-pulse mb-2" />
                     <div className="h-4 w-64 rounded-lg bg-gray-100 dark:bg-gray-900 animate-pulse" />
@@ -159,7 +159,7 @@ export default function StatisticsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
+        <div className="min-h-screen p-4 sm:p-8">
             <div className="mb-10">
                 <h1 className="text-2xl font-bold text-black dark:text-white">
                     {t('dashboard.statistics.heading')}

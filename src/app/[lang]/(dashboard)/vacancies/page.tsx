@@ -227,7 +227,7 @@ function VacanciesPageContent() {
     ].filter((c): c is { key: string; label: string } => c !== null)
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
+        <div className="min-h-screen p-4 sm:p-8">
 
             {/* Header */}
             <div className="flex items-center justify-between mb-6 sm:mb-8">
@@ -337,7 +337,7 @@ function VacanciesPageContent() {
                 </div>
             ) : (
                 <>
-                    <div className="rounded-3xl border border-black dark:border-white overflow-hidden">
+                    <div className="rounded-3xl border border-black dark:border-white overflow-hidden bg-white dark:bg-black">
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm min-w-[900px]">
                                 <thead>
@@ -793,7 +793,7 @@ function VacanciesPageContent() {
 
 function PageSkeleton() {
     return (
-        <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
+        <div className="min-h-screen p-4 sm:p-8">
             <div className="h-8 w-40 rounded-full bg-gray-100 dark:bg-gray-900 animate-pulse mb-8" />
             <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (

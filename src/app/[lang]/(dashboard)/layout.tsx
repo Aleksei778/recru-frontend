@@ -40,7 +40,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         </span>
                     </header>
 
-                    <main className="flex-1 overflow-y-auto">{children}</main>
+                    <main className="flex-1 overflow-y-auto bg-gray-100 dark:bg-gray-900">{children}</main>
                 </div>
             </div>
         </AuthGuard>
