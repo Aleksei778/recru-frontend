@@ -57,7 +57,7 @@ export default function InterviewDetailPage() {
 
     if (loading || !interview || !interview.candidate || !interview.vacancy) {
         return (
-            <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
+            <div className="min-h-screen p-4 sm:p-8">
                 <div className="max-w-3xl mx-auto space-y-4">
                     {[...Array(4)].map((_, i) => (
                         <div key={i} className="h-24 rounded-2xl border border-gray-100 dark:border-gray-900 animate-pulse" />
@@ -68,7 +68,7 @@ export default function InterviewDetailPage() {
     }
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black p-8">
+        <div className="min-h-screen p-8">
             <div className="max-w-3xl mx-auto">
 
                 <div className="mb-6 sm:mb-8 flex items-start justify-between gap-3">
@@ -85,7 +85,7 @@ export default function InterviewDetailPage() {
                 </div>
 
                 {interview.status === 'questions_review' && (
-                    <div className="rounded-3xl border border-black dark:border-white p-6 mb-6">
+                    <div className="rounded-3xl border border-black dark:border-white p-6 bg-white dark:bg-black mb-6">
                         <p className="text-sm text-black dark:text-white font-medium mb-1">
                             {t('dashboard.interviews.id.questionsReady')}
                         </p>
@@ -118,7 +118,7 @@ export default function InterviewDetailPage() {
                 )}
 
                 {interview.status === 'ready' && (
-                    <div className="rounded-3xl border border-black dark:border-white p-6 mb-6">
+                    <div className="rounded-3xl border border-black dark:border-white p-6 bg-white dark:bg-black mb-6">
                         <div className="flex items-center gap-3 mb-1">
                             <MailIcon className="w-5 h-5 text-black dark:text-white" />
                             <p className="text-sm font-medium text-black dark:text-white">
@@ -158,7 +158,7 @@ export default function InterviewDetailPage() {
                 )}
 
                 {interview.status === 'evaluated' && (
-                    <div className="rounded-3xl border border-black dark:border-white p-6 mb-6">
+                    <div className="rounded-3xl border border-black dark:border-white p-6 bg-white dark:bg-black mb-6">
                         <div className="flex items-center gap-3 mb-4">
                             <CheckCircleIcon className="w-5 h-5 text-black dark:text-white" />
                             <span className="font-semibold text-black dark:text-white">{t('dashboard.interviews.id.evaluationResults')}</span>
@@ -202,7 +202,7 @@ export default function InterviewDetailPage() {
                             {t('dashboard.interviews.id.candidateAnswers')}
                         </h2>
                         {interview.questions.map(q => (
-                            <div key={q.id} className="rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
+                            <div key={q.id} className="rounded-2xl border border-gray-200 dark:border-gray-800 p-5 bg-white dark:bg-black">
                                 <p className="text-xs text-gray-400 mb-2">{t('dashboard.interviews.id.questionNumber', { number: q.number })}</p>
                                 <p className="text-sm font-medium text-black dark:text-white mb-3">{q.text}</p>
                                 {q.answer?.text ? (

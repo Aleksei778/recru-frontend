@@ -301,3 +301,24 @@ export type SkillCategory = {
     name: string
     slug: string
 }
+
+export interface CandidateFilters {
+    search?: string
+    status?: string
+    grade?: string
+    source?: string
+    sort?: string
+    order?: string
+    page?: number
+}
+
+export interface VacancyFilters {
+    search?: string
+    status?: string
+    employment_type?: string
+    work_mode?: string
+    grade?: string
+    sort?: string
+    order?: string
+    page?: number
+}

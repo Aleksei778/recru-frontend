@@ -19,6 +19,44 @@
     "login": "Вход",
     "registeringIn": "Регистрируем Вас в системе..."
   },
+  "validation": {
+    "emailRequired": "Введите email",
+    "emailInvalid": "Введите корректный email",
+    "passwordRequired": "Введите пароль",
+    "passwordMin": "Минимум 8 символов",
+    "passwordUppercase": "Минимум одна заглавная буква",
+    "passwordLowercase": "Минимум одна строчная буква",
+    "passwordNumber": "Минимум одна цифра",
+    "passwordSymbol": "Минимум один спецсимвол",
+    "passwordConfirmRequired": "Подтвердите пароль",
+    "passwordConfirmMismatch": "Пароли не совпадают",
+    "companyRequired": "Введите название компании",
+    "subdomainRequired": "Введите субдомен",
+    "subdomainInvalid": "Только строчные буквы, цифры и дефисы (3–63 символа)",
+    "subdomainStartEnd": "Субдомен не может начинаться или заканчиваться на дефис",
+    "invalidCredentials": "Неверный email или пароль",
+    "vacancyTitleRequired": "Введите название вакансии",
+    "vacancyTitleMaxLength": "Не более 255 символов",
+    "vacancyDescriptionRequired": "Введите описание вакансии",
+    "vacancyExperienceRequired": "Укажите требуемый опыт (лет)",
+    "vacancyExperienceMin": "Значение не может быть отрицательным",
+    "vacancyGradeRequired": "Выберите грейд",
+    "vacancySalaryMaxMin": "Максимальная зарплата должна быть ≥ минимальной",
+    "candidateFirstNameRequired": "Введите имя",
+    "candidateLastNameRequired": "Введите фамилию",
+    "candidateNameMaxLength": "Не более 255 символов",
+    "candidateGradeRequired": "Выберите грейд",
+    "candidateSaveError": "Не удалось сохранить кандидата",
+    "candidateCreateError": "Не удалось создать кандидата",
+    "candidateWorkplacesMinRequired": "Добавьте хотя бы одно место работы",
+    "candidateWorkplacePositionRequired": "Укажите должность",
+    "candidateWorkplaceCompanyRequired": "Укажите компанию",
+    "candidateWorkplaceStartDateRequired": "Укажите дату начала",
+    "candidateSocialsMinRequired": "Добавьте хотя бы одну соцсеть",
+    "candidateSocialNameRequired": "Введите название соцсети",
+    "candidateSocialUrlRequired": "Введите URL",
+    "candidateSocialUrlInvalid": "Введите корректный URL (https://...)"
+  },
   "candidate": {
     "lastName": "Фамилия",
     "firstName": "Имя",
@@ -119,6 +157,7 @@
         "gradePlaceholder": "Любой грейд",
         "saving": "Сохранение...",
         "add": "Добавить кандидата",
+        "saveError": "Не удалось создать кандидата",
         "locale": {
           "ru": "Русский",
           "en": "English"
@@ -135,6 +174,41 @@
         "copy": "Скопировать",
         "validity": "Ссылка действительна 7 дней.",
         "close": "Закрыть"
+      },
+      "detail": {
+        "back": "К кандидатам",
+        "contacts": "Контакты",
+        "education": "Образование",
+        "source": "Источник",
+        "skills": "Навыки",
+        "workExperience": "Опыт работы",
+        "interviews": "Интервью",
+        "present": "наст. время",
+        "yearsExp": "{{years}} лет опыта",
+        "notSpecified": "Не указано",
+        "professionalInfo": "Профессиональные данные",
+        "editButton": "Редактировать",
+        "cancelEdit": "Отмена",
+        "saveChanges": "Сохранить",
+        "saveError": "Не удалось сохранить изменения",
+        "unsavedChanges": "Есть несохранённые изменения. Покинуть страницу?",
+        "statusLabel": "Статус",
+        "experienceLabel": "Опыт (лет)",
+        "localeLabel": "Язык",
+        "status": {
+          "new": "Новый",
+          "screened": "Проверен",
+          "approved": "Одобрен",
+          "rejected": "Отклонён"
+        },
+        "sources": {
+          "hh": "hh.ru",
+          "habr": "Habr Карьера",
+          "social": "Социальные сети",
+          "email": "Email",
+          "resume_parsing": "Парсинг резюме",
+          "bulk_import": "Массовый импорт"
+        }
       }
     },
     "vacancies": {
@@ -149,31 +223,43 @@
       "deleteText": "Это действие необратимо.",
       "cancel": "Отмена",
       "saving": "Сохранение...",
+      "deleting": "Удаление...",
+      "unsavedChanges": "Есть несохранённые изменения. Всё равно уйти?",
       "experience": "Опыт: {{years}}+ лет",
+      "tableHeaders": {
+        "vacancy": "Вакансия",
+        "company": "Компания",
+        "location": "Локация",
+        "salary": "Зарплата",
+        "skills": "Навыки",
+        "experience": "Опыт",
+        "status": "Статус"
+      },
       "modal": {
         "createTitle": "Новая вакансия",
         "editTitle": "Редактировать вакансию",
         "title": "Название *",
         "titlePlaceholder": "Например: Senior Frontend Developer",
-        "description": "Описание",
+        "description": "Описание *",
         "descriptionPlaceholder": "Описание вакансии...",
         "location": "Местоположение",
         "locationPlaceholder": "Например: Москва",
         "salaryMin": "Зарплата от",
         "salaryMax": "Зарплата до",
         "salaryCurrency": "Валюта",
-        "experienceYears": "Опыт (лет)",
+        "experienceYears": "Опыт (лет) *",
         "employmentType": "Тип занятости",
         "workMode": "Формат работы",
         "status": "Статус",
         "skillsLabel": "Требуемые навыки",
         "skillPlaceholder": "Введите навык и нажмите Enter",
-        "grade": "Грейд",
-        "gradePlaceholder": "Любой грейд",
+        "grade": "Грейд *",
+        "gradePlaceholder": "Выберите грейд",
         "educationLevel": "Уровень образования",
         "educationLevelPlaceholder": "Любое образование",
         "add": "Создать",
-        "update": "Сохранить изменения"
+        "update": "Сохранить изменения",
+        "saveError": "Не удалось сохранить. Попробуйте ещё раз."
       },
       "status": {
         "draft": "Черновик",
@@ -204,6 +290,23 @@
         "master": "Магистр",
         "specialist": "Специалист",
         "doctor": "Доктор"
+      },
+      "detail": {
+        "back": "Назад к вакансиям",
+        "notSpecified": "Не указано",
+        "notFound": "Вакансия не найдена.",
+        "createdAt": "Создана",
+        "publishedAt": "Опубликована",
+        "closedAt": "Закрыта",
+        "mainInfo": "О вакансии",
+        "conditions": "Условия",
+        "skills": "Требуемые навыки",
+        "metadata": "Детали",
+        "edit": "Редактировать",
+        "saveChanges": "Сохранить изменения",
+        "cancel": "Отмена",
+        "error": "Не удалось сохранить изменения",
+        "noSkills": "Навыки не указаны"
       }
     },
     "emails": {
@@ -446,6 +549,33 @@
         "strength": "Сильные стороны",
         "weaknesses": "Зоны роста",
         "type_message": "Ваш ответ..."
+      }
+    },
+    "filters": {
+      "clear_all": "Сбросить всё",
+      "sort_by": "Сортировка",
+      "all": "Все",
+      "candidates": {
+        "search_placeholder": "Поиск по имени, email, телефону...",
+        "filter_status": "Статус",
+        "filter_grade": "Грейд",
+        "filter_source": "Источник",
+        "sort_name": "Имя",
+        "sort_created": "Дата создания",
+        "sort_experience": "Опыт",
+        "sort_grade": "Грейд",
+        "sort_status": "Статус"
+      },
+      "vacancies": {
+        "search_placeholder": "Поиск по названию, городу...",
+        "filter_status": "Статус",
+        "filter_employment_type": "Занятость",
+        "filter_work_mode": "Формат",
+        "filter_grade": "Грейд",
+        "sort_title": "Название",
+        "sort_created": "Дата создания",
+        "sort_salary": "Зарплата",
+        "sort_status": "Статус"
       }
     },
     "team": {

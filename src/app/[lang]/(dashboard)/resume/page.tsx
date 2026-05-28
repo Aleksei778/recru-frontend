@@ -277,7 +277,7 @@ export default function ResumePage() {
     }
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
+        <div className="min-h-screen p-4 sm:p-8">
             <div className="max-w-2xl mx-auto">
 
                 <div className="mb-10">
@@ -435,7 +435,7 @@ export default function ResumePage() {
                         }}
                     >
                         {/* AI Summary + circular score */}
-                        <div className="rounded-3xl border border-black dark:border-white p-6">
+                        <div className="rounded-3xl border border-black dark:border-white p-6 bg-white dark:bg-black">
                             <div className="flex items-start gap-5">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-3">
@@ -763,7 +763,7 @@ export default function ResumePage() {
                         </div>
 
                         {candidateMode === 'new' && parsed && (
-                            <div className="rounded-3xl border border-black dark:border-white p-6 space-y-2">
+                            <div className="rounded-3xl border border-black dark:border-white p-6 bg-white dark:bg-black space-y-2">
                                 <p className="text-xs text-gray-400 uppercase tracking-widest font-medium mb-3">
                                     {t('dashboard.resume.candidate.willCreate')}
                                 </p>

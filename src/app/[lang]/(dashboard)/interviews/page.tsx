@@ -58,7 +58,7 @@ export default function InterviewsPage() {
     }, [token])
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black p-4 sm:p-8">
+        <div className="min-h-screen p-4 sm:p-8">
 
             <div className="mb-6 sm:mb-10 flex items-center justify-between">
                 <div>
