@@ -1,6 +1,6 @@
 // src/app/[lang]/(auth)/register/page.tsx
 
-"use client";
+'use client';
 
 import { useState } from "react";
 import { nauryzRedKeds } from "@/lib/font";
@@ -9,10 +9,6 @@ import { useLanguage } from "@/contexts/language-context";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/contexts/auth-context";
 import Link from "next/link";
-
-// ──────────────────────────────────────────────
-// Типы
-// ──────────────────────────────────────────────
 
 type FieldErrors = {
   company?: string;
@@ -31,10 +27,6 @@ type PasswordChecks = {
   symbol: boolean;
 };
 
-// ──────────────────────────────────────────────
-// Вспомогательный компонент — одно требование к паролю
-// ──────────────────────────────────────────────
-
 function PasswordRequirement({ met, label }: { met: boolean; label: string }) {
   return (
     <li className={`flex items-center gap-1.5 text-xs transition-colors ${met ? "text-green-600" : "text-gray-400"}`}>
@@ -43,10 +35,6 @@ function PasswordRequirement({ met, label }: { met: boolean; label: string }) {
     </li>
   );
 }
-
-// ──────────────────────────────────────────────
-// Утилиты валидации
-// ──────────────────────────────────────────────
 
 function checkPassword(value: string): PasswordChecks {
   return {
@@ -63,12 +51,7 @@ function allPasswordChecksMet(checks: PasswordChecks): boolean {
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// строчные буквы, цифры, дефисы; не начинается/не заканчивается на дефис; 1–63 символа
 const SUBDOMAIN_RE = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$|^[a-z0-9]$/;
-
-// ──────────────────────────────────────────────
-// Страница регистрации
-// ──────────────────────────────────────────────
 
 export default function Register() {
   const { t } = useTranslation();
@@ -87,7 +70,6 @@ export default function Register() {
 
   const pwdChecks = checkPassword(password);
 
-  // ── Клиентская валидация ─────────────────────
   const validate = (): boolean => {
     const errs: FieldErrors = {};
 
@@ -110,8 +92,7 @@ export default function Register() {
     if (!password) {
       errs.password = t("validation.passwordRequired");
     } else if (!allPasswordChecksMet(pwdChecks)) {
-      // показываем чеклист (он уже видим), просто ставим ошибку поля
-      errs.password = " "; // пробел — чтобы поле покрасилось, но не дублировать текст
+      errs.password = " ";
     }
 
     if (!passwordConfirmation) {
@@ -124,12 +105,10 @@ export default function Register() {
     return Object.keys(errs).length === 0;
   };
 
-  // ── Сброс ошибки поля при вводе ──────────────
   const clearFieldError = (field: keyof FieldErrors) => {
     setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
-  // ── Маппинг серверных ошибок по полям ────────
   const applyServerErrors = (err: unknown) => {
     if (err instanceof ApiError && err.fieldErrors) {
       const mapped: FieldErrors = {};
@@ -139,7 +118,6 @@ export default function Register() {
         else if (field === "subdomain") mapped.subdomain = msg;
         else if (field === "email") mapped.email = msg;
         else if (field === "password") {
-          // Laravel "confirmed" rule пишет в поле password, но это ошибка подтверждения
           if (msg.toLowerCase().includes("confirm")) {
             mapped.password_confirmation = msg;
           } else {
@@ -157,7 +135,6 @@ export default function Register() {
     }
   };
 
-  // ── Отправка формы ───────────────────────────
   const handleSubmit = async (e: { preventDefault(): void }) => {
     e.preventDefault();
 
@@ -181,7 +158,6 @@ export default function Register() {
     }
   };
 
-  // ── Стиль поля в зависимости от ошибки ───────
   const inputClass = (hasError?: string) =>
     `w-full px-5 py-3.5 bg-white border ${
       hasError
@@ -206,14 +182,14 @@ export default function Register() {
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
 
-            {/* Общая ошибка */}
+            {/* General Error */}
             {fieldErrors.general && (
               <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-2.5">
                 <p className="text-red-600 text-xs text-center">{fieldErrors.general}</p>
               </div>
             )}
 
-            {/* Компания */}
+            {/* Company */}
             <div>
               <input
                 type="text"
@@ -228,13 +204,12 @@ export default function Register() {
               )}
             </div>
 
-            {/* Субдомен */}
+            {/* Subdomain */}
             <div>
               <input
                 type="text"
                 value={subdomain}
                 onChange={(e) => {
-                  // Автоматически приводим к нижнему регистру и убираем недопустимые символы
                   const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "");
                   setSubdomain(val);
                   clearFieldError("subdomain");
@@ -264,7 +239,7 @@ export default function Register() {
               )}
             </div>
 
-            {/* Пароль + чеклист требований */}
+            {/* Password */}
             <div>
               <input
                 type="password"
@@ -279,7 +254,7 @@ export default function Register() {
               {fieldErrors.password && fieldErrors.password.trim() && (
                 <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.password}</p>
               )}
-              {/* Чеклист требований к паролю */}
+
               {showPasswordChecklist && (
                 <ul className="mt-2 ml-4 space-y-0.5">
                   <PasswordRequirement met={pwdChecks.minLength}  label={t("validation.passwordMin")} />
@@ -291,7 +266,7 @@ export default function Register() {
               )}
             </div>
 
-            {/* Подтверждение пароля */}
+            {/* Password Confirmation */}
             <div>
               <input
                 type="password"
@@ -317,7 +292,7 @@ export default function Register() {
               </button>
             </div>
 
-            {/* Ссылка на вход */}
+            {/* Link to Login */}
             <div className="flex items-center justify-center gap-6 text-xs pt-2">
               <Link
                 href={`/${language}/login`}

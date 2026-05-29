@@ -26,7 +26,6 @@ export default function Login() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Валидация на клиенте
   const validate = (): boolean => {
     const errs: FieldErrors = {};
 
@@ -44,15 +43,13 @@ export default function Login() {
     return Object.keys(errs).length === 0;
   };
 
-  // Сбрасываем ошибку конкретного поля при вводе
   const clearFieldError = (field: keyof FieldErrors) => {
     setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
-  // Маппинг серверных ошибок по полям
   const applyServerErrors = (err: unknown) => {
     if (err instanceof ApiError) {
-      // 401 invalid credentials — не раскрываем какое именно поле неверно
+      // 401 invalid credentials
       if (err.status === 401) {
         setFieldErrors({ general: t("validation.invalidCredentials") });
         return;
@@ -112,7 +109,7 @@ export default function Login() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-            {/* Общая ошибка (например, неверные данные) */}
+            {/* General Error */}
             {fieldErrors.general && (
               <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-2.5">
                 <p className="text-red-600 text-xs text-center">{fieldErrors.general}</p>

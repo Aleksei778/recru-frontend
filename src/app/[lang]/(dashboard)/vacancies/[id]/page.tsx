@@ -116,7 +116,6 @@ export default function VacancyDetailPage() {
         setFieldErrors({})
     }
 
-    // Обновить поле и сбросить его ошибку
     const updateField = <K extends keyof VacancyForm>(key: K, value: VacancyForm[K]) => {
         setForm(f => ({ ...f, [key]: value }))
         if (fieldErrors[key as keyof VacancyFieldErrors]) {
@@ -631,7 +630,7 @@ export default function VacancyDetailPage() {
                             </h2>
                             <SkillsInput
                                 value={form.skills}
-                                onChange={skills => {
+                                onChangeAction={skills => {
                                     setForm(f => ({ ...f, skills }))
                                     if (fieldErrors.skill_ids) setFieldErrors(prev => ({ ...prev, skill_ids: undefined }))
                                 }}

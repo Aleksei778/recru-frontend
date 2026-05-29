@@ -3,8 +3,6 @@
 import { ApiError } from '@/lib/api'
 import type { CandidateData } from '@/types'
 
-// ── Nested error types ────────────────────────────────────────────────────────
-
 export type WorkplaceFieldErrors = {
     position?: string
     company_name?: string
@@ -16,8 +14,6 @@ export type SocialFieldErrors = {
     name?: string
     url?: string
 }
-
-// ── Тип ошибок по полям ───────────────────────────────────────────────────────
 
 export type CandidateFieldErrors = {
     first_name?: string
@@ -32,18 +28,12 @@ export type CandidateFieldErrors = {
     locale?: string
     skill_ids?: string
     status?: string
-    /** "Добавьте хотя бы одно место работы" */
     workplaces_min?: string
-    /** "Добавьте хотя бы одну соцсеть" */
     socials_min?: string
-    /** Ошибки вложенных полей workplace[i].field */
     workplaces?: (WorkplaceFieldErrors | undefined)[]
-    /** Ошибки вложенных полей social[i].field */
     socials?: (SocialFieldErrors | undefined)[]
     general?: string
 }
-
-// ── Сообщения (передаются из компонента через t()) ────────────────────────────
 
 export interface CandidateValidationMessages {
     firstNameRequired: string
@@ -56,14 +46,8 @@ export interface CandidateValidationMessages {
     fallback: string
 }
 
-// ── Клиентская валидация ──────────────────────────────────────────────────────
-
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-/**
- * mode='create' — проверяет все обязательные поля
- * mode='update' — только присутствующие поля (min-validation)
- */
 export function validateCandidateForm(
     form: Pick<CandidateData, 'first_name' | 'last_name' | 'email' | 'grade' | 'experience_years'>,
     mode: 'create' | 'update',
@@ -71,7 +55,6 @@ export function validateCandidateForm(
 ): CandidateFieldErrors {
     const errs: CandidateFieldErrors = {}
 
-    // first_name
     if (mode === 'create') {
         if (!form.first_name.trim()) {
             errs.first_name = msg.firstNameRequired
@@ -104,12 +87,10 @@ export function validateCandidateForm(
         errs.email = msg.emailInvalid
     }
 
-    // grade — обязателен при создании (StoreRequest: required)
     if (mode === 'create' && !form.grade) {
         errs.grade = msg.gradeRequired
     }
 
-    // experience_years — не может быть отрицательным
     if (Number(form.experience_years) < 0) {
         errs.experience_years = msg.experienceMin
     }
@@ -117,14 +98,10 @@ export function validateCandidateForm(
     return errs
 }
 
-// ── Known scalar fields ───────────────────────────────────────────────────────
-
 const KNOWN_SCALAR_FIELDS = new Set([
     'first_name', 'last_name', 'middle_name', 'email', 'phone',
     'grade', 'experience_years', 'education_level', 'source', 'locale', 'status',
 ])
-
-// ── Маппинг серверных ошибок (422) ────────────────────────────────────────────
 
 export function applyCandidateApiError(err: unknown, fallback: string): CandidateFieldErrors {
     if (err instanceof ApiError && err.fieldErrors && Object.keys(err.fieldErrors).length > 0) {
@@ -182,8 +159,6 @@ export function applyCandidateApiError(err: unknown, fallback: string): Candidat
     return { general: fallback }
 }
 
-// ── Хелпер: объект сообщений из t() (шаг 1) ─────────────────────────────────
-
 export function buildCandidateMessages(
     t: (key: string) => string,
     fallbackKey: string,
@@ -199,8 +174,6 @@ export function buildCandidateMessages(
         fallback:          t(fallbackKey),
     }
 }
-
-// ── Шаг 2: валидация workplaces и socials ─────────────────────────────────────
 
 export interface CandidateStep2Messages {
     workplacesMinRequired: string
@@ -221,7 +194,6 @@ export function validateCandidateStep2(
 ): CandidateFieldErrors {
     const errs: CandidateFieldErrors = {}
 
-    // ── Workplaces ────────────────────────────────────────────────────────────
     if (form.workplaces.length === 0) {
         errs.workplaces_min = msg.workplacesMinRequired
     } else {
@@ -238,7 +210,6 @@ export function validateCandidateStep2(
         if (hasWpErr) errs.workplaces = wpErrs
     }
 
-    // ── Socials ───────────────────────────────────────────────────────────────
     if (form.socials.length === 0) {
         errs.socials_min = msg.socialsMinRequired
     } else {
@@ -260,13 +231,13 @@ export function validateCandidateStep2(
 
 export function buildCandidateStep2Messages(t: (key: string) => string): CandidateStep2Messages {
     return {
-        workplacesMinRequired:     t('validation.candidateWorkplacesMinRequired'),
+        workplacesMinRequired: t('validation.candidateWorkplacesMinRequired'),
         workplacePositionRequired: t('validation.candidateWorkplacePositionRequired'),
-        workplaceCompanyRequired:  t('validation.candidateWorkplaceCompanyRequired'),
+        workplaceCompanyRequired: t('validation.candidateWorkplaceCompanyRequired'),
         workplaceStartDateRequired: t('validation.candidateWorkplaceStartDateRequired'),
-        socialsMinRequired:        t('validation.candidateSocialsMinRequired'),
-        socialNameRequired:        t('validation.candidateSocialNameRequired'),
-        socialUrlRequired:         t('validation.candidateSocialUrlRequired'),
-        socialUrlInvalid:          t('validation.candidateSocialUrlInvalid'),
+        socialsMinRequired: t('validation.candidateSocialsMinRequired'),
+        socialNameRequired: t('validation.candidateSocialNameRequired'),
+        socialUrlRequired: t('validation.candidateSocialUrlRequired'),
+        socialUrlInvalid: t('validation.candidateSocialUrlInvalid'),
     }
 }

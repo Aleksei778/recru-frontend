@@ -3,8 +3,6 @@
 import { ApiError } from '@/lib/api'
 import type { VacancyForm } from '@/types'
 
-// ── Тип ошибок по полям ───────────────────────────────────────────────────────
-
 export type VacancyFieldErrors = {
     title?: string
     description?: string
@@ -22,8 +20,6 @@ export type VacancyFieldErrors = {
     general?: string
 }
 
-// ── Сообщения (передаются из компонента через t()) ───────────────────────────
-
 export interface VacancyValidationMessages {
     titleRequired: string
     titleMaxLength: string
@@ -35,12 +31,6 @@ export interface VacancyValidationMessages {
     fallback: string
 }
 
-// ── Клиентская валидация ──────────────────────────────────────────────────────
-
-/**
- * mode='create' — проверяет все обязательные поля (title, description, experience_years, grade)
- * mode='update' — проверяет только title и кросс-поля (salary)
- */
 export function validateVacancyForm(
     form: VacancyForm,
     mode: 'create' | 'update',
@@ -48,14 +38,12 @@ export function validateVacancyForm(
 ): VacancyFieldErrors {
     const errs: VacancyFieldErrors = {}
 
-    // title — обязательно в обоих режимах
     if (!form.title.trim()) {
         errs.title = msg.titleRequired
     } else if (form.title.length > 255) {
         errs.title = msg.titleMaxLength
     }
 
-    // Обязательно только при создании (StoreRequest)
     if (mode === 'create') {
         if (!form.description?.trim()) {
             errs.description = msg.descriptionRequired
@@ -70,7 +58,6 @@ export function validateVacancyForm(
         }
     }
 
-    // Кросс-поля: salary_max ≥ salary_min (оба режима)
     if (
         form.salary_min !== null && form.salary_min !== undefined &&
         form.salary_max !== null && form.salary_max !== undefined &&
@@ -81,8 +68,6 @@ export function validateVacancyForm(
 
     return errs
 }
-
-// ── Маппинг серверных ошибок (422) ────────────────────────────────────────────
 
 const KNOWN_FIELDS = new Set([
     'title', 'description', 'employment_type', 'work_mode',
@@ -110,8 +95,6 @@ export function applyVacancyApiError(err: unknown, fallback: string): VacancyFie
     }
     return { general: fallback }
 }
-
-// ── Хелпер: объект сообщений из t() ──────────────────────────────────────────
 
 export function buildVacancyMessages(
     t: (key: string) => string,

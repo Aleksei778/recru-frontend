@@ -1,3 +1,5 @@
+// src/app/[lang]/(dashboard)/vacancies/page.tsx
+
 'use client'
 
 import { Suspense, useEffect, useRef, useState } from 'react'
@@ -147,7 +149,6 @@ function VacanciesPageContent() {
         setFieldErrors({})
     }
 
-    // Обновить поле формы и сбросить его ошибку
     const updateField = <K extends keyof VacancyForm>(key: K, value: VacancyForm[K]) => {
         setForm(f => ({ ...f, [key]: value }))
         if (fieldErrors[key as keyof VacancyFieldErrors]) {
@@ -706,7 +707,7 @@ function VacanciesPageContent() {
                                 </label>
                                 <SkillsInput
                                     value={form.skills}
-                                    onChange={skills => {
+                                    onChangeAction={skills => {
                                         setForm(f => ({ ...f, skills }))
                                         if (fieldErrors.skill_ids) setFieldErrors(prev => ({ ...prev, skill_ids: undefined }))
                                     }}

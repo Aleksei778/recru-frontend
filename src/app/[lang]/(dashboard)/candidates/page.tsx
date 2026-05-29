@@ -1,3 +1,5 @@
+// src/app/[lang]/(dashboard)/candidates/page.tsx
+
 'use client'
 
 import { Suspense, useEffect, useRef, useState } from 'react'
@@ -674,7 +676,7 @@ function CandidatePageContent() {
                             <p className="text-sm font-medium text-black dark:text-white mb-3">{t('dashboard.candidates.modal.skills')}</p>
                             <SkillsInput
                                 value={form.skills}
-                                onChange={(skills: Skill[]) => {
+                                onChangeAction={(skills: Skill[]) => {
                                     setForm(f => ({ ...f, skills }))
                                     if (fieldErrors.skill_ids) setFieldErrors(prev => ({ ...prev, skill_ids: undefined }))
                                 }}

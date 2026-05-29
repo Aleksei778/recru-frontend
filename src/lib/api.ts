@@ -285,8 +285,8 @@ export const interviews = {
         request<Paginated<Interview>>(`/hr/interviews?page=${page}`, {}, token),
 
     get: (id: number, token: string) =>
-        request<{ interview: Interview } | Interview>(`/hr/interviews/${id}`, {}, token)
-            .then(r => ('interview' in r ? r.interview : r)),
+        request<{ data: Interview } | { interview: Interview } | Interview>(`/hr/interviews/${id}`, {}, token)
+            .then(r => ('data' in r ? r.data : 'interview' in r ? r.interview : r)),
 
     create: (data: { vacancy_id: number; candidate_id: number, questions_number: number }, token: string) =>
         request<{ interview: Interview; access_token: string; link: string }>('/hr/interviews', {

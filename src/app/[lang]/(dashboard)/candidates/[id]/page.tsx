@@ -19,8 +19,6 @@ import {
 import { ChevronLeftIcon, LinkIcon, CheckIcon, XIcon, PencilIcon } from 'lucide-react'
 import SkillsInput from '@/components/skills/SkillsInput'
 
-// ── Классы полей ──────────────────────────────────────────────────────────────
-
 const inputCls = (err?: string) =>
     `w-full px-5 py-3 bg-white dark:bg-black
     border ${err ? 'border-red-400 focus:ring-red-300' : 'border-gray-300 dark:border-gray-700 focus:ring-black dark:focus:ring-white'}
@@ -32,8 +30,6 @@ const selectCls = (err?: string) =>
     border ${err ? 'border-red-400 focus:ring-red-300' : 'border-gray-300 dark:border-gray-700 focus:ring-black dark:focus:ring-white'}
     rounded-full text-gray-900 dark:text-white text-sm appearance-none
     focus:outline-none focus:ring-2 focus:border-transparent transition`
-
-// ── Начальное состояние формы из объекта Candidate ────────────────────────────
 
 function candidateToForm(c: Candidate): CandidateData {
     return {
@@ -559,7 +555,7 @@ export default function CandidateDetailPage() {
                             <>
                                 <SkillsInput
                                     value={form.skills}
-                                    onChange={skills => {
+                                    onChangeAction={skills => {
                                         setForm(f => f ? { ...f, skills } : f)
                                         if (fieldErrors.skill_ids) setFieldErrors(prev => ({ ...prev, skill_ids: undefined }))
                                     }}

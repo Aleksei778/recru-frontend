@@ -11,10 +11,10 @@ import type { Skill } from '@/types'
 
 type Props = {
     value?: Skill[]
-    onChange?: (skills: Skill[]) => void
+    onChangeAction?: (skills: Skill[]) => void
 }
 
-export default function SkillsInput({ value = [], onChange }: Props) {
+export default function SkillsInput({ value = [], onChangeAction }: Props) {
     const { token } = useAuth()
 
     const [query, setQuery] = useState('')
@@ -60,7 +60,7 @@ export default function SkillsInput({ value = [], onChange }: Props) {
 
     const update = (newList: Skill[]) => {
         setSelected(newList)
-        onChange?.(newList)
+        onChangeAction?.(newList)
     }
 
     const add = (skill: Skill) => {
